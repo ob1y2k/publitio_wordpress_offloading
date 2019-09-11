@@ -1,0 +1,14 @@
+{
+    "name": "publitio/publitio-offloading",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Anica Sutic",
+            "email": "a.sutic@vegaitsourcing.rs"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "publitio/publitio": "dev-master"
+    }
+}
