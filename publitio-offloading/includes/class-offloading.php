@@ -91,47 +91,53 @@ class Offload
      */
     public function update_offloading_images_src($content = '')
     {
-        $post_urls = $this->filter_attachemnts($content);
-        if (empty($post_urls)) {
+        $post_images = $this->filter_attachemnts($content);
+        if (empty($post_images)) {
             return $content;
         }
         if (PublitioOffloadingAuthService::is_user_authenticated()) {
-            foreach ($post_urls as $post_url) {
-                $attachment_id = $this->get_attachment_id($post_url);
-                if ($attachment_id) {
-                    $attachment = get_post($attachment_id);
-                    if ($attachment) {
-                        $publitioMeta = $this->getPublitioMeta($attachment);
-                        if (!is_null($publitioMeta)) {
-                            $width = preg_match('/ width="([0-9]+)"/', $post_url, $match_width) ? (int)$match_width[1] : 0;
-                            $height = preg_match('/ height="([0-9]+)"/', $post_url, $match_height) ? (int)$match_height[1] : 0;
-                            $class = preg_match('/ class="([^"]*)"/', $post_url, $match_class) ? $match_class[1] : '';
+            foreach ($post_images as $image) {
+                $src = preg_match('/ src="([^"]*)"/', $image, $match_src) ? $match_src[1] : '';
+                if (!empty($src)) {
+                    $attachment_id = $this->get_attachment_id($src);
+                    if ($attachment_id) {
+                        $attachment = get_post($attachment_id);
+                        if ($attachment) {
+                            $publitioMeta = $this->getPublitioMeta($attachment);
+                            if (!is_null($publitioMeta)) {
+                                $width = preg_match('/ width="([0-9]+)"/', $image, $match_width) ? (int)$match_width[1] : 0;
+                                $height = preg_match('/ height="([0-9]+)"/', $image, $match_height) ? (int)$match_height[1] : 0;
+                                $class = preg_match('/ class="([^"]*)"/', $image, $match_class) ? $match_class[1] : '';
 
-                            if (!empty($class)) {
-                                $size = preg_match('/size-([a-zA-Z0-9-_]+)?/', $class, $match_size) ? $match_size[1] : '';
-                            } else {
-                                $size = '';
-                            }
-
-                            if (!empty($width) && !empty($height)) {
-                                $crop = false;
-                                if (!empty($size)) {
-                                    $dimensions = $this->get_image_size($size);
-                                    if (!empty($dimensions) && (bool)$dimensions['crop']) {
-                                        $crop = true;
-                                    }
+                                if (!empty($class)) {
+                                    $size = preg_match('/size-([a-zA-Z0-9-_]+)?/', $class, $match_size) ? $match_size[1] : '';
+                                } else {
+                                    $size = '';
                                 }
-                                $dimensions['width'] = $width;
-                                $dimensions['height'] = $height;
-                                $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
 
-                                $updated_url = $this->publitioApi->getImageUrl($dimensions, $publitioMeta);
+                                if (!empty($width) && !empty($height)) {
+                                    $crop = false;
+                                    if (!empty($size)) {
+                                        $dimensions = $this->get_image_size($size);
+                                        if (!empty($dimensions) && (bool)$dimensions['crop']) {
+                                            $crop = true;
+                                        }
+                                    }
+                                    $dimensions['width'] = $width;
+                                    $dimensions['height'] = $height;
+                                    $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
 
+                                    $updated_src = $this->publitioApi->getImageUrl($dimensions, $publitioMeta);
+
+                                } else {
+                                    $updated_src = $publitioMeta['publitioURL'];
+                                }
                             } else {
-                                $updated_url = $publitioMeta['publitioURL'];
+                                $updated_src = $src;
                             }
-                            if (!empty($updated_url)) {
-                                $content = str_replace($post_url, $updated_url, $content);
+                            if (!empty($updated_src)) {
+                                $updated_image = str_replace($src, $updated_src, $image);
+                                $content = str_replace($image, $updated_image, $content);
                             }
                         }
                     }
@@ -159,7 +165,7 @@ class Offload
     }
 
     /**
-     * Return array of image, video and audio urls from content
+     * Return array of images, videos and audio files from content
      * @param $content
      * @return array
      */
@@ -170,13 +176,13 @@ class Offload
         $audios = array();
 
         if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesImages)) {
-            $images = $matchesImages['src'];
+            $images = $matchesImages[0];
         }
         if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
-            $videos = $matchesVideo['src'];
+            $videos = $matchesVideo[0];
         }
         if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
-            $audios = $matchesAudio['src'];
+            $audios = $matchesAudio[0];
         }
 
         $attachments = array_merge((array)$images, (array)$videos, (array)$audios);
@@ -221,15 +227,14 @@ class Offload
      * @param $url
      * @return int
      */
-    private function get_attachment_id($url)
-    {
+    private function get_attachment_id( $url ) {
         $attach_id = attachment_url_to_postid($url);
-        if ($attach_id) {
+        if($attach_id) {
             $attachment_id = $attach_id;
         } else {
             $attachment_id = 0;
             $dir = wp_upload_dir();
-            if (false !== strpos($url, $dir['baseurl'] . '/')) {
+            if ( false !== strpos( $url, $dir['baseurl'] . '/' ) ) {
                 $file = basename($url);
                 $query_args = array(
                     'post_type' => 'attachment',
