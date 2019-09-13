@@ -110,7 +110,8 @@ class Admin
     }
 
     /**
-     * Update default player on plugin settings
+     * Update default player
+     * @param $player_id
      */
     public function update_default_offloading_player($player_id) {
         if (isset($_POST['player_id'])) {

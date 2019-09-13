@@ -159,18 +159,28 @@ class PublitioApiService
         $this->handle_success($response);
     }
 
+    /**
+     * When user is unauthorized remove credentials
+     */
     private function handle_unauthorized()
     {
         PublitioOffloadingAuthService::delete_credentials();
         wp_send_json(['status' => 401]);
     }
 
+    /**
+     * When error remove credentials
+     */
     private function handle_error()
     {
         PublitioOffloadingAuthService::delete_credentials();
         wp_send_json(['status' => 500]);
     }
 
+    /**
+     * Function that handle success response
+     * @param $response
+     */
     private function handle_success($response)
     {
         $this->players = $response->players;
