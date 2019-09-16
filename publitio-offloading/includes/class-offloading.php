@@ -91,7 +91,7 @@ class Offload
      */
     public function update_offloading_images_src($content = '')
     {
-        $post_images = $this->filter_attachemnts($content);
+        $post_images = $this->filter_attachments($content);
         if (empty($post_images)) {
             return $content;
         }
@@ -169,7 +169,7 @@ class Offload
      * @param $content
      * @return array
      */
-    private function filter_attachemnts($content)
+    private function filter_attachments($content)
     {
         $images = array();
         $videos = array();

@@ -9,7 +9,6 @@
  * @since      1.0.0
  *
  * @package    Publitio
- * @subpackage Publitio/admin/partials
  */
 ?>
 
@@ -35,12 +34,11 @@
         </div>
 
     <hr />
-
     <div class="section-offloading-wrapper">
-        <label class="form-label" for="default-offloading-player">Player:</label>
-        <select class="form-select" name="default-offloading-player" id="default-offloading-player"></select>
+        <label class="form-label" for="default-offloading-folder">Choose folder:</label>
+        <select class="form-select" name="default-offloading-folder" id="default-offloading-folder"></select>
 
-        <div class="offloading-block error-block" id="player-error-block"></div>
-        <div class="offloading-block success-block" id="player-success-block"></div>
+        <div class="offloading-block error-block" id="folder-error-block"></div>
+        <div class="offloading-block success-block" id="folder-success-block"></div>
     </div>
 </div>

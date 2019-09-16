@@ -30,8 +30,8 @@ class Admin
         add_action('admin_enqueue_scripts', array($this, 'enqueue'));
         add_filter("plugin_action_links_" . PLUGIN, array($this, 'settings_link'));
         add_action('wp_ajax_update_offloading_settings', array($this, 'update_offloading_settings'));
-        add_action('wp_ajax_get_offloading_players', array($this, 'get_offloading_players'));
-        add_action('wp_ajax_update_default_offloading_player',array($this, 'update_default_offloading_player'));
+        add_action('wp_ajax_get_offloading_folders_tree', array($this, 'get_offloading_folders_tree'));
+        add_action('wp_ajax_update_default_offloading_folder',array($this, 'update_default_offloading_folder'));
     }
 
     /**
@@ -93,29 +93,28 @@ class Admin
     /**
      * Get players for account
      */
-    public function get_offloading_players() {
-        $response =  $this->publitioApi->get_players();
+    public function get_offloading_folders_tree() {
+        $response =  $this->publitioApi->get_folders();
         if($response) {
             wp_send_json([
                 'status' => 200,
-                'players' => $response->players,
-                'default_player_id' => get_option('publitio_offloading_default_player')
+                'folders' => $response->folders,
+                'default_folder_id' => get_option('publitio_offloading_default_folder')
             ]);
         } else {
             wp_send_json([
-                'players' => null,
-                'default_player_id' => get_option('publitio_offloading_default_player')
+                'folders' => null,
+                'default_folder_id' => ''
             ]);
         }
     }
 
     /**
-     * Update default player
-     * @param $player_id
+     * Update default folder
      */
-    public function update_default_offloading_player($player_id) {
-        if (isset($_POST['player_id'])) {
-            $this->publitioApi->set_default_offloading_player($_POST['player_id']);
+    public function update_default_offloading_folder() {
+        if (isset($_POST['folder_id'])) {
+            $this->publitioApi->set_default_offloading_folder($_POST['folder_id']);
         }
     }
 }
