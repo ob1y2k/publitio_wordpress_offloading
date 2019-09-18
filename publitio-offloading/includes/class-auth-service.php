@@ -11,7 +11,7 @@ class PublitioOffloadingAuthService {
     }
 
     /**
-     * Setup options
+     * Setup options for api key and api secret
      * @param $api_key
      * @param $api_secret
      */
@@ -21,7 +21,7 @@ class PublitioOffloadingAuthService {
     }
 
     /**
-     * Remove options
+     * Remove options for api key and api secret
      */
     public static function delete_credentials() {
         delete_option('publitio_offloading_secret');

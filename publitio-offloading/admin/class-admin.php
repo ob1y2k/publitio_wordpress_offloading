@@ -45,7 +45,7 @@ class Admin
             'manage_options',
             'publitio_offloading',
             array($this, 'admin_index'),
-            'dashicons-admin-media',
+            PLUGIN_URL . 'admin/images/cloud-icon.png',
             110
         );
     }

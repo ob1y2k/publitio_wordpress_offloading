@@ -11,7 +11,6 @@
         getFoldersList()
         updateSettingsButtonClick()
         updateDefaultFolderChange()
-
     });
 
     function updateSettingsButtonClick() {
@@ -23,13 +22,13 @@
                 api_key: $('#api-offloading-key').val()
             }, function (response) {
                 if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
-                    showBlock($('#error-block'), 'Wrong credentials');
+                    showBlock($('#error-offload-block'), 'Wrong credentials');
                     clearFolderList();
                 } else if (response.status === STATUSES.SUCCESS) {
-                    showBlock($('#success-block'), 'Great!');
+                    showBlock($('#success-offload-block'), 'Great!');
                     addFoldersList(response.folders)
                 } else {
-                    showBlock($('#error-block'), 'Something went wrong.');
+                    showBlock($('#error-offload-block'), 'Something went wrong.');
                 }
             });
         });
@@ -44,8 +43,9 @@
     function addFoldersList(folders, defaultFolderId = '') {
         clearFolderList();
         if(folders != undefined && folders != null) {
+            $('<option value="">/</option>').appendTo($('#default-offloading-folder'));
             folders.forEach((folder) => {
-                $('<option value="' + folder.id + '">' + folder.name + '</option>').appendTo($('#default-offloading-folder'));
+                $('<option value="' + folder.id + '">' + folder.path + '</option>').appendTo($('#default-offloading-folder'));
             })
             setSelectedOffloadingFolder(defaultFolderId);
         }
@@ -61,8 +61,8 @@
     }
 
     function clearBlocks() {
-        $('#error-block').empty();
-        $('#success-block').empty();
+        $('#error-offload-block').empty();
+        $('#success-offload-block').empty();
         $('#folder-success-block').empty();
         $('#folder-error-block').empty();
     }
