@@ -71,7 +71,7 @@ class PublitioApiService {
             $args['folder'] = $folder;
         }
         $responseUpload = $this->publitio_api->uploadFile(fopen($attachment->guid, 'r'), 'file', $args);
-        if ($responseUpload) {
+        if ($responseUpload->success === true) {
             $publitioMeta = array(
                 'publitio_url' => $responseUpload->url_preview,
                 'public_id' => $responseUpload->public_id,

@@ -37,6 +37,7 @@ define('PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('PLUGIN_URL', plugin_dir_url(__FILE__));
 define('PLUGIN', plugin_basename(__FILE__));
 define('PUBLITIO_MEDIA','https://media.publit.io/file/');
+define( 'PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.0.0' );
 
 /**
  * The code that runs during plugin activation.

@@ -36,8 +36,22 @@ class Offload
             add_filter('wp_calculate_image_srcset', array($this, 'wp_calculate_image_offloading_srcset'), 999, 5);
             add_filter('the_content', array($this, 'update_offloading_images_src'), 999);
             add_filter('post_thumbnail_html', array($this, 'featured_image_update_url'), 999, 5);
+            add_filter('get_header_image_tag', array($this, 'update_header_image_src'), 999, 5);
             wp_enqueue_script('offloadingfrontscripts', PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
         }
+    }
+
+    /**
+     * Replace custom header image  url if exist
+     * @param $html
+     * @param $header
+     * @param $attr
+     * @return mixed|string
+     */
+    public function update_header_image_src($html, $header, $attr)
+    {
+        $html = $this->update_offloading_images_src($html);
+        return $html;
     }
 
     /**
@@ -49,7 +63,7 @@ class Offload
      * @param $attr
      * @return mixed
      */
-    function featured_image_update_url($html, $post_id, $post_thumbnail_id, $size, $attr)
+    public function featured_image_update_url($html, $post_id, $post_thumbnail_id, $size, $attr)
     {
         $html = $this->update_offloading_images_src($html, $post_thumbnail_id);
         return $html;
@@ -169,16 +183,14 @@ class Offload
                         } else {
                             $updated_src = $publitioMeta['publitio_url'];
                         }
-                    } else {
-                        $updated_src = $src;
-                    }
-                    if (!empty($updated_src)) {
-                        if (!empty($updated_poster)) {
-                            $updated_image = str_replace(array($src, $poster_src), array($updated_src, $updated_poster), $image);
-                        } else {
-                            $updated_image = str_replace($src, $updated_src, $image);
+                        if (!empty($updated_src)) {
+                            if (!empty($updated_poster)) {
+                                $updated_image = str_replace(array($src, $poster_src), array($updated_src, $updated_poster), $image);
+                            } else {
+                                $updated_image = str_replace($src, $updated_src, $image);
+                            }
+                            $content = str_replace($image, $updated_image, $content);
                         }
-                        $content = str_replace($image, $updated_image, $content);
                     }
                 }
             }

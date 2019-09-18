@@ -91,7 +91,7 @@ class Admin
     }
 
     /**
-     * Get players for account
+     * Get list of folders for account
      */
     public function get_offloading_folders_tree() {
         $response =  $this->publitioApi->get_folders();
