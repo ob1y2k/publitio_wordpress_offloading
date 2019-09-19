@@ -45,7 +45,7 @@ class Admin
             'manage_options',
             'publitio_offloading',
             array($this, 'admin_index'),
-            'dashicons-admin-media',
+            PLUGIN_URL . 'admin/images/cloud-icon.png',
             110
         );
     }
@@ -91,7 +91,7 @@ class Admin
     }
 
     /**
-     * Get players for account
+     * Get list of folders for account
      */
     public function get_offloading_folders_tree() {
         $response =  $this->publitioApi->get_folders();

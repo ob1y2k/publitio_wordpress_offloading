@@ -34,7 +34,7 @@ class PublitioApiService {
         $this->check_credentials();
     }
     /**
-     * Get list of folders for Publitio user
+     * Get list of folders for Publitio account
      */
     public function get_folders() {
         if (PublitioOffloadingAuthService::is_user_authenticated()) {
@@ -63,14 +63,20 @@ class PublitioApiService {
      * @return array|null
      */
     public function uploadFile($attachment) {
-        $args = array('public_id' => $attachment->guid);
+        $args = array(
+            'public_id' => $attachment->post_name
+        );
         $folder = get_option('publitio_offloading_default_folder');
-        if ($folder) {
+        if ($folder && !empty($folder)) {
             $args['folder'] = $folder;
         }
         $responseUpload = $this->publitio_api->uploadFile(fopen($attachment->guid, 'r'), 'file', $args);
-        if ($responseUpload) {
-            $publitioMeta = array('publitioURL' => $responseUpload->url_preview, 'public_id' => $responseUpload->public_id, 'extension' => $responseUpload->extension);
+        if ($responseUpload->success === true) {
+            $publitioMeta = array(
+                'publitio_url' => $responseUpload->url_preview,
+                'public_id' => $responseUpload->public_id,
+                'extension' => $responseUpload->extension
+            );
             if ($folder) {
                 $publitioMeta['folder_name'] = $responseUpload->folder;
             }
@@ -92,8 +98,6 @@ class PublitioApiService {
      * Get size information for all currently-registered image sizes.
      *
      * @return array $sizes Data for all currently-registered image sizes.
-     * @uses   get_intermediate_image_sizes()
-     * @global $_wp_additional_image_sizes
      */
     public function _get_all_image_sizes() {
         global $_wp_additional_image_sizes;
@@ -108,7 +112,7 @@ class PublitioApiService {
         return $image_sizes;
     }
     /**
-     * Try to get players with api key and api secret
+     * Try to get list of folders with api key and api secret
      */
     private function check_credentials() {
         $response = $this->get_folders();
@@ -141,7 +145,7 @@ class PublitioApiService {
         wp_send_json(['status' => 500]);
     }
     /**
-     * Function that handle success response
+     * When success handle response
      * @param $response
      */
     private function handle_success($response) {
