@@ -37,7 +37,9 @@ class Offload
             add_filter('the_content', array($this, 'update_offloading_images_src'), 999);
             add_filter('post_thumbnail_html', array($this, 'featured_image_update_url'), 999, 5);
             add_filter('get_header_image_tag', array($this, 'update_header_image_src'), 999, 5);
-            wp_enqueue_script('offloadingfrontscripts', PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+            if(get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no') {
+                wp_enqueue_script('offloadingfrontscripts', PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+            }
         }
     }
 

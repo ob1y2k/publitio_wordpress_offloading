@@ -32,6 +32,7 @@ class Admin
         add_action('wp_ajax_update_offloading_settings', array($this, 'update_offloading_settings'));
         add_action('wp_ajax_get_offloading_folders_tree', array($this, 'get_offloading_folders_tree'));
         add_action('wp_ajax_update_default_offloading_folder',array($this, 'update_default_offloading_folder'));
+        add_action('wp_ajax_update_allow_download',array($this, 'update_allow_download'));
     }
 
     /**
@@ -99,12 +100,14 @@ class Admin
             wp_send_json([
                 'status' => 200,
                 'folders' => $response->folders,
-                'default_folder_id' => get_option('publitio_offloading_default_folder')
+                'default_folder_id' => get_option('publitio_offloading_default_folder'),
+                'allow_download' => get_option('publitio_offloading_allow_download')
             ]);
         } else {
             wp_send_json([
                 'folders' => null,
-                'default_folder_id' => ''
+                'default_folder_id' => '',
+                'allow_download' => ''
             ]);
         }
     }
@@ -115,6 +118,12 @@ class Admin
     public function update_default_offloading_folder() {
         if (isset($_POST['folder_id'])) {
             $this->publitioApi->set_default_offloading_folder($_POST['folder_id']);
+        }
+    }
+
+    public function update_allow_download() {
+        if (isset($_POST['allow'])) {
+            $this->publitioApi->set_allow_download_offloading($_POST['allow']);
         }
     }
 }

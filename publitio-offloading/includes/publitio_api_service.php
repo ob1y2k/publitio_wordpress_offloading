@@ -57,6 +57,21 @@ class PublitioApiService {
             ]);
         }
     }
+
+    public function set_allow_download_offloading($allow) {
+        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+            if($allow === "true") {
+                $option = 'yes';
+            } else {
+                $option = 'no';
+            }
+            update_option('publitio_offloading_allow_download', $option);
+            wp_send_json([
+                'status' => 200,
+                'allow_download' => 'yes'
+            ]);
+        }
+    }
     /**
      * Function for upload image to Publitio Dashboard
      * @param $attachment
@@ -149,10 +164,14 @@ class PublitioApiService {
      * @param $response
      */
     private function handle_success($response) {
+        if(!get_option('publitio_offloading_allow_download')) {
+            update_option('publitio_offloading_allow_download', 'yes');
+        }
         wp_send_json([
             'status' => 200,
             'folders' => $response->folders,
-            'default_folder_id' => get_option('publitio_offloading_default_folder')
+            'default_folder_id' => get_option('publitio_offloading_default_folder'),
+            'allow_download' => get_option('publitio_offloading_allow_download')
         ]);
     }
 }

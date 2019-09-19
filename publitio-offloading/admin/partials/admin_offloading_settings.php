@@ -35,7 +35,14 @@
     <div class="button-section-offloading-wrapper">
         <button type="button" class="publitio-offload-button" id="update-offloading-button">Update Settings</button>
     </div>
-
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <label class="switch">
+            <input type="checkbox" id="allow-download">
+            <span class="slider round"></span>
+        </label>
+        <span class="download-text">Allow users to download media files</span>
+    </div>
     <hr/>
     <div class="section-offloading-wrapper">
         <label class="form-offload-label" for="default-offloading-folder">Folder:</label>
