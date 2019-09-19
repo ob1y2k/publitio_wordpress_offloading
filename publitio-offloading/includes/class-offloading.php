@@ -134,6 +134,7 @@ class Offload
         }
         foreach ($post_images as $image) {
             $src = preg_match('/ src="([^"]*)"/', $image, $match_src) ? $match_src[1] : '';
+            $class_id = preg_match('/wp-image-([0-9]+)/i', $image, $match_class) ? $match_class[1] : 0;
             if (empty($src)) {
                 $src = $image;
             }
@@ -148,6 +149,8 @@ class Offload
             }
             if (!empty($attach_id)) {
                 $attachment_id = $attach_id;
+            } elseif ($class_id && $class_id !== 0) {
+                $attachment_id = $class_id;
             } else {
                 $attachment_id = $this->get_attachment_id($src);
             }
