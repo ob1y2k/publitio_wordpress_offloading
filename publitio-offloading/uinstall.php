@@ -12,3 +12,4 @@ if( ! defined('WP_UNINSTALL_PLUGIN') ) {
 delete_option('publitio_offloading_key');
 delete_option('publitio_offloading_secret');
 delete_option('publitio_offloading_default_folder');
+delete_option('publitio_offloading_allow_download');

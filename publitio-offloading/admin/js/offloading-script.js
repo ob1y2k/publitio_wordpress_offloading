@@ -11,6 +11,7 @@
         getFoldersList()
         updateSettingsButtonClick()
         updateDefaultFolderChange()
+        changeAllowDownload()
     });
 
     function updateSettingsButtonClick() {
@@ -24,25 +25,29 @@
                 if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
                     showBlock($('#error-offload-block'), 'Wrong credentials');
                     clearFolderList();
+                    setCheckBoxValue('');
                 } else if (response.status === STATUSES.SUCCESS) {
                     showBlock($('#success-offload-block'), 'Great!');
-                    addFoldersList(response.folders)
+                    addFoldersList(response.folders);
+                    setCheckBoxValue(response.allow_download);
                 } else {
                     showBlock($('#error-offload-block'), 'Something went wrong.');
+                    setCheckBoxValue('');
                 }
             });
         });
     }
 
     function getFoldersList() {
-        jQuery.get(ajaxurl, { action: 'get_offloading_folders_tree' }, function(response) {
-            addFoldersList(response.folders,response.default_folder_id)
+        jQuery.get(ajaxurl, {action: 'get_offloading_folders_tree'}, function (response) {
+            addFoldersList(response.folders, response.default_folder_id);
+            setCheckBoxValue(response.allow_download);
         })
     }
 
     function addFoldersList(folders, defaultFolderId = '') {
         clearFolderList();
-        if(folders != undefined && folders != null) {
+        if (folders != undefined && folders != null) {
             $('<option value="">/</option>').appendTo($('#default-offloading-folder'));
             folders.forEach((folder) => {
                 $('<option value="' + folder.id + '">' + folder.path + '</option>').appendTo($('#default-offloading-folder'));
@@ -52,7 +57,7 @@
     }
 
     function setSelectedOffloadingFolder(id) {
-        $('#default-offloading-folder > option[value="' + id +'"]').attr("selected", "selected");
+        $('#default-offloading-folder > option[value="' + id + '"]').attr("selected", "selected");
     }
 
     function clearFolderList() {
@@ -69,7 +74,7 @@
 
     function showBlock(elem, content) {
         $(elem).text(content)
-        setTimeout(function() {
+        setTimeout(function () {
             clearBlocks()
         }, 3000)
     }
@@ -89,6 +94,44 @@
                 }
             });
         });
+    }
+
+    function changeAllowDownload() {
+        let allow;
+        $('#allow-download').bind('change', function (event) {
+            if ($('#allow-download').is(":checked")) {
+                allow = true;
+            } else {
+                allow = false;
+            }
+            jQuery.post(ajaxurl, {
+                action: 'update_allow_download',
+                allow: allow
+            }, function (response) {
+
+            });
+        });
+    }
+
+    function setCheckBoxValue(allow) {
+        if(allow !== '') {
+            setCheckBoxDisabled(false);
+            if (allow === 'no') {
+                $("#allow-download").attr('checked', false);
+            } else {
+                $("#allow-download").attr('checked', true);
+            }
+        } else {
+            setCheckBoxDisabled(true);
+        }
+    }
+
+    function setCheckBoxDisabled(value) {
+        if(value) {
+            $("#allow-download").attr("disabled", true);
+        } else {
+            $("#allow-download").removeAttr("disabled");
+        }
     }
 
 })(jQuery);

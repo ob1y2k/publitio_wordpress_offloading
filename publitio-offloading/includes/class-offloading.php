@@ -37,7 +37,9 @@ class Offload
             add_filter('the_content', array($this, 'update_offloading_images_src'), 999);
             add_filter('post_thumbnail_html', array($this, 'featured_image_update_url'), 999, 5);
             add_filter('get_header_image_tag', array($this, 'update_header_image_src'), 999, 5);
-            wp_enqueue_script('offloadingfrontscripts', PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+            if(get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no') {
+                wp_enqueue_script('offloadingfrontscripts', PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+            }
         }
     }
 
@@ -134,6 +136,7 @@ class Offload
         }
         foreach ($post_images as $image) {
             $src = preg_match('/ src="([^"]*)"/', $image, $match_src) ? $match_src[1] : '';
+            $class_id = preg_match('/wp-image-([0-9]+)/i', $image, $match_class) ? $match_class[1] : 0;
             if (empty($src)) {
                 $src = $image;
             }
@@ -148,6 +151,8 @@ class Offload
             }
             if (!empty($attach_id)) {
                 $attachment_id = $attach_id;
+            } elseif ($class_id && $class_id !== 0) {
+                $attachment_id = $class_id;
             } else {
                 $attachment_id = $this->get_attachment_id($src);
             }
