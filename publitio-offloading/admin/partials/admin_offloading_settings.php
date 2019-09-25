@@ -37,11 +37,44 @@
     </div>
     <hr/>
     <div class="section-offloading-wrapper">
-        <label class="switch">
-            <input type="checkbox" id="allow-download">
-            <span class="slider round"></span>
-        </label>
-        <span class="download-text">Allow users to download media files</span>
+        <div class="off-margin">
+            <label class="switch">
+                <input type="checkbox"
+                       id="allow-download" <?php echo(get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no' ? '' : 'checked') ?>>
+                <span class="slider round"></span>
+            </label>
+            <span class="download-text">Allow users to download media files</span>
+        </div>
+        <div class="offloading-block error-offload-block" id="error-allow-block"></div>
+        <div class="offloading-block success-offload-block" id="success-allow-block"></div>
+    </div>
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <label class="form-offload-label" for="default-offloading-folder">Select files to be offloaded:</label>
+        <div class="files-checkbox off-margin">
+            <div class="offload-checkbox">
+                <label class="files_label">Image</label>
+                <input <?php echo(get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no' ? '' : 'checked') ?>
+                        class="files-offload-input" type='checkbox' id="image_checkbox">
+            </div>
+            <div class="offload-checkbox">
+                <label class="files_label">Video</label>
+                <input <?php echo(get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no' ? '' : 'checked') ?>
+                        class="files-offload-input" type='checkbox' id="video_checkbox">
+            </div>
+            <div class="offload-checkbox">
+                <label class="files_label">Audio</label>
+                <input <?php echo(get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no' ? '' : 'checked') ?>
+                        class="files-offload-input" type='checkbox' id="audio_checkbox">
+            </div>
+            <div class="offload-checkbox">
+                <label class="files_label">Document(pdf)</label>
+                <input <?php echo(get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no' ? '' : 'checked') ?>
+                        class="files-offload-input" type='checkbox' id="document_checkbox">
+            </div>
+        </div>
+        <div class="offloading-block error-offload-block" id="error-checkbox-block"></div>
+        <div class="offloading-block success-offload-block" id="success-checkbox-block"></div>
     </div>
     <hr/>
     <div class="section-offloading-wrapper">
@@ -50,5 +83,41 @@
 
         <div class="offloading-block error-offload-block" id="folder-error-block"></div>
         <div class="offloading-block success-offload-block" id="folder-success-block"></div>
+    </div>
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <label class="form-offload-label" for="default-offloading-cname">CNAME:</label>
+        <select class="form-offload-select" name="default-offloading-cname" id="default-offloading-cname"></select>
+
+        <div class="offloading-block error-offload-block" id="cname-error-block"></div>
+        <div class="offloading-block success-offload-block" id="cname-success-block"></div>
+    </div>
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <label class="form-offload-label" for="offloading-image-quality">Image quality:</label>
+        <select class="form-offload-select" name="offloading-image-quality" id="offloading-image-quality">
+            <option value="100">original</option>
+            <option value="90">90</option>
+            <option selected value="80">80</option>
+            <option value="70">70</option>
+            <option value="60">60</option>
+            <option value="50">50</option>
+        </select>
+
+        <div class="offloading-block error-offload-block" id="folder-error-image-quality"></div>
+        <div class="offloading-block success-offload-block" id="folder-success-image-quality"></div>
+    </div>
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <label class="form-offload-label" for="offloading-video-quality">Video quality:</label>
+        <select class="form-offload-select" name="offloading-video-quality" id="offloading-video-quality">
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+        </select>
+
+        <div class="offloading-block error-offload-block" id="folder-error-video-quality"></div>
+        <div class="offloading-block success-offload-block" id="folder-success-video-quality"></div>
     </div>
 </div>

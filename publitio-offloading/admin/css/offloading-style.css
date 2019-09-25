@@ -66,8 +66,8 @@
 .switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 30px;
+    width: 55px;
+    height: 26px;
 }
 
 .switch input {
@@ -91,9 +91,9 @@
 .slider:before {
     position: absolute;
     content: "";
-    height: 21px;
-    width: 21px;
-    left: 6px;
+    height: 17px;
+    width: 16px;
+    left: 8px;
     bottom: 5px;
     background-color: white;
     -webkit-transition: .4s;
@@ -101,7 +101,7 @@
 }
 
 .download-text {
-    font-size: 18px;
+    font-size: 16px;
 }
 
 input:checked + .slider {
@@ -128,4 +128,25 @@ input:checked + .slider:before {
 
 .slider.round:before {
     border-radius: 50%;
+}
+
+.files-checkbox {
+    display: flex;
+    margin-top: 15px;
+}
+
+.offload-checkbox {
+    flex-grow: 1;
+}
+
+.files_label {
+    font-size:16px;
+}
+
+.files-offload-input {
+    margin-top: 0 !important;
+}
+
+.off-margin {
+    margin: 8px 0;
 }

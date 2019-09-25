@@ -44,6 +44,16 @@ class Offload
     }
 
     /**
+     * When file is uploaded to Media folder automatically upload it on Publitio
+     * @param $attcID
+     */
+    public function upload_file_to_publitio($attcID)
+    {
+        $attachment = get_post($attcID);
+        $this->getPublitioMeta($attachment);
+    }
+
+    /**
      * Replace custom header image  url if exist
      * @param $html
      * @param $header
@@ -69,16 +79,6 @@ class Offload
     {
         $html = $this->update_offloading_images_src($html, $post_thumbnail_id);
         return $html;
-    }
-
-    /**
-     * When file is uploaded to Media folder automatically upload it on Publitio
-     * @param $attcID
-     */
-    public function upload_file_to_publitio($attcID)
-    {
-        $attachment = get_post($attcID);
-        $this->getPublitioMeta($attachment);
     }
 
     /**
@@ -108,12 +108,12 @@ class Offload
                                 }
                             }
                             $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
-                            $url = $this->publitioApi->getImageUrl($dimensions, $publitioMeta);
+                            $url = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
                         } elseif (!empty($dimensions['width'])) {
                             $dimensions['crop'] = 'c_fit';
-                            $url = $this->publitioApi->getImageUrl($dimensions, $publitioMeta);
+                            $url = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
                         } else {
-                            $url = $publitioMeta['publitio_url'];
+                            $url = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
                         }
                     }
                     $sources[$key]['url'] = $url;
@@ -139,15 +139,6 @@ class Offload
             $class_id = preg_match('/wp-image-([0-9]+)/i', $image, $match_class) ? $match_class[1] : 0;
             if (empty($src)) {
                 $src = $image;
-            }
-            $poster_src = preg_match('/ poster="([^"]*)"/', $image, $match_poster) ? $match_poster[1] : '';
-            if (!empty($poster_src)) {
-                $poster_id = $this->get_attachment_id($poster_src);
-                if ($poster_id && $poster_id !== 0) {
-                    $poster = get_post($poster_id);
-                    $publitioMetaPoster = $this->getPublitioMeta($poster);
-                    $updated_poster = $publitioMetaPoster['publitio_url'];
-                }
             }
             if (!empty($attach_id)) {
                 $attachment_id = $attach_id;
@@ -183,17 +174,13 @@ class Offload
                             $dimensions['height'] = $height;
                             $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
 
-                            $updated_src = $this->publitioApi->getImageUrl($dimensions, $publitioMeta);
+                            $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
 
                         } else {
-                            $updated_src = $publitioMeta['publitio_url'];
+                            $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
                         }
-                        if (!empty($updated_src)) {
-                            if (!empty($updated_poster)) {
-                                $updated_image = str_replace(array($src, $poster_src), array($updated_src, $updated_poster), $image);
-                            } else {
-                                $updated_image = str_replace($src, $updated_src, $image);
-                            }
+                        if (!empty($updated_src) && !is_null($updated_src)) {
+                            $updated_image = str_replace($src, $updated_src, $image);
                             $content = str_replace($image, $updated_image, $content);
                         }
                     }
@@ -210,11 +197,37 @@ class Offload
      */
     private function getPublitioMeta($attachment)
     {
+        $filetype = wp_check_filetype( wp_get_attachment_url($attachment->ID));
+
+        if(get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
+            if($this->publitioApi->isImageType($filetype['ext'])) {
+                return null;
+            }
+        }
+
+        if(get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no') {
+            if($this->publitioApi->isVideoType($filetype['ext'])) {
+                return null;
+            }
+        }
+
+        if(get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no') {
+            if($this->publitioApi->isAudioType($filetype['ext'])) {
+                return null;
+            }
+        }
+
+        if(get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no') {
+            if($this->publitioApi->isDocumentType($filetype['ext'])) {
+                return null;
+            }
+        }
+
         $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
         if (!$publitioMeta) {
             $publitioMeta = $this->publitioApi->uploadFile($attachment);
             if (is_null($publitioMeta)) {
-                $publitioMeta = null;
+                return null;
             }
         }
         return $publitioMeta;
@@ -229,8 +242,10 @@ class Offload
     {
         $images = array();
         $videos = array();
+        $posters = array();
         $audios = array();
         $backgrounds = array();
+        $pdfFiles = array();
 
         if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesImages)) {
             $images = $matchesImages[0];
@@ -246,7 +261,15 @@ class Offload
             $backgrounds = $matchesBackground['image'];
         }
 
-        $attachments = array_merge((array)$images, (array)$videos, (array)$audios, (array)$backgrounds);
+        if(preg_match_all('/<a\shref=\"([^\"]*)\">(.*)<\/a>/siU', $content, $matchesPdf)) {
+            $pdfFiles = $matchesPdf[1];
+        }
+
+        if(preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
+            $posters = $matchesPoster['poster'];
+        }
+
+        $attachments = array_merge((array)$images, (array)$videos, (array)$audios, (array)$backgrounds, (array)$pdfFiles, (array)$posters);
         return $attachments;
     }
 
