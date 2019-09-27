@@ -33,6 +33,9 @@ class Offload
         if (PublitioOffloadingAuthService::is_user_authenticated()) {
             $this->sizes = $this->publitioApi->_get_all_image_sizes();
             add_action('add_attachment', array($this, 'upload_file_to_publitio'));
+            if(get_option('publitio_offloading_delete_checkbox') === 'yes') {
+                add_action( 'deleted_post_meta',array($this, 'deleted_file_from_publitio'), 10 ,4);
+            }
             add_filter('wp_calculate_image_srcset', array($this, 'wp_calculate_image_offloading_srcset'), 999, 5);
             add_filter('the_content', array($this, 'update_offloading_images_src'), 999);
             add_filter('post_thumbnail_html', array($this, 'featured_image_update_url'), 999, 5);
@@ -51,6 +54,21 @@ class Offload
     {
         $attachment = get_post($attcID);
         $this->getPublitioMeta($attachment);
+    }
+
+    /**
+     * Call delete file function in attachment has publitio meta
+     * @param $deleted_meta_ids
+     * @param $post_id
+     * @param $meta_key
+     * @param $only_delete_these_meta_values
+     */
+    public function deleted_file_from_publitio( $deleted_meta_ids, $post_id, $meta_key, $only_delete_these_meta_values )
+    {
+        $publitioMeta = get_post_meta($post_id, 'publitioMeta', true);
+        if($publitioMeta) {
+            $this->publitioApi->deleteFileFromPublitio($publitioMeta['id']);
+        }
     }
 
     /**

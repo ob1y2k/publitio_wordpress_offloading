@@ -37,6 +37,9 @@ class Admin
         add_action('wp_ajax_update_image_offloading_quality', array($this, 'update_image_offloading_quality'));
         add_action('wp_ajax_update_video_offloading_quality', array($this, 'update_video_offloading_quality'));
         add_action('wp_ajax_update_files_checkbox', array($this, 'update_files_checkbox'));
+        add_action('wp_ajax_update_delete_checkbox', array($this, 'update_delete_checkbox'));
+        add_action('wp_ajax_get_media_list', array($this, 'get_media_list'));
+        add_action('wp_ajax_sync_media_file', array($this, 'sync_media_file'));
     }
 
     /**
@@ -114,7 +117,8 @@ class Admin
                 'image_checkbox' => get_option('publitio_offloading_image_checkbox'),
                 'video_checkbox' => get_option('publitio_offloading_video_checkbox'),
                 'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
-                'document_checkbox' => get_option('publitio_offloading_document_checkbox')
+                'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
+                'delete_checkbox' => get_option('publitio_offloading_delete_checkbox')
             ]);
         } else {
             wp_send_json([
@@ -128,7 +132,8 @@ class Admin
                 'image_checkbox' => '',
                 'video_checkbox' => '',
                 'audio_checkbox' => '',
-                'document_checkbox' => ''
+                'document_checkbox' => '',
+                'delete_checkbox' => ''
             ]);
         }
     }
@@ -192,4 +197,40 @@ class Admin
             $this->publitioApi->set_files_checkbox($_POST['id'], $_POST['value']);
         }
     }
+
+    /**
+     * Update checkbox to define which is delete from publitio is allowed
+     */
+    public function update_delete_checkbox()
+    {
+        if (isset($_POST['delete_checkbox'])) {
+            $this->publitioApi->set_delete_checkbox($_POST['delete_checkbox']);
+        }
+    }
+
+    /**
+     * Return list of media objects
+     */
+    public function get_media_list() {
+        $media_query = get_posts(  array(
+            'post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'posts_per_page' => -1,
+        ) );
+
+        wp_send_json([
+            'media' => $media_query
+        ]);
+    }
+
+    /**
+     * Synchronize media file with Publitio
+     */
+    public function sync_media_file() {
+        if(isset($_POST['attach_id'])) {
+            $this->publitioApi->syncMedia($_POST['attach_id']);
+        }
+    }
+
+
 }

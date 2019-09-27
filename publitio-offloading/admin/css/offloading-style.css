@@ -5,7 +5,7 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway');
 
 .page-offloading-wrapper {
-    padding: 50px 50px;
+    padding: 15px 50px;
     font-family: 'Raleway', sans-serif;
     font-size: 1.5rem;
 }
@@ -42,7 +42,7 @@
     border: 1px solid #4D6D90;
     color: white;
     border-radius: 3%;
-    font-size: 20px;
+    font-size: 18px;
     box-shadow: 5px 5px 5px grey;
     cursor: pointer;
 }
@@ -143,10 +143,94 @@ input:checked + .slider:before {
     font-size:16px;
 }
 
-.files-offload-input {
+.files-offload-input,.files-offload-delete {
     margin-top: 0 !important;
 }
 
 .off-margin {
     margin: 8px 0;
 }
+
+#myProgress {
+    width: 100%;
+    background-color: white;
+    border-radius: 4px;
+}
+
+#myBar {
+    width: 0;
+    height: 50px;
+    background-color: #4D6D90;
+}
+
+.sync-button {
+    font-size: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    opacity: 1;
+    display: none;
+}
+
+#loadNumber {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+}
+
+.popup {
+    margin: 0 auto;
+    width: 50%;
+    position: fixed;
+    border-radius: 4px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.popup h2 {
+    margin-top: 0;
+    color: #333;
+    font-family: Tahoma, Arial, sans-serif;
+}
+.popup .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    transition: all 200ms;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+}
+.popup .close:hover {
+    color: #06D85F;
+}
+.popup .content {
+    max-height: 30%;
+    overflow: auto;
+}
+
+@media screen and (max-width: 700px){
+    .box{
+        width: 70%;
+    }
+    .popup{
+        width: 70%;
+    }
+}
+
+
+
+

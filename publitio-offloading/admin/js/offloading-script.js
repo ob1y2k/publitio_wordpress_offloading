@@ -16,6 +16,8 @@
         changeImageQuality()
         changeVideoQuality()
         checkboxFiles()
+        changeDelete()
+        syncMediaFiles()
     });
 
     function updateSettingsButtonClick() {
@@ -49,18 +51,19 @@
     }
 
     function handleResponse(response) {
-        if(response.folders != null) {
+        if (response.folders != null) {
             $(".form-offload-select").removeAttr("disabled");
             $(".files-offload-input").removeAttr("disabled");
-            addFoldersList(response.folders,response.default_folder_id);
+            addFoldersList(response.folders, response.default_folder_id);
             addCnameList(response.cnames, response.default_cname_url);
             setCheckBoxValue(response.allow_download);
             setImageQualityValue(response.image_quality);
             setVideoQualityValue(response.video_quality);
-            setFilesCheckbox('image_checkbox',response.image_checkbox);
-            setFilesCheckbox('video_checkbox',response.video_checkbox);
-            setFilesCheckbox('audio_checkbox',response.audio_checkbox);
-            setFilesCheckbox('document_checkbox',response.document_checkbox);
+            setFilesCheckbox('image_checkbox', response.image_checkbox);
+            setFilesCheckbox('video_checkbox', response.video_checkbox);
+            setFilesCheckbox('audio_checkbox', response.audio_checkbox);
+            setFilesCheckbox('document_checkbox', response.document_checkbox);
+            setFilesCheckbox('delete_checkbox', response.delete_checkbox);
         } else {
             setCheckBoxValue('');
             $(".form-offload-select").attr("disabled", true);
@@ -76,18 +79,18 @@
 
     function addFoldersList(folders, defaultFolderId = '') {
         clearFolderList();
-        if (folders != undefined && folders != null) {
+        if (folders !== undefined && folders !== null) {
             $('<option value="">/</option>').appendTo($('#default-offloading-folder'));
             folders.forEach((folder) => {
                 $('<option value="' + folder.id + '">' + folder.path + '</option>').appendTo($('#default-offloading-folder'));
-            })
+            });
             setSelectedOffloadingFolder(defaultFolderId);
         }
     }
 
     function addCnameList(cnames, defaultCnameId = '') {
         clearCnameList();
-        if (cnames != undefined && cnames != null) {
+        if (cnames !== undefined && cnames !== null) {
             $('<option value="">https://media.publit.io</option>').appendTo($('#default-offloading-cname'));
             cnames.forEach((cname) => {
                 $('<option value="' + cname.url + '">' + cname.url + '</option>').appendTo($('#default-offloading-cname'));
@@ -106,31 +109,17 @@
 
     function clearFolderList(show = false) {
         $('#default-offloading-folder').empty();
-        if(show === true) {
+        if (show === true) {
             $('<option selected hidden disabled>None</option>').appendTo($('#default-offloading-folder'));
         }
     }
 
     function clearCnameList(show = false) {
         $('#default-offloading-cname').empty();
-        if(show === true) {
+        if (show === true) {
             $('<option selected hidden disabled>None</option>').appendTo($('#default-offloading-cname'));
         }
     }
-
-    // function clearImageQuality(show = false) {
-    //     $('#offloading-image-quality').empty();
-    //     if(show === true) {
-    //         $('<option selected hidden disabled>None</option>').appendTo($('#offloading-image-quality'));
-    //     }
-    // }
-    //
-    // function clearVideoQuality(show = false) {
-    //     $('#offloading-video-quality').empty();
-    //     if(show === true) {
-    //         $('<option selected hidden disabled>None</option>').appendTo($('#offloading-video-quality'));
-    //     }
-    // }
 
     function clearBlocks() {
         $('#error-offload-block').empty();
@@ -147,6 +136,10 @@
         $('#error-checkbox-block').empty();
         $('#success-allow-block').empty();
         $('#error-allow-block').empty();
+        $('#success-delete-block').empty();
+        $('#error-delete-block').empty();
+        $('#media-upload-message-success').empty();
+        $('#media-upload-message-error').empty();
     }
 
     function showBlock(elem, content) {
@@ -235,18 +228,74 @@
         })
     }
 
+    function changeDelete() {
+        $("#delete_checkbox").bind('change', function (event) {
+            jQuery.post(ajaxurl, {
+                    action: 'update_delete_checkbox',
+                    delete_checkbox: event.target.checked
+                }, function (response) {
+                    if (response.status === STATUSES.SUCCESS) {
+                        showBlock($('#success-delete-block'), 'Great!');
+                    } else {
+                        showBlock($('#error-delete-block'), 'Something went wrong.');
+                    }
+                }
+            )
+        })
+    }
+
+    function syncMediaFiles() {
+        $('#media-offload').bind('click', function (event) {
+            let media_list = null;
+            jQuery.get(ajaxurl, {action: 'get_media_list'}, function (response) {
+                media_list = response.media;
+                syncMedia(media_list);
+            })
+        })
+    }
+
+    function syncMedia(media_list) {
+        let numOfUploaded = 0;
+        $('#popup1').show();
+        if (media_list !== undefined && media_list !== null) {
+            let numOfMedia = media_list.length;
+            media_list.forEach((media) => {
+                jQuery.post(ajaxurl, {
+                    action: 'sync_media_file',
+                    attach_id: media.ID
+                }, function (responseMedia) {
+                    if (responseMedia.sync === true) {
+                        numOfUploaded++;
+                        let result = Math.round((numOfUploaded / numOfMedia) * 100);
+                        console.log(result);
+                        $("#myBar").width(result + "%");
+                        $("#loadNumber").empty();
+                        $("#loadNumber").text(result + "%");
+                        if (numOfUploaded === numOfMedia) {
+                            setTimeout(function () {
+                                $('#popup1').hide();
+                                $("#loadNumber").text(result + "%");
+                                showBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
+                            }, 1000)
+                        }
+                    } else {
+                        $('#popup1').hide();
+                        $("#myBar").width("0%");
+                        $("#loadNumber").text("0%");
+                        showBlock($('#media-upload-message-error'), 'Something went wrong.!');
+                        return;
+                    }
+                })
+            })
+        }
+    }
+
 
     function changeAllowDownload() {
-        let allow;
         $('#allow-download').bind('change', function (event) {
-            if ($('#allow-download').is(":checked")) {
-                allow = true;
-            } else {
-                allow = false;
-            }
             jQuery.post(ajaxurl, {
                 action: 'update_allow_download',
-                allow: allow
+                allow: event.target.checked
             }, function (response) {
                 if (response.status === STATUSES.SUCCESS) {
                     showBlock($('#success-allow-block'), 'Great!');
@@ -259,48 +308,52 @@
 
     function setCheckBoxValue(allow) {
         if (allow !== '') {
-            setCheckBoxDisabled('allow-download',false);
+            setCheckBoxDisabled('allow-download', false);
             if (allow === 'no') {
                 $("#allow-download").attr('checked', false);
             } else {
                 $("#allow-download").attr('checked', true);
             }
         } else {
-            setCheckBoxDisabled('allow-download',true);
+            setCheckBoxDisabled('allow-download', true);
         }
     }
 
-    function setCheckBoxDisabled(id,value) {
+    function setCheckBoxDisabled(id, value) {
         if (value) {
-            $("#"+id).attr("disabled", true);
+            $("#" + id).attr("disabled", true);
         } else {
-            $("#"+id).removeAttr("disabled");
+            $("#" + id).removeAttr("disabled");
         }
     }
 
     function setImageQualityValue(quality) {
-        if(!quality || quality === "") {
+        if (!quality || quality === "") {
             quality = '80';
         }
         $('#offloading-image-quality > option[value="' + quality + '"]').attr("selected", "selected");
     }
 
     function setVideoQualityValue(quality) {
-        if(!quality || quality === "") {
+        if (!quality || quality === "") {
             quality = '480';
         }
         $('#offloading-video-quality > option[value="' + quality + '"]').attr("selected", "selected");
     }
 
-    function setFilesCheckbox(id,value) {
-        if(!value || value === "" || value === 'yes') {
-            $("#"+id).attr('checked', true);
+    function setFilesCheckbox(id, value) {
+        if ((!value || value === "" || value === 'yes') && (id !== 'delete_checkbox')) {
+            $("#" + id).attr('checked', true);
+        } else if (id === 'delete_checkbox') {
+            if (value === "yes") {
+                $("#" + id).attr('checked', true);
+            } else {
+                $("#" + id).attr('checked', false);
+            }
         } else {
-            $("#"+id).attr('checked', false);
+            $("#" + id).attr('checked', false);
         }
     }
 
 })(jQuery);
-
-
 

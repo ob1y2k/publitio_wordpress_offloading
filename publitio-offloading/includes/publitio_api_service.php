@@ -139,18 +139,70 @@ class PublitioApiService
      * @param $id
      * @param $value
      */
-    public function set_files_checkbox($id,$value) {
+    public function set_files_checkbox($id, $value)
+    {
         if (PublitioOffloadingAuthService::is_user_authenticated()) {
             if ($value === "true") {
                 $option = 'yes';
             } else {
                 $option = 'no';
             }
-            update_option('publitio_offloading_'.$id, $option);
+            update_option('publitio_offloading_' . $id, $option);
             wp_send_json([
                 'status' => 200,
-                id => $option
+                $id => $option
             ]);
+        }
+    }
+
+    /**
+     * Set checkbox option for each type of media (image,video,audio,document)
+     * @param $id
+     * @param $value
+     */
+    public function set_delete_checkbox($value)
+    {
+        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+            if ($value === "true") {
+                $option = 'yes';
+            } else {
+                $option = 'no';
+            }
+            update_option('publitio_offloading_delete_checkbox', $option);
+            wp_send_json([
+                'status' => 200,
+                'delete_checkbox' => $option
+            ]);
+        }
+    }
+
+    /**
+     * Check if Publitio file exists, if not upload it again and update meta data for attachment
+     * @param $attcID
+     */
+    public function syncMedia($attcID)
+    {
+        $attachment = get_post($attcID);
+        $publitioMeta = $this->getPublitioMeta($attachment);
+        if (!is_null($publitioMeta)) {
+            $responseShow = $this->publitio_api->call("/files/show/" . $publitioMeta['id'], "GET");
+            if ($responseShow->success !== true) {
+                if(delete_post_meta($attachment->ID, 'publitioMeta')) {
+                    $publitioMetaData = $this->getPublitioMeta($attachment);
+                    if(!is_null($publitioMetaData)) {
+                        wp_send_json([
+                            'sync' => true
+                        ]);
+                    }
+                }
+                wp_send_json([
+                    'sync' => false
+                ]);
+            } else {
+                wp_send_json([
+                    'sync' => true
+                ]);
+            }
         }
     }
 
@@ -171,6 +223,7 @@ class PublitioApiService
         $responseUpload = $this->publitio_api->uploadFile(fopen(wp_get_attachment_url($attachment->ID), 'r'), 'file', $args);
         if ($responseUpload->success === true) {
             $publitioMeta = array(
+                'id' => $responseUpload->id,
                 'publitio_url' => $responseUpload->url_preview,
                 'public_id' => $responseUpload->public_id,
                 'extension' => $responseUpload->extension
@@ -185,6 +238,16 @@ class PublitioApiService
     }
 
     /**
+     * Delete file from Publitio when it is permanently deleted from Media folder in Wordpress
+     * @param $id
+     */
+    public function deleteFileFromPublitio($id)
+    {
+        $response = $this->publitio_api->call('/files/delete/' . $id, 'DELETE');
+        $a = 1;
+    }
+
+    /**
      * Get publitio url with url transformations
      * @param $dimensions - size of image
      * @param $publitioMeta
@@ -192,7 +255,7 @@ class PublitioApiService
      */
     public function getTransformedUrl($dimensions, $publitioMeta)
     {
-        if(is_null($publitioMeta)) {
+        if (is_null($publitioMeta)) {
             return null;
         }
         $media_url = PUBLITIO_MEDIA;
@@ -200,9 +263,9 @@ class PublitioApiService
             $media_url = get_option('publitio_offloading_default_cname') . '/file/';
         }
         if (is_null($dimensions)) {
-            if($this->isImageType($publitioMeta['extension'])) {
+            if ($this->isImageType($publitioMeta['extension'])) {
                 $qualityImage = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
-                return $media_url . ($qualityImage  ? 'q_' . $qualityImage . '/' : '') . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                return $media_url . ($qualityImage ? 'q_' . $qualityImage . '/' : '') . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             } elseif ($this->isVideoType($publitioMeta['extension'])) {
                 $qualityVideo = get_option('publitio_offloading_video_quality') ? get_option('publitio_offloading_video_quality') : '480';
                 return $media_url . ($qualityVideo ? 'h_' . $qualityVideo . '/' : '') . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
@@ -231,6 +294,50 @@ class PublitioApiService
         }
         if (isset($_wp_additional_image_sizes) && count($_wp_additional_image_sizes)) $image_sizes = array_merge($image_sizes, $_wp_additional_image_sizes);
         return $image_sizes;
+    }
+
+    /**
+     * Check if attachment type is image
+     * @param $type
+     * @return bool
+     */
+    public function isImageType($type)
+    {
+        $image_types = array('jpg', 'jpeg', 'jpe', 'png', 'gif', 'bmp', 'psd', 'webp', 'ai', 'tif', 'tiff', 'svg');
+        return in_array($type, $image_types);
+    }
+
+    /**
+     * Check if attachment type is video
+     * @param $type
+     * @return bool
+     */
+    public function isVideoType($type)
+    {
+        $video_types = array('mp4', 'webm', 'ogv', 'avi', 'mov', 'flv', '3gp', '3g2', 'wmv', 'mpeg', 'mkv');
+        return in_array($type, $video_types);
+    }
+
+    /**
+     * Check if attachment type is pdf
+     * @param $type
+     * @return bool
+     */
+    public function isAudioType($type)
+    {
+        $audio_types = array('mp3', 'wav', 'ogg', 'aac', 'aiff', 'amr', 'ac3', 'au', 'flac', 'm4a', 'aac', 'ra', 'voc', 'wma');
+        return in_array($type, $audio_types);
+    }
+
+    /**
+     * Check if attachment type is pdf
+     * @param $type
+     * @return bool
+     */
+    public function isDocumentType($type)
+    {
+        $doc_types = array('pdf');
+        return in_array($type, $doc_types);
     }
 
     /**
@@ -280,15 +387,15 @@ class PublitioApiService
      */
     private function handle_success($response)
     {
-        if (!get_option('publitio_offloading_allow_download')) {
-            update_option('publitio_offloading_allow_download', 'yes');
-        }
-        if (!get_option('publitio_offloading_image_quality')) {
-            update_option('publitio_offloading_image_quality', '80');
-        }
-        if (!get_option('publitio_offloading_video_quality')) {
-            update_option('publitio_offloading_video_quality', '480');
-        }
+        delete_option('publitio_offloading_default_folder');
+        delete_option('publitio_offloading_allow_download');
+        delete_option('publitio_offloading_default_cname');
+        delete_option('publitio_offloading_delete_checkbox');
+        update_option('publitio_offloading_allow_download', 'yes');
+        update_option('publitio_offloading_image_quality', '80');
+        update_option('publitio_offloading_video_quality', '480');
+        update_option('publitio_offloading_delete_checkbox', 'no');
+
         wp_send_json([
             'status' => 200,
             'folders' => $response->folders,
@@ -298,46 +405,29 @@ class PublitioApiService
             'allow_download' => get_option('publitio_offloading_allow_download'),
             'image_quality' => get_option('publitio_offloading_image_quality'),
             'video_quality' => get_option('publitio_offloading_video_quality'),
+            'image_checkbox' => get_option('publitio_offloading_image_checkbox'),
+            'video_checkbox' => get_option('publitio_offloading_video_checkbox'),
+            'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
+            'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
+            'delete_checkbox' => get_option('publitio_offloading_delete_checkbox')
         ]);
     }
 
-    /**
-     * Check if attachment type is image
-     * @param $type
-     * @return bool
-     */
-    public function isImageType($type) {
-        $image_types = array('jpg', 'jpeg', 'jpe', 'png', 'gif', 'bmp', 'psd', 'webp', 'ai', 'tif', 'tiff', 'svg');
-        return in_array($type, $image_types);
-    }
 
     /**
-     * Check if attachment type is video
-     * @param $type
-     * @return bool
+     * Get Publitio Meta Data for attachment
+     * @param $attachment
+     * @return array|mixed|null
      */
-    public function isVideoType($type) {
-        $video_types = array('mp4', 'webm', 'ogv', 'avi', 'mov', 'flv', '3gp', '3g2', 'wmv', 'mpeg', 'mkv');
-        return in_array($type, $video_types);
-    }
-
-    /**
-     * Check if attachment type is pdf
-     * @param $type
-     * @return bool
-     */
-    public function isAudioType($type) {
-        $audio_types = array('mp3', 'wav', 'ogg', 'aac', 'aiff', 'amr', 'ac3', 'au', 'flac', 'm4a', 'aac', 'ra', 'voc' , 'wma');
-        return in_array($type, $audio_types);
-    }
-
-    /**
-     * Check if attachment type is pdf
-     * @param $type
-     * @return bool
-     */
-    public function isDocumentType($type) {
-        $doc_types = array('pdf');
-        return in_array($type, $doc_types);
+    private function getPublitioMeta($attachment)
+    {
+        $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
+        if (!$publitioMeta) {
+            $publitioMeta = $this->uploadFile($attachment);
+            if (is_null($publitioMeta)) {
+                return null;
+            }
+        }
+        return $publitioMeta;
     }
 }

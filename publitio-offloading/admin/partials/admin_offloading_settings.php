@@ -50,31 +50,40 @@
     </div>
     <hr/>
     <div class="section-offloading-wrapper">
-        <label class="form-offload-label" for="default-offloading-folder">Select files to be offloaded:</label>
+        <label class="form-offload-label">Select files to be offloaded:</label>
         <div class="files-checkbox off-margin">
             <div class="offload-checkbox">
-                <label class="files_label">Image</label>
                 <input <?php echo(get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no' ? '' : 'checked') ?>
                         class="files-offload-input" type='checkbox' id="image_checkbox">
+                <label class="files_label">Image</label>
             </div>
             <div class="offload-checkbox">
-                <label class="files_label">Video</label>
                 <input <?php echo(get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no' ? '' : 'checked') ?>
                         class="files-offload-input" type='checkbox' id="video_checkbox">
+                <label class="files_label">Video</label>
             </div>
             <div class="offload-checkbox">
-                <label class="files_label">Audio</label>
                 <input <?php echo(get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no' ? '' : 'checked') ?>
                         class="files-offload-input" type='checkbox' id="audio_checkbox">
+                <label class="files_label">Audio</label>
             </div>
             <div class="offload-checkbox">
-                <label class="files_label">Document(pdf)</label>
                 <input <?php echo(get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no' ? '' : 'checked') ?>
                         class="files-offload-input" type='checkbox' id="document_checkbox">
+                <label class="files_label">Document(pdf)</label>
             </div>
         </div>
         <div class="offloading-block error-offload-block" id="error-checkbox-block"></div>
         <div class="offloading-block success-offload-block" id="success-checkbox-block"></div>
+    </div>
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <input <?php echo(get_option('publitio_offloading_delete_checkbox') && get_option('publitio_offloading_delete_checkbox') === 'yes' ? 'checked' : '') ?>
+                class="files-offload-delete" type='checkbox' id="delete_checkbox">
+        <span class="download-text">Delete file from Publitio when Media is deleted permanently</span>
+
+        <div class="offloading-block error-offload-block" id="error-delete-block"></div>
+        <div class="offloading-block success-offload-block" id="success-delete-block"></div>
     </div>
     <hr/>
     <div class="section-offloading-wrapper">
@@ -98,7 +107,7 @@
         <select class="form-offload-select" name="offloading-image-quality" id="offloading-image-quality">
             <option value="100">original</option>
             <option value="90">90</option>
-            <option selected value="80">80</option>
+            <option selected value="80">80 (default)</option>
             <option value="70">70</option>
             <option value="60">60</option>
             <option value="50">50</option>
@@ -113,11 +122,25 @@
         <select class="form-offload-select" name="offloading-video-quality" id="offloading-video-quality">
             <option value="1080">1080p</option>
             <option value="720">720p</option>
-            <option value="480">480p</option>
+            <option selected value="480">480p</option>
             <option value="360">360p</option>
         </select>
 
         <div class="offloading-block error-offload-block" id="folder-error-video-quality"></div>
         <div class="offloading-block success-offload-block" id="folder-success-video-quality"></div>
+    </div>
+    <hr/>
+    <div class="section-offloading-wrapper">
+        <button class="sync-button" id="media-offload">Sync Now</button>
+        <div class="offloading-block error-offload-block" id="media-upload-message-error"></div>
+        <div class="offloading-block success-offload-block" id="media-upload-message-success"></div>
+    </div>
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <div id="myProgress">
+                <div id="loadNumber">0%</div>
+                <div id="myBar"></div>
+            </div>
+        </div>
     </div>
 </div>
