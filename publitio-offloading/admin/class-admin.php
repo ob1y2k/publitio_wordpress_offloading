@@ -30,9 +30,16 @@ class Admin
         add_action('admin_enqueue_scripts', array($this, 'enqueue'));
         add_filter("plugin_action_links_" . PLUGIN, array($this, 'settings_link'));
         add_action('wp_ajax_update_offloading_settings', array($this, 'update_offloading_settings'));
-        add_action('wp_ajax_get_offloading_folders_tree', array($this, 'get_offloading_folders_tree'));
-        add_action('wp_ajax_update_default_offloading_folder',array($this, 'update_default_offloading_folder'));
-        add_action('wp_ajax_update_allow_download',array($this, 'update_allow_download'));
+        add_action('wp_ajax_get_offloading_account_settings', array($this, 'get_offloading_account_settings'));
+        add_action('wp_ajax_update_default_offloading_folder', array($this, 'update_default_offloading_folder'));
+        add_action('wp_ajax_update_default_offloading_cname', array($this, 'update_default_offloading_cname'));
+        add_action('wp_ajax_update_allow_download', array($this, 'update_allow_download'));
+        add_action('wp_ajax_update_image_offloading_quality', array($this, 'update_image_offloading_quality'));
+        add_action('wp_ajax_update_video_offloading_quality', array($this, 'update_video_offloading_quality'));
+        add_action('wp_ajax_update_files_checkbox', array($this, 'update_files_checkbox'));
+        add_action('wp_ajax_update_delete_checkbox', array($this, 'update_delete_checkbox'));
+        add_action('wp_ajax_get_media_list', array($this, 'get_media_list'));
+        add_action('wp_ajax_sync_media_file', array($this, 'sync_media_file'));
     }
 
     /**
@@ -92,22 +99,41 @@ class Admin
     }
 
     /**
-     * Get list of folders for account
+     * Get account settings
      */
-    public function get_offloading_folders_tree() {
-        $response =  $this->publitioApi->get_folders();
-        if($response) {
+    public function get_offloading_account_settings()
+    {
+        $response = $this->publitioApi->get_account_settins();
+        if ($response) {
             wp_send_json([
                 'status' => 200,
                 'folders' => $response->folders,
+                'cnames' => $response->cnames,
                 'default_folder_id' => get_option('publitio_offloading_default_folder'),
-                'allow_download' => get_option('publitio_offloading_allow_download')
+                'default_cname_url' => get_option('publitio_offloading_default_cname'),
+                'allow_download' => get_option('publitio_offloading_allow_download'),
+                'image_quality' => get_option('publitio_offloading_image_quality'),
+                'video_quality' => get_option('publitio_offloading_video_quality'),
+                'image_checkbox' => get_option('publitio_offloading_image_checkbox'),
+                'video_checkbox' => get_option('publitio_offloading_video_checkbox'),
+                'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
+                'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
+                'delete_checkbox' => get_option('publitio_offloading_delete_checkbox')
             ]);
         } else {
             wp_send_json([
                 'folders' => null,
+                'cnames' => null,
                 'default_folder_id' => '',
-                'allow_download' => ''
+                'default_cname_url' => '',
+                'allow_download' => '',
+                'image_quality' => '',
+                'video_quality' => '',
+                'image_checkbox' => '',
+                'video_checkbox' => '',
+                'audio_checkbox' => '',
+                'document_checkbox' => '',
+                'delete_checkbox' => ''
             ]);
         }
     }
@@ -115,15 +141,96 @@ class Admin
     /**
      * Update default folder
      */
-    public function update_default_offloading_folder() {
+    public function update_default_offloading_folder()
+    {
         if (isset($_POST['folder_id'])) {
             $this->publitioApi->set_default_offloading_folder($_POST['folder_id']);
         }
     }
 
-    public function update_allow_download() {
+    /**
+     * Update default cname
+     */
+    public function update_default_offloading_cname()
+    {
+        if (isset($_POST['cname_url'])) {
+            $this->publitioApi->set_default_offloading_cname($_POST['cname_url']);
+        }
+    }
+
+    /**
+     * Update allow download option
+     */
+    public function update_allow_download()
+    {
         if (isset($_POST['allow'])) {
             $this->publitioApi->set_allow_download_offloading($_POST['allow']);
         }
     }
+
+    /**
+     * Update image quality
+     */
+    public function update_image_offloading_quality()
+    {
+        if (isset($_POST['image_quality'])) {
+            $this->publitioApi->set_offloading_image_quality($_POST['image_quality']);
+        }
+    }
+
+    /**
+     * Update video quality
+     */
+    public function update_video_offloading_quality()
+    {
+        if (isset($_POST['video_quality'])) {
+            $this->publitioApi->set_offloading_video_quality($_POST['video_quality']);
+        }
+    }
+
+    /**
+     * Update checkbox to define which files should be offloaded
+     */
+    public function update_files_checkbox()
+    {
+        if (isset($_POST['id']) && isset($_POST['value'])) {
+            $this->publitioApi->set_files_checkbox($_POST['id'], $_POST['value']);
+        }
+    }
+
+    /**
+     * Update checkbox to define which is delete from publitio is allowed
+     */
+    public function update_delete_checkbox()
+    {
+        if (isset($_POST['delete_checkbox'])) {
+            $this->publitioApi->set_delete_checkbox($_POST['delete_checkbox']);
+        }
+    }
+
+    /**
+     * Return list of media objects
+     */
+    public function get_media_list() {
+        $media_query = get_posts(  array(
+            'post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'posts_per_page' => -1,
+        ) );
+
+        wp_send_json([
+            'media' => $media_query
+        ]);
+    }
+
+    /**
+     * Synchronize media file with Publitio
+     */
+    public function sync_media_file() {
+        if(isset($_POST['attach_id'])) {
+            $this->publitioApi->syncMedia($_POST['attach_id']);
+        }
+    }
+
+
 }

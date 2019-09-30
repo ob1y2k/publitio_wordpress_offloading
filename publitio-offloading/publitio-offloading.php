@@ -25,7 +25,7 @@
  * Domain Path:       /languages
  */
 
-if ( ! defined( 'WPINC' ) ) {
+if (!defined('WPINC')) {
     die;
 }
 
@@ -36,13 +36,14 @@ if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
 define('PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('PLUGIN_URL', plugin_dir_url(__FILE__));
 define('PLUGIN', plugin_basename(__FILE__));
-define('PUBLITIO_MEDIA','https://media.publit.io/file/');
-define( 'PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.0.0' );
+define('PUBLITIO_MEDIA', 'https://media.publit.io/file/');
+define('PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.0.0');
 
 /**
  * The code that runs during plugin activation.
  */
-function activate_publitio_offloading() {
+function activate_publitio_offloading()
+{
     require_once PLUGIN_PATH . 'includes/class-publitio-offloading-activator.php';
     Publitio_Offloading_Activator::activate();
 }
@@ -50,13 +51,14 @@ function activate_publitio_offloading() {
 /**
  * The code that runs during plugin deactivation.
  */
-function deactivate_publitio_offloading() {
+function deactivate_publitio_offloading()
+{
     require_once PLUGIN_PATH . 'includes/class-publitio-offloading-deactivator.php';
     Publitio_Offloading_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_publitio_offloading' );
-register_deactivation_hook( __FILE__, 'deactivate_publitio_offloading' );
+register_activation_hook(__FILE__, 'activate_publitio_offloading');
+register_deactivation_hook(__FILE__, 'deactivate_publitio_offloading');
 
 require PLUGIN_PATH . 'includes/class-init.php';
 
