@@ -31,6 +31,7 @@ class PublitioOffloadingAuthService {
         delete_option('publitio_offloading_default_cname');
         delete_option('publitio_offloading_image_quality');
         delete_option('publitio_offloading_video_quality');
+        delete_option('publitio_offloading_replace_checkbox');
     }
 
     /**
