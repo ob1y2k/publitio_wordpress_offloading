@@ -157,7 +157,6 @@ class PublitioApiService
 
     /**
      * Set checkbox option for each type of media (image,video,audio,document)
-     * @param $id
      * @param $value
      */
     public function set_delete_checkbox($value)
@@ -177,6 +176,26 @@ class PublitioApiService
     }
 
     /**
+     * Set checkbox option for automatically replacing media url with Publitio URL
+     * @param $value
+     */
+    public function set_replace_checkbox($value)
+    {
+        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+            if ($value === "true") {
+                $option = 'yes';
+            } else {
+                $option = 'no';
+            }
+            update_option('publitio_offloading_replace_checkbox', $option);
+            wp_send_json([
+                'status' => 200,
+                'replace_checkbox' => $option
+            ]);
+        }
+    }
+
+    /**
      * Check if Publitio file exists, if not upload it again and update meta data for attachment
      * @param $attcID
      */
@@ -187,9 +206,9 @@ class PublitioApiService
         if (!is_null($publitioMeta)) {
             $responseShow = $this->publitio_api->call("/files/show/" . $publitioMeta['id'], "GET");
             if ($responseShow->success !== true) {
-                if(delete_post_meta($attachment->ID, 'publitioMeta')) {
+                if (delete_post_meta($attachment->ID, 'publitioMeta')) {
                     $publitioMetaData = $this->getPublitioMeta($attachment);
-                    if(!is_null($publitioMetaData)) {
+                    if (!is_null($publitioMetaData)) {
                         wp_send_json([
                             'sync' => true
                         ]);
@@ -214,25 +233,29 @@ class PublitioApiService
     public function uploadFile($attachment)
     {
         $args = array(
-            'public_id' => $attachment->post_name
+            'public_id' => $attachment->post_name,
+            'wp_url' => $attachment->guid
         );
         $folder = get_option('publitio_offloading_default_folder');
         if ($folder && !empty($folder)) {
             $args['folder'] = $folder;
         }
-        $responseUpload = $this->publitio_api->uploadFile(fopen(wp_get_attachment_url($attachment->ID), 'r'), 'file', $args);
-        if ($responseUpload->success === true) {
-            $publitioMeta = array(
-                'id' => $responseUpload->id,
-                'publitio_url' => $responseUpload->url_preview,
-                'public_id' => $responseUpload->public_id,
-                'extension' => $responseUpload->extension
-            );
-            if ($folder) {
-                $publitioMeta['folder_name'] = $responseUpload->folder;
+        $attach = get_attached_file($attachment->ID);
+        if (file_exists($attach)) {
+            $responseUpload = $this->publitio_api->uploadFile(fopen($attachment->guid, 'r'), 'file', $args);
+            if ($responseUpload->success === true) {
+                $publitioMeta = array(
+                    'id' => $responseUpload->id,
+                    'publitio_url' => $responseUpload->url_preview,
+                    'public_id' => $responseUpload->public_id,
+                    'extension' => $responseUpload->extension
+                );
+                if ($folder) {
+                    $publitioMeta['folder_name'] = $responseUpload->folder;
+                }
+                update_post_meta($attachment->ID, 'publitioMeta', $publitioMeta);
+                return $publitioMeta;
             }
-            update_post_meta($attachment->ID, 'publitioMeta', $publitioMeta);
-            return $publitioMeta;
         }
         return null;
     }
@@ -244,11 +267,44 @@ class PublitioApiService
     public function deleteFileFromPublitio($id)
     {
         $response = $this->publitio_api->call('/files/delete/' . $id, 'DELETE');
-        $a = 1;
     }
 
     /**
-     * Get publitio url with url transformations
+     * Remove file from upload folder, but leave media object in database
+     * @param $id
+     * @param bool $response
+     */
+    public function deleteAtachment($id, $response = true)
+    {
+        $meta = wp_get_attachment_metadata($id);
+        $attach = get_attached_file($id);
+        $pi = pathinfo($attach);
+
+        $img_dirname = $pi['dirname'];
+        $sizes = $meta['sizes'];
+        if ($sizes) {
+            foreach ($sizes as $size) {
+                $filename = $size['file'];
+                $img_size_url = $img_dirname . "/" . $filename;
+                wp_delete_file($img_size_url);
+            }
+        }
+        wp_delete_file($attach);
+        if ($response === true) {
+            if (!file_exists($attach)) {
+                wp_send_json([
+                    'deleted' => true
+                ]);
+            } else {
+                wp_send_json([
+                    'deleted' => false
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Return Publitio URL with url transformations
      * @param $dimensions - size of image
      * @param $publitioMeta
      * @return string
@@ -273,13 +329,86 @@ class PublitioApiService
                 return $media_url . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             }
         } else {
-            return $media_url . 'w_' . $dimensions['width'] . ',' . ($dimensions['height'] ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . '/' . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+            if ($this->isImageType($publitioMeta['extension'])) {
+                $qualityImage = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
+                return $media_url . 'w_' . $dimensions['width'] . ',' . ($dimensions['height'] ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . ($qualityImage ? ',q_' . $qualityImage : '') . '/' . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+            } else {
+                return $media_url . 'w_' . $dimensions['width'] . ',' . ($dimensions['height'] ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . '/' . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+            }
         }
     }
 
     /**
+     * Get all media that need synchronization with Publitio
+     * @return array
+     */
+    public function get_media_for_sync() {
+        $args = array('post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'posts_per_page' => -1);
+        $attachments = get_posts($args);
+        $unsync = array();
+        foreach ($attachments as $attachment) {
+            $attach = get_attached_file($attachment->ID);
+            if (file_exists($attach)) {
+                array_push($unsync, $attachment);
+            }
+        }
+
+        return $unsync;
+    }
+
+    /**
+     * Get all media that are in upload folder and have Publitio URL
+     * @return array
+     */
+    public function get_undeleted_attachments()
+    {
+        $args = array('post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'posts_per_page' => -1);
+        $attachments = get_posts($args);
+        $undelete = array();
+        foreach ($attachments as $attachment) {
+            $attach = get_attached_file($attachment->ID);
+            $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
+            if (file_exists($attach) && $publitioMeta) {
+                $filetype = wp_check_filetype($attachment->guid);
+                $add_to_array = true;
+                if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
+                    if ($this->isImageType($filetype['ext'])) {
+                        $add_to_array = false;
+                    }
+                }
+
+                if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no') {
+                    if ($this->isVideoType($filetype['ext'])) {
+                        $add_to_array = false;
+                    }
+                }
+
+                if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no') {
+                    if ($this->isAudioType($filetype['ext'])) {
+                        $add_to_array = false;
+                    }
+                }
+
+                if (get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no') {
+                    if ($this->isDocumentType($filetype['ext'])) {
+                        $add_to_array = false;
+                    }
+                }
+                if ($add_to_array === true) {
+                    array_push($undelete, $attachment);
+                }
+            }
+        }
+
+        return $undelete;
+    }
+
+    /**
      * Get size information for all currently-registered image sizes.
-     *
      * @return array $sizes Data for all currently-registered image sizes.
      */
     public function _get_all_image_sizes()
@@ -395,6 +524,8 @@ class PublitioApiService
         update_option('publitio_offloading_image_quality', '80');
         update_option('publitio_offloading_video_quality', '480');
         update_option('publitio_offloading_delete_checkbox', 'no');
+        delete_option('publitio_offloading_replace_checkbox');
+
 
         wp_send_json([
             'status' => 200,
@@ -409,7 +540,8 @@ class PublitioApiService
             'video_checkbox' => get_option('publitio_offloading_video_checkbox'),
             'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
             'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
-            'delete_checkbox' => get_option('publitio_offloading_delete_checkbox')
+            'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
+            'replace_checkbox' => get_option('publitio_offloading_replace_checkbox')
         ]);
     }
 
