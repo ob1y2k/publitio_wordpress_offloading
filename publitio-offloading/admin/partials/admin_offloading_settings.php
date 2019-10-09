@@ -152,14 +152,6 @@
         <div class="offloading-block error-offload-block" id="media-upload-message-error"></div>
         <div class="offloading-block success-offload-block" id="media-upload-message-success"></div>
     </div>
-    <div id="popup1" class="overlay">
-        <div class="popup">
-            <div id="myProgress">
-                <div id="loadNumber">0</div>
-                <div id="myBar"></div>
-            </div>
-        </div>
-    </div>
     <hr />
     <div class="section-offloading-wrapper">
         <div class="off-margin">
@@ -177,5 +169,13 @@
         <button class="sync-button" id="media-delete">Delete All Offloaded Media</button>
         <div class="offloading-block error-offload-block" id="media-delete-message-error"></div>
         <div class="offloading-block success-offload-block" id="media-delete-message-success"></div>
+    </div>
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <div id="myProgress">
+                <div id="loadNumber">0</div>
+                <div id="myBar"></div>
+            </div>
+        </div>
     </div>
 </div>

@@ -113,7 +113,7 @@ class Offload
     public function edit_post_content($post)
     {
         $content = $post->post_content;
-        $updated = $this->update_offloading_images_src($content, '', true);
+        $updated = $this->update_offloading_images_src($content,'',true);
         $post->post_content = $updated;
         return $post;
     }
@@ -282,51 +282,55 @@ class Offload
         }
         foreach ($post_images as $image) {
             $src = preg_match('/ src="([^"]*)"/', $image, $match_src) ? $match_src[1] : '';
-            $uploads = wp_upload_dir();
-            if (strpos($src, $uploads['baseurl']) === false) {
+            $class_id = preg_match('/wp-image-([0-9]+)/i', $image, $match_class) ? $match_class[1] : 0;
+            if (empty($src) || $src === "") {
+                $src = $image;
+            }
+
+            if (!empty($attach_id)) {
+                $attachment_id = $attach_id;
+            } elseif ($class_id && $class_id !== 0) {
+                $attachment_id = $class_id;
+            } else {
+                $attachment_id = $this->get_attachment_id($src);
+            }
+
+            $quit = false;
+            if ($check === true) {
+                $attach = get_attached_file($attachment_id);
+                if (file_exists($attach)) {
+                    $quit = true;
+                }
+            }
+
+            if ($quit === true) {
+                break;
+            }
+
+            if (strpos($src, 'wp-content') === false) {
                 $valueQ = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
                 $valueV = get_option('publitio_offloading_video_quality') ? get_option('publitio_offloading_video_quality') : '480';
 
                 if (preg_match("/(.file\/.*?)[^\/]*/", $src, $matches)) {
                     $file_path = $matches[0];
                     if (preg_match("/q_\d{1,3}/", $file_path, $matchesQ)) {
-                        $q_value = $matchesQ;
+                        $q_value = $matchesQ[0];
                         $new_file_path = str_replace($q_value, "q_" . $valueQ, $file_path);
                         $new_src = str_replace($file_path, $new_file_path, $src);
                         $updated_image = str_replace($src, $new_src, $image);
                         $content = str_replace($image, $updated_image, $content);
                     }
-
-                    if (preg_match("/h_\d{3,4}/", $file_path, $matchesV)) {
-                        $v_value = $matchesV;
-                        $new_file_path = str_replace($v_value, "h_" . $valueV, $file_path);
-                        $new_src = str_replace($file_path, $new_file_path, $src);
-                        $updated_image = str_replace($src, $new_src, $image);
-                        $content = str_replace($image, $updated_image, $content);
+                    if (strpos($image, 'video') !== false) {
+                        if (preg_match("/h_\d{3,4}/", $file_path, $matchesV)) {
+                            $v_value = $matchesV[0];
+                            $new_file_path = str_replace($v_value, "h_" . $valueV, $file_path);
+                            $new_src = str_replace($file_path, $new_file_path, $src);
+                            $updated_image = str_replace($src, $new_src, $image);
+                            $content = str_replace($image, $updated_image, $content);
+                        }
                     }
                 }
             } else {
-                $class_id = preg_match('/wp-image-([0-9]+)/i', $image, $match_class) ? $match_class[1] : 0;
-                if (empty($src)) {
-                    $src = $image;
-                }
-                if (!empty($attach_id)) {
-                    $attachment_id = $attach_id;
-                } elseif ($class_id && $class_id !== 0) {
-                    $attachment_id = $class_id;
-                } else {
-                    $attachment_id = $this->get_attachment_id($src);
-                }
-                $quit = false;
-                if ($check === true) {
-                    $attach = get_attached_file($attachment_id);
-                    if (file_exists($attach)) {
-                        $quit = true;
-                    }
-                }
-                if ($quit) {
-                    break;
-                }
                 if ($attachment_id && $attachment_id !== 0) {
                     $attachment = get_post($attachment_id);
                     if ($attachment) {
