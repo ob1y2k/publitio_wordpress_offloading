@@ -244,11 +244,18 @@ class PublitioApiService
         if (file_exists($attach)) {
             $responseUpload = $this->publitio_api->uploadFile(fopen($attachment->guid, 'r'), 'file', $args);
             if ($responseUpload->success === true) {
+                if($this->isVideoType($responseUpload->extension)) {
+                    $ext = 'mp4';
+                } else if ($this->isAudioType($responseUpload->extension)) {
+                    $ext = 'mp3';
+                } else {
+                    $ext = $responseUpload->extension;
+                }
                 $publitioMeta = array(
                     'id' => $responseUpload->id,
                     'publitio_url' => $responseUpload->url_preview,
                     'public_id' => $responseUpload->public_id,
-                    'extension' => $responseUpload->extension
+                    'extension' => $ext
                 );
                 if ($folder) {
                     $publitioMeta['folder_name'] = $responseUpload->folder;
@@ -525,6 +532,10 @@ class PublitioApiService
         update_option('publitio_offloading_video_quality', '480');
         update_option('publitio_offloading_delete_checkbox', 'no');
         delete_option('publitio_offloading_replace_checkbox');
+        delete_option('publitio_offloading_image_checkbox');
+        delete_option('publitio_offloading_video_checkbox');
+        delete_option('publitio_offloading_audio_checkbox');
+        delete_option('publitio_offloading_document_checkbox');
 
 
         wp_send_json([

@@ -90,19 +90,6 @@
     </div>
     <br/>
     <div class="section-offloading-wrapper">
-        <div class="offload-checkbox">
-            <label class="switch">
-                <input type="checkbox"
-                       id="delete_checkbox" class="files-offload-delete" <?php echo(get_option('publitio_offloading_delete_checkbox') && get_option('publitio_offloading_delete_checkbox') === 'yes' ? 'checked' : '') ?>>
-                <span class="slider round"></span>
-            </label>
-            <span class="download-text">Delete file from Publitio when Media is deleted permanently</span>
-        </div>
-        <div class="offloading-block error-offload-block" id="error-delete-block"></div>
-        <div class="offloading-block success-offload-block" id="success-delete-block"></div>
-    </div>
-    <br/>
-    <div class="section-offloading-wrapper">
         <label class="form-offload-label" for="default-offloading-folder">Folder:</label>
         <select class="form-offload-select" name="default-offloading-folder" id="default-offloading-folder"></select>
 
@@ -121,7 +108,7 @@
     <div class="section-offloading-wrapper">
         <label class="form-offload-label" for="offloading-image-quality">Image quality:</label>
         <select class="form-offload-select" name="offloading-image-quality" id="offloading-image-quality">
-            <option value="100">original</option>
+            <option value="100">100</option>
             <option value="90">90</option>
             <option selected value="80">80 (default)</option>
             <option value="70">70</option>
@@ -153,6 +140,18 @@
         <div class="offloading-block success-offload-block" id="media-upload-message-success"></div>
     </div>
     <hr />
+    <div class="section-offloading-wrapper">
+        <div class="offload-checkbox">
+            <label class="switch">
+                <input type="checkbox"
+                       id="delete_checkbox" class="files-offload-delete" <?php echo(get_option('publitio_offloading_delete_checkbox') && get_option('publitio_offloading_delete_checkbox') === 'yes' ? 'checked' : '') ?>>
+                <span class="slider round"></span>
+            </label>
+            <span class="download-text">Delete file from Publitio when Media is deleted permanently</span>
+        </div>
+        <div class="offloading-block error-offload-block" id="error-delete-block"></div>
+        <div class="offloading-block success-offload-block" id="success-delete-block"></div>
+    </div>
     <div class="section-offloading-wrapper">
         <div class="off-margin">
             <label class="switch">

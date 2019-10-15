@@ -305,7 +305,7 @@
                                 let result = Math.round((numOfUploaded / numOfMedia) * 100);
                                 $("#myBar").width(result + "%");
                                 $("#loadNumber").empty();
-                                $("#loadNumber").text(numOfUploaded);
+                                $("#loadNumber").text(numOfUploaded + " of "+ numOfMedia + " / " + result + "% completed");
                                 if (numOfUploaded === numOfMedia) {
                                     setTimeout(function () {
                                         $('#popup1').hide();
@@ -355,7 +355,7 @@
                                 let result = Math.round((numOfDeleted / numOfMediaForDelete) * 100);
                                 $("#myBar").width(result + "%");
                                 $("#loadNumber").empty();
-                                $("#loadNumber").text(numOfDeleted);
+                                $("#loadNumber").text(numOfDeleted + " of "+ numOfMediaForDelete + " / " + result + "% completed");
                                 if (numOfDeleted === numOfMediaForDelete) {
                                     setTimeout(function () {
                                         $('#popup1').hide();
