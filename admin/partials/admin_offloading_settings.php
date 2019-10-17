@@ -33,7 +33,7 @@
     </div>
 
     <div class="button-section-offloading-wrapper">
-        <button type="button" class="publitio-offload-button" id="update-offloading-button">Update Settings</button>
+        <button type="button" class="publitio-offload-button" id="update-offloading-button">Save Api Keys</button>
     </div>
     <hr />
     <div class="section-offloading-wrapper">
@@ -43,7 +43,7 @@
                        id="allow-download" <?php echo(get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no' ? '' : 'checked') ?>>
                 <span class="slider round"></span>
             </label>
-            <span class="download-text">Allow users to download media files</span>
+            <span class="download-text">Allow users to save/download media files</span>
         </div>
         <div class="offloading-block error-offload-block" id="error-allow-block"></div>
         <div class="offloading-block success-offload-block" id="success-allow-block"></div>
@@ -90,7 +90,7 @@
     </div>
     <br/>
     <div class="section-offloading-wrapper">
-        <label class="form-offload-label" for="default-offloading-folder">Folder:</label>
+        <label class="form-offload-label" for="default-offloading-folder">Upload Folder:</label>
         <select class="form-offload-select" name="default-offloading-folder" id="default-offloading-folder"></select>
 
         <div class="offloading-block error-offload-block" id="folder-error-block"></div>
@@ -98,7 +98,7 @@
     </div>
     <br/>
     <div class="section-offloading-wrapper">
-        <label class="form-offload-label" for="default-offloading-cname">CNAME:</label>
+        <label class="form-offload-label" for="default-offloading-cname">Custom CNAME:</label>
         <select class="form-offload-select" name="default-offloading-cname" id="default-offloading-cname"></select>
 
         <div class="offloading-block error-offload-block" id="cname-error-block"></div>

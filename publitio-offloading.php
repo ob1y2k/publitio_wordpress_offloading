@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       Publitio Offloading
  * Plugin URI:        https://publit.io/
- * Description:       Simple Image & Video Asset Management in the cloud.
+ * Description:       This WordPress plugin offloads your media library to Publitio
  * Version:           1.0.0
  * Author:            Publitio
  * Author URI:        https://publit.io
