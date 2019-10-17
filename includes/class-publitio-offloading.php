@@ -2,12 +2,12 @@
 /**
  * @package Publitio
  */
-require_once PLUGIN_PATH . '/includes/class-auth-service.php';
+require_once PUBLITIO_OFFLOADING_PLUGIN_PATH . '/includes/class-publitio-offloading-auth-service.php';
 
 /**
  * Class Offload - handle media offloading
  */
-class Offload
+class PWPO_Offload
 {
     /**
      * @var Instance of PublitioApiService class
@@ -22,32 +22,32 @@ class Offload
     public function __construct()
     {
         $this->publitioApi = new PublitioApiService();
-        $this->register();
+        $this->pwpo_register();
     }
 
     /**
      * Register all necessary filters and actions and get all image sizes
      */
-    public function register()
+    public function pwpo_register()
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::is_user_authenticated()) {
             $this->sizes = $this->publitioApi->_get_all_image_sizes();
-            add_action('add_attachment', array($this, 'upload_file_to_publitio'));
+            add_action('add_attachment', array($this, 'pwpo_upload_file_to_publitio'));
             if (get_option('publitio_offloading_delete_checkbox') === 'yes') {
-                add_action('deleted_post_meta', array($this, 'deleted_file_from_publitio'), 10, 4);
+                add_action('deleted_post_meta', array($this, 'pwpo_delete_file_from_publitio'), 10, 4);
             }
-            add_filter('the_content', array($this, 'update_offloading_images_src'), 10);
-            add_filter('wp_calculate_image_srcset', array($this, 'wp_calculate_image_offloading_srcset'), 10, 5);
-            add_filter('image_downsize', array($this, 'filter_image_downsize'), 10, 3);
+            add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 10);
+            add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
+            add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
 
 
-            add_filter('post_thumbnail_html', array($this, 'featured_image_update_url'), 10, 5);
-            add_filter('get_header_image_tag', array($this, 'update_header_image_src'), 10, 5);
+            add_filter('post_thumbnail_html', array($this, 'pwpo_featured_image_update_url'), 10, 5);
+            add_filter('get_header_image_tag', array($this, 'pwpo_update_header_image_src'), 10, 5);
             if (get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no') {
-                wp_enqueue_script('offloadingfrontscripts', PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+                wp_enqueue_script('offloadingfrontscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
             }
-            add_filter('wp_get_attachment_url', array($this, 'get_url'), 10, 2);
-            add_action('the_post', array($this, 'edit_post_content'), 10, 1);
+            add_filter('wp_get_attachment_url', array($this, 'pwpo_get_url'), 10, 2);
+            add_action('the_post', array($this, 'pwpo_edit_post_content'), 10, 1);
         }
     }
 
@@ -56,7 +56,7 @@ class Offload
      * @param $url
      * @return string
      */
-    public function get_url($url)
+    public function pwpo_get_url($url)
     {
         $attachment_id = $this->get_attachment_id($url);
         $attachment = get_post($attachment_id);
@@ -111,10 +111,10 @@ class Offload
      * @param $post
      * @return mixed
      */
-    public function edit_post_content($post)
+    public function pwpo_edit_post_content($post)
     {
         $content = $post->post_content;
-        $updated = $this->update_post_content($content);
+        $updated = $this->pwpo_update_post_content($content);
         $post->post_content = $updated;
         return $post;
     }
@@ -126,7 +126,7 @@ class Offload
      * @param $size
      * @return array|bool
      */
-    public function filter_image_downsize($downsize, $attach_id, $size)
+    public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
         $crop = false;
         $attachment = get_post($attach_id);
@@ -183,20 +183,20 @@ class Offload
      * When file is uploaded to Media folder automatically upload it on Publitio
      * @param $attcID
      */
-    public function upload_file_to_publitio($attcID)
+    public function pwpo_upload_file_to_publitio($attcID)
     {
         $attachment = get_post($attcID);
         $this->getPublitioMeta($attachment);
     }
 
     /**
-     * Call delete file function in attachment has publitio meta
+     * Call delete file function if attachment has Publitio meta
      * @param $deleted_meta_ids
      * @param $post_id
      * @param $meta_key
      * @param $only_delete_these_meta_values
      */
-    public function deleted_file_from_publitio($deleted_meta_ids, $post_id, $meta_key, $only_delete_these_meta_values)
+    public function pwpo_delete_file_from_publitio($deleted_meta_ids, $post_id, $meta_key, $only_delete_these_meta_values)
     {
         $publitioMeta = get_post_meta($post_id, 'publitioMeta', true);
         if ($publitioMeta) {
@@ -211,9 +211,9 @@ class Offload
      * @param $attr
      * @return mixed|string
      */
-    public function update_header_image_src($html, $header, $attr)
+    public function pwpo_update_header_image_src($html, $header, $attr)
     {
-        $html = $this->update_offloading_images_src($html);
+        $html = $this->pwpo_update_offloading_images_src($html);
         return $html;
     }
 
@@ -226,9 +226,9 @@ class Offload
      * @param $attr
      * @return mixed
      */
-    public function featured_image_update_url($html, $post_id, $post_thumbnail_id, $size, $attr)
+    public function pwpo_featured_image_update_url($html, $post_id, $post_thumbnail_id, $size, $attr)
     {
-        $html = $this->update_offloading_images_src($html, $post_thumbnail_id);
+        $html = $this->pwpo_update_offloading_images_src($html, $post_thumbnail_id);
         return $html;
     }
 
@@ -241,7 +241,7 @@ class Offload
      * @param $attachment_id
      * @return mixed
      */
-    public function wp_calculate_image_offloading_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id)
+    public function pwpo_calculate_image_offloading_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id)
     {
         $attachment = get_post($attachment_id);
         if ($attachment) {
@@ -279,7 +279,7 @@ class Offload
      * @param string $content
      * @return mixed|string
      */
-    public function update_offloading_images_src($content = '', $attach_id = '')
+    public function pwpo_update_offloading_images_src($content = '', $attach_id = '')
     {
         $post_images = $this->filter_attachments($content);
         if (empty($post_images)) {
@@ -377,7 +377,7 @@ class Offload
      * @param string $content
      * @return mixed|string
      */
-    public function update_post_content($content = '')
+    public function pwpo_update_post_content($content = '')
     {
         $post_images = $this->filter_attachments($content);
         if (empty($post_images)) {

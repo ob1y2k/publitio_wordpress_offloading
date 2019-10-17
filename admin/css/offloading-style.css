@@ -152,13 +152,13 @@ input:checked + .slider:before {
     margin: 10px 0;
 }
 
-#myProgress {
+#publitioProgress {
     width: 100%;
     background-color: white;
     border-radius: 4px;
 }
 
-#myBar {
+#publitioBar {
     width: 0;
     height: 50px;
     background-color: #4D6D90;
@@ -182,7 +182,7 @@ input:checked + .slider:before {
     display: none;
 }
 
-#loadNumber {
+#loadPublitioNumber {
     position: fixed;
     left: 50%;
     top: 50%;
@@ -191,7 +191,7 @@ input:checked + .slider:before {
     padding-bottom: 5px;
 }
 
-.popup {
+.offloading-popup {
     margin: 0 auto;
     width: 50%;
     position: fixed;
@@ -201,12 +201,12 @@ input:checked + .slider:before {
     transform: translate(-50%, -50%);
 }
 
-.popup h2 {
+.offloading-popup h2 {
     margin-top: 0;
     color: #333;
     font-family: Tahoma, Arial, sans-serif;
 }
-.popup .close {
+.offloading-popup .close {
     position: absolute;
     top: 20px;
     right: 30px;
@@ -216,10 +216,10 @@ input:checked + .slider:before {
     text-decoration: none;
     color: #333;
 }
-.popup .close:hover {
+.offloading-popup .close:hover {
     color: #06D85F;
 }
-.popup .content {
+.offloading-popup .content {
     max-height: 30%;
     overflow: auto;
 }
@@ -228,7 +228,7 @@ input:checked + .slider:before {
     .box{
         width: 70%;
     }
-    .popup{
+    .offloading-popup{
         width: 70%;
     }
 }

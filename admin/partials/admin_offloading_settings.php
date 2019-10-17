@@ -20,13 +20,13 @@
         </h2>
     </div>
     <div class="section-offloading-wrapper">
-        <label class="form-offload-label" for="api-offloading-key">API key:</label>
-        <input class="form-offload-input" id="api-offloading-key" name="api-offloading-key" type="password"
-               value="<?php echo get_option('publitio_offloading_key', ''); ?>"/>
+        <label class="form-offload-label" for="api-publitio-offloading-key">API key:</label>
+        <input class="form-offload-input" id="api-publitio-offloading-key" name="api-publitio-offloading-key" type="password"
+               value="<?php echo esc_html(get_option('publitio_offloading_key', '')); ?>"/>
 
-        <label class="form-offload-label" for="api-offloading-secret">API secret:</label>
-        <input class="form-offload-input" id="api-offloading-secret" name="api-offloading-secret" type="password"
-               value="<?php echo get_option('publitio_offloading_secret', ''); ?>"/>
+        <label class="form-offload-label" for="api-publitio-offloading-secret">API secret:</label>
+        <input class="form-offload-input" id="api-publitio-offloading-secret" name="api-publitio-offloading-secret" type="password"
+               value="<?php echo esc_html(get_option('publitio_offloading_secret', '')); ?>"/>
 
         <div class="offloading-block error-offload-block" id="error-offload-block"></div>
         <div class="offloading-block success-offload-block" id="success-offload-block"></div>
@@ -40,7 +40,7 @@
         <div class="off-margin">
             <label class="switch">
                 <input type="checkbox"
-                       id="allow-download" <?php echo(get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no' ? '' : 'checked') ?>>
+                       id="allow-download" <?php echo esc_html((get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no' ? '' : 'checked')) ?>>
                 <span class="slider round"></span>
             </label>
             <span class="download-text">Allow users to save/download media files</span>
@@ -55,7 +55,7 @@
             <div class="offload-checkbox">
                 <label class="switch">
                     <input type="checkbox"
-                           id="image_checkbox" class="files-offload-input" <?php echo(get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no' ? '' : 'checked') ?>>
+                           id="image_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no' ? '' : 'checked')) ?>>
                     <span class="slider round"></span>
                 </label>
                 <span class="download-text">Image</span>
@@ -63,7 +63,7 @@
             <div class="offload-checkbox">
                 <label class="switch">
                     <input type="checkbox"
-                           id="video_checkbox" class="files-offload-input" <?php echo(get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no' ? '' : 'checked') ?>>
+                           id="video_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no' ? '' : 'checked')) ?>>
                     <span class="slider round"></span>
                 </label>
                 <span class="download-text">Video</span>
@@ -71,7 +71,7 @@
             <div class="offload-checkbox">
                 <label class="switch">
                     <input type="checkbox"
-                           id="audio_checkbox" class="files-offload-input" <?php echo(get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no' ? '' : 'checked') ?>>
+                           id="audio_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no' ? '' : 'checked')) ?>>
                     <span class="slider round"></span>
                 </label>
                 <span class="download-text">Audio</span>
@@ -79,7 +79,7 @@
             <div class="offload-checkbox">
                 <label class="switch">
                     <input type="checkbox"
-                           id="document_checkbox" class="files-offload-input" <?php echo(get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no' ? '' : 'checked') ?>>
+                           id="document_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no' ? '' : 'checked')) ?>>
                     <span class="slider round"></span>
                 </label>
                 <span class="download-text">Document (pdf)</span>
@@ -90,16 +90,16 @@
     </div>
     <br/>
     <div class="section-offloading-wrapper">
-        <label class="form-offload-label" for="default-offloading-folder">Upload Folder:</label>
-        <select class="form-offload-select" name="default-offloading-folder" id="default-offloading-folder"></select>
+        <label class="form-offload-label" for="default-publitio-offloading-folder">Upload Folder:</label>
+        <select class="form-offload-select" name="default-publitio-offloading-folder" id="default-publitio-offloading-folder"></select>
 
         <div class="offloading-block error-offload-block" id="folder-error-block"></div>
         <div class="offloading-block success-offload-block" id="folder-success-block"></div>
     </div>
     <br/>
     <div class="section-offloading-wrapper">
-        <label class="form-offload-label" for="default-offloading-cname">Custom CNAME:</label>
-        <select class="form-offload-select" name="default-offloading-cname" id="default-offloading-cname"></select>
+        <label class="form-offload-label" for="default-publitio-offloading-cname">Custom CNAME:</label>
+        <select class="form-offload-select" name="default-publitio-offloading-cname" id="default-publitio-offloading-cname"></select>
 
         <div class="offloading-block error-offload-block" id="cname-error-block"></div>
         <div class="offloading-block success-offload-block" id="cname-success-block"></div>
@@ -144,7 +144,7 @@
         <div class="offload-checkbox">
             <label class="switch">
                 <input type="checkbox"
-                       id="delete_checkbox" class="files-offload-delete" <?php echo(get_option('publitio_offloading_delete_checkbox') && get_option('publitio_offloading_delete_checkbox') === 'yes' ? 'checked' : '') ?>>
+                       id="delete_checkbox" class="files-offload-delete" <?php echo esc_html((get_option('publitio_offloading_delete_checkbox') && get_option('publitio_offloading_delete_checkbox') === 'yes' ? 'checked' : '')) ?>>
                 <span class="slider round"></span>
             </label>
             <span class="download-text">Delete file from Publitio when Media is deleted permanently</span>
@@ -156,7 +156,7 @@
         <div class="off-margin">
             <label class="switch">
                 <input type="checkbox" class="files-offload-delete"
-                       id="replace_checkbox" <?php echo(get_option('publitio_offloading_replace_checkbox') && get_option('publitio_offloading_replace_checkbox') === 'yes' ? 'checked' : '') ?>>
+                       id="replace_checkbox" <?php echo esc_html((get_option('publitio_offloading_replace_checkbox') && get_option('publitio_offloading_replace_checkbox') === 'yes' ? 'checked' : '')) ?>>
                 <span class="slider round"></span>
             </label>
             <span class="download-text">Delete files from Media library once uploaded to Publitio</span>
@@ -169,11 +169,11 @@
         <div class="offloading-block error-offload-block" id="media-delete-message-error"></div>
         <div class="offloading-block success-offload-block" id="media-delete-message-success"></div>
     </div>
-    <div id="popup1" class="overlay">
-        <div class="popup">
-            <div id="myProgress">
-                <div id="loadNumber">0</div>
-                <div id="myBar"></div>
+    <div id="publitio-popup" class="overlay">
+        <div class="offloading-popup">
+            <div id="publitioProgress">
+                <div id="loadPublitioNumber">0</div>
+                <div id="publitioBar"></div>
             </div>
         </div>
     </div>

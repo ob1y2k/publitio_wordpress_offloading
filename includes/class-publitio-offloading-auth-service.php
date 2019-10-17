@@ -1,6 +1,6 @@
 <?php
 
-class PublitioOffloadingAuthService {
+class PWPO_AuthService {
 
     /**
      * Check if user is is authenticated

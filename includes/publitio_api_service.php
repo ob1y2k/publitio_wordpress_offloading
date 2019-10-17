@@ -2,7 +2,7 @@
 /**
  * @package Publitio
  */
-require_once PLUGIN_PATH . '/includes/class-auth-service.php';
+require_once PUBLITIO_OFFLOADING_PLUGIN_PATH . '/includes/class-publitio-offloading-auth-service.php';
 
 
 /**
@@ -17,9 +17,9 @@ class PublitioApiService
 
     public function __construct()
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
-            $key = PublitioOffloadingAuthService::get_key();
-            $secret = PublitioOffloadingAuthService::get_secret();
+        if (PWPO_AuthService::is_user_authenticated()) {
+            $key = PWPO_AuthService::get_key();
+            $secret = PWPO_AuthService::get_secret();
             $this->publitio_api = new \Publitio\API($key, $secret);
         } else {
             $this->publitio_api = NULL;
@@ -34,7 +34,7 @@ class PublitioApiService
     public function init($api_key, $api_secret)
     {
         $this->publitio_api = new \Publitio\API($api_key, $api_secret);
-        PublitioOffloadingAuthService::add_credentials($api_key, $api_secret);
+        PWPO_AuthService::add_credentials($api_key, $api_secret);
         $this->check_credentials();
     }
 
@@ -42,9 +42,9 @@ class PublitioApiService
      * Get list of account settings for Publitio account
      * @return object
      */
-    public function get_account_settins()
+    public function get_publitio_account_settins()
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::is_user_authenticated()) {
             $resp = $this->publitio_api->call('/folders/tree', 'GET');
             $cnames = $this->publitio_api->call('/cnames/list', 'GET');
             $resp->cnames = $cnames->cnames;
@@ -60,11 +60,11 @@ class PublitioApiService
      */
     public function set_default_offloading_folder($folder_id)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
-            update_option('publitio_offloading_default_folder', $folder_id);
+        if (PWPO_AuthService::is_user_authenticated()) {
+            update_option('publitio_offloading_default_folder', sanitize_text_field($folder_id));
             wp_send_json([
                 'status' => 200,
-                'folder_id' => $folder_id
+                'folder_id' => esc_html($folder_id)
             ]);
         }
     }
@@ -75,11 +75,11 @@ class PublitioApiService
      */
     public function set_default_offloading_cname($cname_url)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
-            update_option('publitio_offloading_default_cname', $cname_url);
+        if (PWPO_AuthService::is_user_authenticated()) {
+            update_option('publitio_offloading_default_cname', esc_url_raw($cname_url));
             wp_send_json([
                 'status' => 200,
-                'default_cname_url' => $cname_url
+                'default_cname_url' => esc_url($cname_url)
             ]);
         }
     }
@@ -90,31 +90,31 @@ class PublitioApiService
      */
     public function set_allow_download_offloading($allow)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::is_user_authenticated()) {
             if ($allow === "true") {
                 $option = 'yes';
             } else {
                 $option = 'no';
             }
-            update_option('publitio_offloading_allow_download', $option);
+            update_option('publitio_offloading_allow_download', sanitize_text_field($option));
             wp_send_json([
                 'status' => 200,
-                'allow_download' => 'yes'
+                'allow_download' => esc_html($option)
             ]);
         }
     }
 
     /**
-     * Set value image quality (50,60,70,80,90,original)
+     * Set value image quality (50,60,70,80(default),90,100)
      * @param $image_quality
      */
     public function set_offloading_image_quality($image_quality)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
-            update_option('publitio_offloading_image_quality', $image_quality);
+        if (PWPO_AuthService::is_user_authenticated()) {
+            update_option('publitio_offloading_image_quality', sanitize_text_field($image_quality));
             wp_send_json([
                 'status' => 200,
-                'image_quality' => $image_quality
+                'image_quality' => esc_html($image_quality)
             ]);
         }
     }
@@ -125,11 +125,11 @@ class PublitioApiService
      */
     public function set_offloading_video_quality($video_quality)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
-            update_option('publitio_offloading_video_quality', $video_quality);
+        if (PWPO_AuthService::is_user_authenticated()) {
+            update_option('publitio_offloading_video_quality', sanitize_text_field($video_quality));
             wp_send_json([
                 'status' => 200,
-                'video_quality' => $video_quality
+                'video_quality' => esc_html($video_quality)
             ]);
         }
     }
@@ -141,7 +141,7 @@ class PublitioApiService
      */
     public function set_files_checkbox($id, $value)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::is_user_authenticated()) {
             if ($value === "true") {
                 $option = 'yes';
             } else {
@@ -150,7 +150,7 @@ class PublitioApiService
             update_option('publitio_offloading_' . $id, $option);
             wp_send_json([
                 'status' => 200,
-                $id => $option
+                $id => esc_html($option)
             ]);
         }
     }
@@ -161,7 +161,7 @@ class PublitioApiService
      */
     public function set_delete_checkbox($value)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::is_user_authenticated()) {
             if ($value === "true") {
                 $option = 'yes';
             } else {
@@ -170,7 +170,7 @@ class PublitioApiService
             update_option('publitio_offloading_delete_checkbox', $option);
             wp_send_json([
                 'status' => 200,
-                'delete_checkbox' => $option
+                'delete_checkbox' => esc_html($option)
             ]);
         }
     }
@@ -181,7 +181,7 @@ class PublitioApiService
      */
     public function set_replace_checkbox($value)
     {
-        if (PublitioOffloadingAuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::is_user_authenticated()) {
             if ($value === "true") {
                 $option = 'yes';
             } else {
@@ -190,7 +190,7 @@ class PublitioApiService
             update_option('publitio_offloading_replace_checkbox', $option);
             wp_send_json([
                 'status' => 200,
-                'replace_checkbox' => $option
+                'replace_checkbox' => esc_html($option)
             ]);
         }
     }
@@ -321,7 +321,7 @@ class PublitioApiService
         if (is_null($publitioMeta)) {
             return null;
         }
-        $media_url = PUBLITIO_MEDIA;
+        $media_url = PUBLITIO_OFFLOADING_PUBLITIO_MEDIA;
         if (get_option('publitio_offloading_default_cname')) {
             $media_url = get_option('publitio_offloading_default_cname') . '/file/';
         }
@@ -481,7 +481,7 @@ class PublitioApiService
      */
     private function check_credentials()
     {
-        $response = $this->get_account_settins();
+        $response = $this->get_publitio_account_settins();
         $this->handle_response($response);
     }
 
@@ -504,7 +504,7 @@ class PublitioApiService
      */
     private function handle_unauthorized()
     {
-        PublitioOffloadingAuthService::delete_credentials();
+        PWPO_AuthService::delete_credentials();
         wp_send_json(['status' => 401]);
     }
 
@@ -513,7 +513,7 @@ class PublitioApiService
      */
     private function handle_error()
     {
-        PublitioOffloadingAuthService::delete_credentials();
+        PWPO_AuthService::delete_credentials();
         wp_send_json(['status' => 500]);
     }
 
