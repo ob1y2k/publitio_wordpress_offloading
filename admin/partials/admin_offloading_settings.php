@@ -15,7 +15,7 @@
 <div class="page-offloading-wrapper">
     <div class="section-offloading-wrapper">
         <h2 class="section-offloading-title">
-            <img src="<?php echo PLUGIN_URL . 'admin/images/cloud-icon.png'; ?>" alt=""/>
+            <img src="<?php echo PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/images/cloud-icon.png'; ?>" alt=""/>
             Publitio Offloading Settings
         </h2>
     </div>
