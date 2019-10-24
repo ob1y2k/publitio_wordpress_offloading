@@ -21,7 +21,7 @@ For more info check out [Publitio](https://publit.io) website
 
 Or check detailed documentation for [Publitio API](https://publit.io/docs)
 
-This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wp_offloading)
+This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
 
 == Installation ==
 
