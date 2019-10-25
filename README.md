@@ -10,3 +10,5 @@ For more info check out [Publitio](https://publit.io) website
 
 Or check detailed documentation for [Publitio API](https://publit.io/docs)
 
+Plugin is in BETA and testing phase. For support send us email at support@publit.io
+

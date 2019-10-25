@@ -23,6 +23,8 @@ Or check detailed documentation for [Publitio API](https://publit.io/docs)
 
 This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
 
+Plugin is in BETA and testing phase. For support send us email at support@publit.io
+
 == Installation ==
 
 1. Upload plugin to the `/wp-content/plugins/` directory
@@ -49,7 +51,13 @@ Publitio is cloud-based media asset management service.
 = 1.0 =
 * Initial version of Publitio Offloading Wordpress plugin.
 
+= 1.0.1 =
+* Danger Zone notice added
+
 == Upgrade Notice ==
 
 = 1.0 =
 Just install
+
+= 1.0.1 =
+* Danger Zone notice added
