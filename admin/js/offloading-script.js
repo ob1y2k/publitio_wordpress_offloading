@@ -265,17 +265,36 @@
 
         function replacePublitioMedia() {
             $("#replace_checkbox").bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                        action: 'pwpo_update_replace_media',
-                        replace_checkbox: event.target.checked
-                    }, function (response) {
-                        if (response.status === STATUSES.SUCCESS) {
-                            showPublitioBlock($('#media-replace-message-success'), 'Great!');
-                        } else {
-                            showPublitioBlock($('#media-replace-message-error'), 'Something went wrong.');
-                        }
+                //console.log("replacePublitioMedia " + event.target.checked);
+                if(event.target.checked==true) {
+                    if (confirm('Are you sure you want to delete files from Media library once they are uploaded to Publitio? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
+                        jQuery.post(ajaxurl, {
+                                action: 'pwpo_update_replace_media',
+                                replace_checkbox: event.target.checked
+                            }, function (response) {
+                                if (response.status === STATUSES.SUCCESS) {
+                                    showPublitioBlock($('#media-replace-message-success'), 'Great!');
+                                } else {
+                                    showPublitioBlock($('#media-replace-message-error'), 'Something went wrong.');
+                                }
+                            }
+                        )
+                    } else {
+                        $("#replace_checkbox").attr('checked', false);
                     }
-                )
+                } else {
+                    jQuery.post(ajaxurl, {
+                            action: 'pwpo_update_replace_media',
+                            replace_checkbox: event.target.checked
+                        }, function (response) {
+                            if (response.status === STATUSES.SUCCESS) {
+                                showPublitioBlock($('#media-replace-message-success'), 'Great!');
+                            } else {
+                                showPublitioBlock($('#media-replace-message-error'), 'Something went wrong.');
+                            }
+                        }
+                    )
+                }
             })
         }
 
@@ -341,7 +360,7 @@
 
         function deletePublitioMedia(media_list) {
             if (media_list !== undefined && media_list !== null && media_list.length > 0) {
-                if (confirm('Are you sure you want to delete all Media locally and replace it with Publitio Media?')) {
+                if (confirm('Are you sure you want to delete all offloaded Media locally and replace it with Publitio Media URLs? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                     let numOfDeleted = 0;
                     $('#publitio-popup').show();
                     let numOfMediaForDelete = media_list.length;

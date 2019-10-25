@@ -28,6 +28,10 @@
             Read tutorial <a target="_blank" href="https://publit.io/community/blog/wordpress-offloading-with-publitio">How to setup Publitio Offloading Wordpress Plugin</a>
         </p>
 
+         <p class="download-text">
+         Plugin is in <strong>BETA and testing</strong> phase. For support send us email at <a href="mailto:support@publit.io">support@publit.io</a>
+         </p>
+
     </div>
     <div class="section-offloading-wrapper">
         <label class="form-offload-label" for="api-publitio-offloading-key">API key:</label>
@@ -162,20 +166,27 @@
         <div class="offloading-block error-offload-block" id="error-delete-block"></div>
         <div class="offloading-block success-offload-block" id="success-delete-block"></div>
     </div>
+
+    <hr />
+
     <div class="section-offloading-wrapper">
+
+        <p class="danger-text">DANGER ZONE!</p>
+        <p class="download-text">Options bellow are <strong>best to keep OFF</strong> (default). If you use them, <strong>plugin will delete files from local storage</strong> once they are uploaded to Publitio (useful if you have limited space within site) - but if you choose to <strong>deactivate Publitio Offloading plugin</strong> in the future, your site posts/pages <strong>will result in broken media links</strong> (as they are no longer present locally). <span class="danger-text">Use with caution & at your own risk as there is no going back once you use this options!</span>
+        </p>
         <div class="off-margin">
             <label class="switch">
                 <input type="checkbox" class="files-offload-delete"
                        id="replace_checkbox" <?php echo esc_html((get_option('publitio_offloading_replace_checkbox') && get_option('publitio_offloading_replace_checkbox') === 'yes' ? 'checked' : '')) ?>>
                 <span class="slider round"></span>
             </label>
-            <span class="download-text">Delete files from Media library once uploaded to Publitio</span>
+            <span class="download-text">Delete files from Media library once uploaded to Publitio.</span><span class="danger-text"> [Danger zone!]</span>
         </div>
         <div class="offloading-block error-offload-block" id="media-replace-message-error"></div>
         <div class="offloading-block success-offload-block" id="media-replace-message-success"></div>
     </div>
     <div class="section-offloading-wrapper">
-        <button class="sync-button" id="media-delete">Delete All Offloaded Media</button>
+        <button class="sync-button" id="media-delete">Delete All Offloaded Media </button> <span class="danger-text">[Danger zone!]</span> 
         <div class="offloading-block error-offload-block" id="media-delete-message-error"></div>
         <div class="offloading-block success-offload-block" id="media-delete-message-success"></div>
     </div>
