@@ -18,6 +18,16 @@
             <img src="<?php echo PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/images/cloud-icon.png'; ?>" alt=""/>
             Publitio Offloading Settings
         </h2>
+
+        
+        <p class="download-text">
+          This WordPress plugin offloads your media library to <a target="_blank" href="https://publit.io/">Publitio</a> 
+        </p>
+
+        <p class="download-text">
+            Read tutorial <a target="_blank" href="https://publit.io/community/blog/wordpress-offloading-with-publitio">How to setup Publitio Offloading Wordpress Plugin</a>
+        </p>
+
     </div>
     <div class="section-offloading-wrapper">
         <label class="form-offload-label" for="api-publitio-offloading-key">API key:</label>
