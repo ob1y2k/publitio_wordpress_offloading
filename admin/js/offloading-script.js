@@ -323,7 +323,7 @@
                             if (responseMedia.sync === true) {
                                 numOfUploaded++;
                             } else {
-                                console.log(responseMedia.guid);
+                                //console.log(responseMedia.guid);
                                 numOfFailed++;
                             }
 
@@ -349,6 +349,33 @@
                                 }, 1000)
                             }
                         })
+                        .fail(function() {
+                            //console.log("error sync " + media.ID);
+                            numOfFailed++;
+
+                            let result = Math.round(((numOfUploaded + numOfFailed) / numOfMedia) * 100);
+                            $("#publitioBar").width(result + "%");
+                            $("#loadPublitioNumber").empty();
+                            let resFailed = "";
+                            if(numOfFailed !== 0 ) {
+                                resFailed = ' <span class="red-text">('+numOfFailed+' failed)</span>';
+                            }
+                            $("#loadPublitioNumber").html(numOfUploaded + " of "+ numOfMedia + resFailed  + " / " + result + "% completed");
+                            if ((numOfUploaded+numOfFailed) === numOfMedia) {
+                                setTimeout(function () {
+                                    $('#publitio-popup').hide();
+                                    $("#loadPublitioNumber").html(0);
+                                    $("#publitioBar").width("0%");
+                                    if(numOfFailed !== 0) {
+                                        showPublitioBlock($('#media-upload-message-success'), numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+numOfFailed+' failed)</span>');
+                                    } else {
+                                        showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
+                                    }
+
+                                }, 1000)
+                            }
+
+                        });
                     })
                 }
             } else {

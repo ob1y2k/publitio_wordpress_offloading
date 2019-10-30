@@ -1,2 +1,4 @@
 vendor/
 _builds/
+.DS_Store
+admin/.DS_Store

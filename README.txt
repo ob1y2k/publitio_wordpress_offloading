@@ -54,6 +54,9 @@ Publitio is cloud-based media asset management service.
 = 1.0.1 =
 * Danger Zone notice added
 
+= 1.0.2 =
+* Sync Now fix
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -61,3 +64,6 @@ Just install
 
 = 1.0.1 =
 * Danger Zone notice added
+
+= 1.0.2 =
+* Sync Now fix
