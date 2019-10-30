@@ -200,7 +200,10 @@ class PWPO_Offload
     {
         $publitioMeta = get_post_meta($post_id, 'publitioMeta', true);
         if ($publitioMeta) {
-            $this->publitioApi->deleteFileFromPublitio($publitioMeta['id']);
+            $responseShow = $this->publitioApi->showFile( $publitioMeta['id']);
+            if ($responseShow->success === true) {
+                $this->publitioApi->deleteFileFromPublitio($publitioMeta['id']);
+            }
         }
     }
 
