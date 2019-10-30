@@ -162,7 +162,7 @@
         }
 
         function showPublitioBlock(elem, content) {
-            $(elem).text(content);
+            $(elem).html(content);
             setTimeout(function () {
                 clearBlocks()
             }, 3000)
@@ -265,7 +265,6 @@
 
         function replacePublitioMedia() {
             $("#replace_checkbox").bind('change', function (event) {
-                //console.log("replacePublitioMedia " + event.target.checked);
                 if(event.target.checked==true) {
                     if (confirm('Are you sure you want to delete files from Media library once they are uploaded to Publitio? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                         jQuery.post(ajaxurl, {
@@ -312,33 +311,42 @@
             if (media_list !== undefined && media_list !== null && media_list.length > 0) {
                 if (confirm('Are you sure you want to synchronize all media files with Publitio?')) {
                     let numOfUploaded = 0;
+                    let numOfFailed = 0;
                     $('#publitio-popup').show();
                     let numOfMedia = media_list.length;
                     media_list.forEach((media) => {
                         jQuery.post(ajaxurl, {
+                            async: false,
                             action: 'pwpo_sync_media_file',
                             attach_id: media.ID
                         }, function (responseMedia) {
                             if (responseMedia.sync === true) {
                                 numOfUploaded++;
-                                let result = Math.round((numOfUploaded / numOfMedia) * 100);
-                                $("#publitioBar").width(result + "%");
-                                $("#loadPublitioNumber").empty();
-                                $("#loadPublitioNumber").text(numOfUploaded + " of "+ numOfMedia + " / " + result + "% completed");
-                                if (numOfUploaded === numOfMedia) {
-                                    setTimeout(function () {
-                                        $('#publitio-popup').hide();
-                                        $("#loadPublitioNumber").empty();
-                                        $("#publitioBar").width("0%");
-                                        showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
-                                    }, 1000)
-                                }
                             } else {
-                                $('#publitio-popup').hide();
-                                $("#publitioBar").width("0%");
-                                $("#loadPublitioNumber").empty();
-                                showPublitioBlock($('#media-upload-message-error'), 'Something went wrong.!');
-                                return;
+                                console.log(responseMedia.guid);
+                                numOfFailed++;
+                            }
+
+                            let result = Math.round(((numOfUploaded + numOfFailed) / numOfMedia) * 100);
+                            $("#publitioBar").width(result + "%");
+                            $("#loadPublitioNumber").empty();
+                            let resFailed = "";
+                            if(numOfFailed !== 0 ) {
+                                resFailed = ' <span class="red-text">('+numOfFailed+' failed)</span>';
+                            }
+                            $("#loadPublitioNumber").html(numOfUploaded + " of "+ numOfMedia + resFailed  + " / " + result + "% completed");
+                            if ((numOfUploaded+numOfFailed) === numOfMedia) {
+                                setTimeout(function () {
+                                    $('#publitio-popup').hide();
+                                    $("#loadPublitioNumber").html(0);
+                                    $("#publitioBar").width("0%");
+                                    if(numOfFailed !== 0) {
+                                        showPublitioBlock($('#media-upload-message-success'), numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+numOfFailed+' failed)</span>');
+                                    } else {
+                                        showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
+                                    }
+
+                                }, 1000)
                             }
                         })
                     })
@@ -362,33 +370,41 @@
             if (media_list !== undefined && media_list !== null && media_list.length > 0) {
                 if (confirm('Are you sure you want to delete all offloaded Media locally and replace it with Publitio Media URLs? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                     let numOfDeleted = 0;
+                    let numOfDeletedFailed = 0;
                     $('#publitio-popup').show();
                     let numOfMediaForDelete = media_list.length;
                     media_list.forEach((media) => {
                         jQuery.post(ajaxurl, {
+                            async: false,
                             action: 'pwpo_delete_media_file',
                             attach_id: media.ID
                         }, function (responseMedia) {
                             if (responseMedia.deleted === true) {
                                 numOfDeleted++;
-                                let result = Math.round((numOfDeleted / numOfMediaForDelete) * 100);
-                                $("#publitioBar").width(result + "%");
-                                $("#loadPublitioNumber").empty();
-                                $("#loadPublitioNumber").text(numOfDeleted + " of "+ numOfMediaForDelete + " / " + result + "% completed");
-                                if (numOfDeleted === numOfMediaForDelete) {
-                                    setTimeout(function () {
-                                        $('#publitio-popup').hide();
-                                        $("#loadPublitioNumber").empty();
-                                        $("#publitioBar").width("0%");
-                                        showPublitioBlock($('#media-delete-message-success'), 'All media files are deleted successfully!');
-                                    }, 1000)
-                                }
                             } else {
-                                $('#publitio-popup').hide();
-                                $("#publitioBar").width("0%");
-                                $("#loadPublitioNumber").empty();
-                                showPublitioBlock($('#media-delete-message-error'), 'Something went wrong.!');
-                                return;
+                                numOfDeletedFailed++;
+                            }
+
+                            let result = Math.round(((numOfDeleted + numOfDeletedFailed) / numOfMediaForDelete) * 100);
+                            $("#publitioBar").width(result + "%");
+                            $("#loadPublitioNumber").empty();
+                            let resDeleteFailed = "";
+                            if(numOfDeletedFailed !== 0 ) {
+                                resDeleteFailed = '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>';
+                            }
+                            $("#loadPublitioNumber").html(numOfDeleted + " of "+ numOfMediaForDelete + resDeleteFailed  + " / " + result + "% completed");
+                            if (numOfDeleted + numOfDeletedFailed === numOfMediaForDelete) {
+                                setTimeout(function () {
+                                    $('#publitio-popup').hide();
+                                    $("#loadPublitioNumber").html(0);
+                                    $("#publitioBar").width("0%");
+                                    if(numOfDeletedFailed !== 0) {
+                                        showPublitioBlock($('#media-delete-message-success'), numOfDeleted +' deleted successfully!' + '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>');
+                                    } else {
+                                        showPublitioBlock($('#media-delete-message-success'), 'All media files are deleted successfully!');
+                                    }
+
+                                }, 1000)
                             }
                         })
                     })

@@ -204,7 +204,7 @@ class PublitioApiService
         $attachment = get_post($attcID);
         $publitioMeta = $this->getPublitioMeta($attachment);
         if (!is_null($publitioMeta)) {
-            $responseShow = $this->publitio_api->call("/files/show/" . $publitioMeta['id'], "GET");
+            $responseShow = $this->showFile($publitioMeta['id']);
             if ($responseShow->success !== true) {
                 if (delete_post_meta($attachment->ID, 'publitioMeta')) {
                     $publitioMetaData = $this->getPublitioMeta($attachment);
@@ -212,12 +212,29 @@ class PublitioApiService
                         wp_send_json([
                             'sync' => true
                         ]);
+                    } else {
+                        wp_send_json([
+                            'sync' => false,
+                            'guid' => $attachment->guid
+                        ]);
                     }
                 }
                 wp_send_json([
-                    'sync' => false
+                    'sync' => false,
+                    'guid' => $attachment->guid
                 ]);
-            } else {
+            }
+            else {
+                if($responseShow->url_preview !== $publitioMeta['publitio_url']) {
+                    $publitioMeta['publitio_url'] = $responseShow->url_preview;
+                    if($responseShow->folder && !is_null($responseShow->folder)) {
+                        $publitioMeta['folder_name'] = $responseShow->folder;
+                    } else {
+                        unset($publitioMeta['folder_name']);
+                    }
+                    update_post_meta($attachment->ID, 'publitioMeta', $publitioMeta);
+                }
+
                 wp_send_json([
                     'sync' => true
                 ]);
@@ -273,7 +290,16 @@ class PublitioApiService
      */
     public function deleteFileFromPublitio($id)
     {
-        $response = $this->publitio_api->call('/files/delete/' . $id, 'DELETE');
+        $this->publitio_api->call('/files/delete/' . $id, 'DELETE');
+    }
+
+    /**
+     * Check if file exists on Publitio Dashboard
+     * @param $id
+     * @return mixed
+     */
+    public function showFile($id) {
+        return $responseShow = $this->publitio_api->call("/files/show/" . $id, "GET");
     }
 
     /**
@@ -362,7 +388,7 @@ class PublitioApiService
             }
         }
 
-        return $unsync;
+        return $attachments;
     }
 
     /**
