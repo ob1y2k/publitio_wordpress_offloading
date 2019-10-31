@@ -314,14 +314,17 @@ class PublitioApiService
         $pi = pathinfo($attach);
 
         $img_dirname = $pi['dirname'];
-        $sizes = $meta['sizes'];
-        if ($sizes) {
-            foreach ($sizes as $size) {
-                $filename = $size['file'];
-                $img_size_url = $img_dirname . "/" . $filename;
-                wp_delete_file($img_size_url);
+        if(file_exists($attach)) {
+            $sizes = $meta['sizes'];
+            if ($sizes) {
+                foreach ($sizes as $size) {
+                    $filename = $size['file'];
+                    $img_size_url = $img_dirname . "/" . $filename;
+                    wp_delete_file($img_size_url);
+                }
             }
         }
+
         wp_delete_file($attach);
         if ($response === true) {
             if (!file_exists($attach)) {
@@ -405,7 +408,7 @@ class PublitioApiService
         foreach ($attachments as $attachment) {
             $attach = get_attached_file($attachment->ID);
             $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
-            if (file_exists($attach) && $publitioMeta) {
+            if (file_exists($attach) && $publitioMeta && !is_null($publitioMeta)) {
                 $filetype = wp_check_filetype($attachment->guid);
                 $add_to_array = true;
                 if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
