@@ -380,18 +380,10 @@ class PublitioApiService
      */
     public function get_media_for_sync() {
         $args = array('post_type' => 'attachment',
-            'post_status' => 'inherit',
+            'post_status' => 'null',
             'posts_per_page' => -1);
         $attachments = get_posts($args);
-        $unsync = array();
-        foreach ($attachments as $attachment) {
-            $attach = get_attached_file($attachment->ID);
-            if (file_exists($attach)) {
-                array_push($unsync, $attachment);
-            }
-        }
-
-        return $attachments;
+        return array_chunk($attachments,100);
     }
 
     /**
