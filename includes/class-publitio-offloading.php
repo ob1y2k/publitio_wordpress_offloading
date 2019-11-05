@@ -156,19 +156,21 @@ class PWPO_Offload
             } else {
                 if ($size && $size !== "") {
                     $dimensions = $this->get_image_size($size);
-                    if (!empty($dimensions) && (bool)$dimensions['crop']) {
+                    if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
                         $crop = true;
+                        $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
+                    } else {
+                        $dimensions = null;
                     }
-                    $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
                 } else {
-                    return false;
+                    $dimensions = null;
                 }
-
             }
 
-            if (empty($dimensions)) {
-                return false;
-            }
+//            if (empty($dimensions)) {
+//                return false;
+//            }
+
             return array(
                 $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
                 $dimensions['width'],
@@ -340,8 +342,6 @@ class PWPO_Offload
                                 $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
 
                                 $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
-
-//                            } else if ($class_id !== 0 && (empty($src_set) || $src_set === '')) {
                             } else if ($attach_id !== 0) {
                                 $metadata = wp_get_attachment_metadata($attachment_id);
                                 $sizesMeta = $metadata['sizes'];

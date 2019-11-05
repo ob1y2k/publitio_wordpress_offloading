@@ -26,8 +26,8 @@ class PWPO_Admin
      */
     public function pwpo_register()
     {
-        add_action('admin_menu', array($this, 'pwpo_add_admin_pages'));
         add_action('admin_enqueue_scripts', array($this, 'pwpo_enqueue'));
+        add_action('admin_menu', array($this, 'pwpo_add_admin_pages'));
         add_filter("plugin_action_links_" . PUBLITIO_OFFLOADING_PLUGIN, array($this, 'pwpo_settings_link'));
         add_action('wp_ajax_pwpo_update_offloading_settings', array($this, 'pwpo_update_offloading_settings'));
         add_action('wp_ajax_pwpo_get_offloading_account_settings', array($this, 'pwpo_get_offloading_account_settings'));
