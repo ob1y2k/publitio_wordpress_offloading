@@ -357,22 +357,23 @@ class PublitioApiService
         if (is_null($dimensions)) {
             if ($this->isImageType($publitioMeta['extension'])) {
                 $qualityImage = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
-                return $media_url . ($qualityImage ? 'q_' . $qualityImage . '/' : '') . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                $publitio_url = $media_url . ($qualityImage ? 'q_' . $qualityImage . '/' : '') . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             } elseif ($this->isVideoType($publitioMeta['extension'])) {
                 $qualityVideo = get_option('publitio_offloading_video_quality') ? get_option('publitio_offloading_video_quality') : '480';
-                return $media_url . ($qualityVideo ? 'h_' . $qualityVideo . '/' : '') . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                $publitio_url = $media_url . ($qualityVideo ? 'h_' . $qualityVideo . '/' : '') . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             } else {
-                return $media_url . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                $publitio_url = $media_url . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             }
         } else {
             if ($this->isImageType($publitioMeta['extension'])) {
                 $qualityImage = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
-                $a = $media_url . 'w_' . $dimensions['width'] . ',' . (isset($dimensions['height']) ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . ($qualityImage ? ',q_' . $qualityImage : '') . '/' . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
-                return $a;
+                $publitio_url = $media_url . 'w_' . $dimensions['width'] . ',' . (isset($dimensions['height']) ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . ($qualityImage ? ',q_' . $qualityImage : '') . '/' . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             } else {
-                return $media_url . 'w_' . $dimensions['width'] . ',' . (isset($dimensions['height']) ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . '/' . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                $publitio_url = $media_url . 'w_' . $dimensions['width'] . ',' . (isset($dimensions['height']) ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . '/' . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             }
         }
+        $publitio_url = preg_replace('/\s/', '', $publitio_url);
+        return $publitio_url;
     }
 
     /**
