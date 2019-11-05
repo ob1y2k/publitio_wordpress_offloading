@@ -1,6 +1,50 @@
 (function ($) {
         'use strict';
 
+        jQuery.extend({
+            whenAll: function(expires, firstParam) {
+                return whenAllFx(0, jQuery.makeArray(arguments));
+            }
+        });
+
+        function whenAllFx(expires, args) {
+            const def = jQuery.Deferred();
+            let failed = false;
+            const results = [];
+            let to;
+
+            if (expires) {
+                to = setTimeout(function() {
+                    def.reject('expired', results.slice(0), args);
+                }, expires);
+            }
+
+            function next(remainingArgs) {
+                if (remainingArgs.length) {
+                    const arg = remainingArgs.shift();
+                    results.push(arg);
+                    jQuery.when(arg).fail(function() {
+                        failed = true;
+                    }).always(function() {
+                        next(remainingArgs);
+                    });
+                }
+                else {
+                    to && clearTimeout(to);
+                    if (failed) {
+                        def.reject(results);
+                    }
+                    else {
+                        def.resolve(results);
+                    }
+                }
+            }
+
+            next(args.slice(0));
+
+            return def.promise();
+        }
+
         const STATUSES = {
             ERROR_UNAUTHORIZED: 401,
             ERROR: 500,
@@ -265,7 +309,7 @@
 
         function replacePublitioMedia() {
             $("#replace_checkbox").bind('change', function (event) {
-                if(event.target.checked==true) {
+                if(event.target.checked === true) {
                     if (confirm('Are you sure you want to delete files from Media library once they are uploaded to Publitio? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                         jQuery.post(ajaxurl, {
                                 action: 'pwpo_update_replace_media',
@@ -307,76 +351,70 @@
             })
         }
 
+         function media_list_sync(mainList,media_list,index,resultInfo) {
+            const requestList = [];
+            media_list.forEach((media) => {
+                requestList.push(
+                    jQuery.post(ajaxurl,
+                        {async:false,action: 'pwpo_sync_media_file',attach_id: media.ID},
+                        function (responseMedia) {
+                            if (responseMedia.sync === true) {
+                                resultInfo.numOfUploaded++;
+                            } else {
+                                resultInfo.numOfFailed++;
+                            }
+                    }).fail(function() {
+                        resultInfo.numOfFailed++;
+                    }).always(function() {
+                        let result = (((resultInfo.numOfUploaded + resultInfo.numOfFailed) / resultInfo.numOfMedia) * 100).toFixed(1);
+                        $("#publitioBar").width(result + "%");
+                        let resFailed = "";
+                        if (resultInfo.numOfFailed !== 0) {
+                            resFailed = ' <span class="red-text">(' + resultInfo.numOfFailed + ' failed)</span>';
+                        }
+                        $("#loadPublitioNumber").html(resultInfo.numOfUploaded + " of " + resultInfo.numOfMedia + resFailed + " / " + result + "% completed");
+                    })
+                );
+            });
+
+             $.whenAll(...requestList).done(function(x){
+                 recursiveMediaLoading(mainList,index+1,resultInfo);
+             }).fail(function(x) {
+                 recursiveMediaLoading(mainList,index+1,resultInfo);
+             })
+        }
+
+        function recursiveMediaLoading(media_list, index , resultInfo) {
+            if(index < media_list.length) {
+                media_list_sync(media_list,media_list[index],index,resultInfo);
+            } else {
+                if ((resultInfo.numOfUploaded+resultInfo.numOfFailed) === resultInfo.numOfMedia) {
+                    setTimeout(function () {
+                        $('#publitio-popup').hide();
+                        $("#loadPublitioNumber").html(0);
+                        $("#publitioBar").width("0%");
+                        if(resultInfo.numOfFailed !== 0) {
+                            showPublitioBlock($('#media-upload-message-success'), resultInfo.numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+resultInfo.numOfFailed+' failed)</span>');
+                        } else {
+                            showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
+                        }
+
+                    }, 1000)
+                }
+            }
+        }
+
+
         function syncPublitioMedia(media_list) {
             if (media_list !== undefined && media_list !== null && media_list.length > 0) {
                 if (confirm('Are you sure you want to synchronize all media files with Publitio?')) {
-                    let numOfUploaded = 0;
-                    let numOfFailed = 0;
+                    const resultInfo = {
+                        numOfUploaded:0,
+                        numOfFailed : 0,
+                        numOfMedia : media_list.map((item) => item.length).reduce((a,b) => a+b,0)
+                    };
                     $('#publitio-popup').show();
-                    let numOfMedia = media_list.length;
-                    media_list.forEach((media) => {
-                        jQuery.post(ajaxurl, {
-                            async: false,
-                            action: 'pwpo_sync_media_file',
-                            attach_id: media.ID
-                        }, function (responseMedia) {
-                            if (responseMedia.sync === true) {
-                                numOfUploaded++;
-                            } else {
-                                //console.log(responseMedia.guid);
-                                numOfFailed++;
-                            }
-
-                            let result = Math.round(((numOfUploaded + numOfFailed) / numOfMedia) * 100);
-                            $("#publitioBar").width(result + "%");
-                            $("#loadPublitioNumber").empty();
-                            let resFailed = "";
-                            if(numOfFailed !== 0 ) {
-                                resFailed = ' <span class="red-text">('+numOfFailed+' failed)</span>';
-                            }
-                            $("#loadPublitioNumber").html(numOfUploaded + " of "+ numOfMedia + resFailed  + " / " + result + "% completed");
-                            if ((numOfUploaded+numOfFailed) === numOfMedia) {
-                                setTimeout(function () {
-                                    $('#publitio-popup').hide();
-                                    $("#loadPublitioNumber").html(0);
-                                    $("#publitioBar").width("0%");
-                                    if(numOfFailed !== 0) {
-                                        showPublitioBlock($('#media-upload-message-success'), numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+numOfFailed+' failed)</span>');
-                                    } else {
-                                        showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
-                                    }
-
-                                }, 1000)
-                            }
-                        })
-                        .fail(function() {
-                            //console.log("error sync " + media.ID);
-                            numOfFailed++;
-
-                            let result = Math.round(((numOfUploaded + numOfFailed) / numOfMedia) * 100);
-                            $("#publitioBar").width(result + "%");
-                            $("#loadPublitioNumber").empty();
-                            let resFailed = "";
-                            if(numOfFailed !== 0 ) {
-                                resFailed = ' <span class="red-text">('+numOfFailed+' failed)</span>';
-                            }
-                            $("#loadPublitioNumber").html(numOfUploaded + " of "+ numOfMedia + resFailed  + " / " + result + "% completed");
-                            if ((numOfUploaded+numOfFailed) === numOfMedia) {
-                                setTimeout(function () {
-                                    $('#publitio-popup').hide();
-                                    $("#loadPublitioNumber").html(0);
-                                    $("#publitioBar").width("0%");
-                                    if(numOfFailed !== 0) {
-                                        showPublitioBlock($('#media-upload-message-success'), numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+numOfFailed+' failed)</span>');
-                                    } else {
-                                        showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
-                                    }
-
-                                }, 1000)
-                            }
-
-                        });
-                    })
+                    recursiveMediaLoading(media_list,0,resultInfo);
                 }
             } else {
                 showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is already synchronized!');
@@ -412,7 +450,7 @@
                                 numOfDeletedFailed++;
                             }
 
-                            let result = Math.round(((numOfDeleted + numOfDeletedFailed) / numOfMediaForDelete) * 100);
+                            let result = (((numOfDeleted + numOfDeletedFailed) / numOfMediaForDelete) * 100).toFixed(1);
                             $("#publitioBar").width(result + "%");
                             $("#loadPublitioNumber").empty();
                             let resDeleteFailed = "";

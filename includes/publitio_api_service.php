@@ -314,14 +314,17 @@ class PublitioApiService
         $pi = pathinfo($attach);
 
         $img_dirname = $pi['dirname'];
-        $sizes = $meta['sizes'];
-        if ($sizes) {
-            foreach ($sizes as $size) {
-                $filename = $size['file'];
-                $img_size_url = $img_dirname . "/" . $filename;
-                wp_delete_file($img_size_url);
+        if(file_exists($attach)) {
+            $sizes = $meta['sizes'];
+            if ($sizes) {
+                foreach ($sizes as $size) {
+                    $filename = $size['file'];
+                    $img_size_url = $img_dirname . "/" . $filename;
+                    wp_delete_file($img_size_url);
+                }
             }
         }
+
         wp_delete_file($attach);
         if ($response === true) {
             if (!file_exists($attach)) {
@@ -354,19 +357,20 @@ class PublitioApiService
         if (is_null($dimensions)) {
             if ($this->isImageType($publitioMeta['extension'])) {
                 $qualityImage = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
-                return $media_url . ($qualityImage ? 'q_' . $qualityImage . '/' : '') . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                return $media_url . ($qualityImage ? 'q_' . $qualityImage . '/' : '') . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             } elseif ($this->isVideoType($publitioMeta['extension'])) {
                 $qualityVideo = get_option('publitio_offloading_video_quality') ? get_option('publitio_offloading_video_quality') : '480';
-                return $media_url . ($qualityVideo ? 'h_' . $qualityVideo . '/' : '') . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                return $media_url . ($qualityVideo ? 'h_' . $qualityVideo . '/' : '') . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             } else {
-                return $media_url . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                return $media_url . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             }
         } else {
             if ($this->isImageType($publitioMeta['extension'])) {
                 $qualityImage = get_option('publitio_offloading_image_quality') ? get_option('publitio_offloading_image_quality') : '80';
-                return $media_url . 'w_' . $dimensions['width'] . ',' . ($dimensions['height'] ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . ($qualityImage ? ',q_' . $qualityImage : '') . '/' . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                $a = $media_url . 'w_' . $dimensions['width'] . ',' . (isset($dimensions['height']) ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . ($qualityImage ? ',q_' . $qualityImage : '') . '/' . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                return $a;
             } else {
-                return $media_url . 'w_' . $dimensions['width'] . ',' . ($dimensions['height'] ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . '/' . ($publitioMeta['folder_name'] ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
+                return $media_url . 'w_' . $dimensions['width'] . ',' . (isset($dimensions['height']) ? 'h_' . $dimensions['height'] . ',' : '') . $dimensions['crop'] . '/' . (isset($publitioMeta['folder_name']) ? $publitioMeta['folder_name'] : '') . $publitioMeta['public_id'] . '.' . $publitioMeta['extension'];
             }
         }
     }
@@ -377,18 +381,10 @@ class PublitioApiService
      */
     public function get_media_for_sync() {
         $args = array('post_type' => 'attachment',
-            'post_status' => 'inherit',
+            'post_status' => 'null',
             'posts_per_page' => -1);
         $attachments = get_posts($args);
-        $unsync = array();
-        foreach ($attachments as $attachment) {
-            $attach = get_attached_file($attachment->ID);
-            if (file_exists($attach)) {
-                array_push($unsync, $attachment);
-            }
-        }
-
-        return $attachments;
+        return array_chunk($attachments,100);
     }
 
     /**
@@ -405,7 +401,7 @@ class PublitioApiService
         foreach ($attachments as $attachment) {
             $attach = get_attached_file($attachment->ID);
             $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
-            if (file_exists($attach) && $publitioMeta) {
+            if (file_exists($attach) && $publitioMeta && !is_null($publitioMeta)) {
                 $filetype = wp_check_filetype($attachment->guid);
                 $add_to_array = true;
                 if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
@@ -447,14 +443,21 @@ class PublitioApiService
     public function _get_all_image_sizes()
     {
         global $_wp_additional_image_sizes;
-        $default_image_sizes = array('thumbnail', 'medium', 'medium_large', 'large');
         $image_sizes = array();
-        foreach ($default_image_sizes as $size) {
-            $image_sizes[$size]['width'] = intval(get_option("{$size}_size_w"));
-            $image_sizes[$size]['height'] = intval(get_option("{$size}_size_h"));
-            $image_sizes[$size]['crop'] = (bool)get_option("{$size}_crop");
+
+        foreach ( get_intermediate_image_sizes() as $_size ) {
+            if ( in_array( $_size, array('thumbnail', 'medium', 'medium_large', 'large') ) ) {
+                $image_sizes[ $_size ]['width']  = get_option( "{$_size}_size_w" );
+                $image_sizes[ $_size ]['height'] = get_option( "{$_size}_size_h" );
+                $image_sizes[ $_size ]['crop']   = (bool) get_option( "{$_size}_crop" );
+            } elseif ( isset( $_wp_additional_image_sizes[ $_size ] ) ) {
+                $image_sizes[ $_size ] = array(
+                    'width'  => $_wp_additional_image_sizes[ $_size ]['width'],
+                    'height' => $_wp_additional_image_sizes[ $_size ]['height'],
+                    'crop'   => $_wp_additional_image_sizes[ $_size ]['crop'],
+                );
+            }
         }
-        if (isset($_wp_additional_image_sizes) && count($_wp_additional_image_sizes)) $image_sizes = array_merge($image_sizes, $_wp_additional_image_sizes);
         return $image_sizes;
     }
 

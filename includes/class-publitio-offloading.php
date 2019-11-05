@@ -34,8 +34,9 @@ class PWPO_Offload
             $this->sizes = $this->publitioApi->_get_all_image_sizes();
             add_action('add_attachment', array($this, 'pwpo_upload_file_to_publitio'));
             if (get_option('publitio_offloading_delete_checkbox') === 'yes') {
-                add_action('deleted_post_meta', array($this, 'pwpo_delete_file_from_publitio'), 10, 4);
+                add_action('delete_post_meta', array($this, 'pwpo_delete_file_from_publitio'), 10, 4);
             }
+
             add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 10);
             add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
             add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
@@ -130,21 +131,19 @@ class PWPO_Offload
     {
         $crop = false;
         $attachment = get_post($attach_id);
-        $attach = get_attached_file($attach_id);
-        if (file_exists($attach)) {
-            return false;
-        }
+//        $attach = get_attached_file($attach_id);
+//        if (file_exists($attach)) {
+//            return false;
+//        }
         $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
         if ($publitioMeta && !is_null($publitioMeta)) {
             $dimensions = array();
             if (is_array($size)) {
-                if (2 === count($size)) {
                     $dimensions = array(
                         'width' => $size[0],
                         'height' => $size[1],
                         'crop' => 'c_fill'
                     );
-                }
             } elseif ('full' === $size) {
                 $meta = wp_get_attachment_metadata($attach_id);
                 if (isset($meta['width']) && isset($meta['height'])) {
@@ -157,19 +156,21 @@ class PWPO_Offload
             } else {
                 if ($size && $size !== "") {
                     $dimensions = $this->get_image_size($size);
-                    if (!empty($dimensions) && (bool)$dimensions['crop']) {
+                    if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
                         $crop = true;
+                        $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
+                    } else {
+                        $dimensions = null;
                     }
-                    $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
                 } else {
-                    return false;
+                    $dimensions = null;
                 }
-
             }
 
-            if (empty($dimensions)) {
-                return false;
-            }
+//            if (empty($dimensions)) {
+//                return false;
+//            }
+
             return array(
                 $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
                 $dimensions['width'],
@@ -198,11 +199,13 @@ class PWPO_Offload
      */
     public function pwpo_delete_file_from_publitio($deleted_meta_ids, $post_id, $meta_key, $only_delete_these_meta_values)
     {
-        $publitioMeta = get_post_meta($post_id, 'publitioMeta', true);
-        if ($publitioMeta) {
-            $responseShow = $this->publitioApi->showFile( $publitioMeta['id']);
-            if ($responseShow->success === true) {
-                $this->publitioApi->deleteFileFromPublitio($publitioMeta['id']);
+        if($meta_key === 'publitioMeta') {
+            $publitioMeta = $only_delete_these_meta_values;
+            if ($publitioMeta) {
+                $responseShow = $this->publitioApi->showFile( $publitioMeta['id']);
+                if ($responseShow->success === true) {
+                    $this->publitioApi->deleteFileFromPublitio($publitioMeta['id']);
+                }
             }
         }
     }
@@ -339,8 +342,7 @@ class PWPO_Offload
                                 $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
 
                                 $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
-
-                            } else if ($class_id !== 0 && (empty($src_set) || $src_set === '')) {
+                            } else if ($attach_id !== 0) {
                                 $metadata = wp_get_attachment_metadata($attachment_id);
                                 $sizesMeta = $metadata['sizes'];
                                 if ($sizesMeta) {
