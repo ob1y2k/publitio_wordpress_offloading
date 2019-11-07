@@ -1,4 +1,6 @@
 vendor/
 _builds/
+publitio-offloading/
 .DS_Store
 admin/.DS_Store
+publitio-offloading.zip

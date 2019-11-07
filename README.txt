@@ -57,6 +57,9 @@ Publitio is cloud-based media asset management service.
 = 1.0.2 =
 * Sync Now fix
 
+= 1.0.3 =
+* Sync Now batch support & minor fixes
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -67,3 +70,7 @@ Just install
 
 = 1.0.2 =
 * Sync Now fix
+
+= 1.0.3 =
+* Sync Now batch support & minor fixes
+
