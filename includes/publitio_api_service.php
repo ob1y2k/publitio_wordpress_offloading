@@ -259,7 +259,7 @@ class PublitioApiService
         }
         $attach = get_attached_file($attachment->ID);
         if (file_exists($attach)) {
-            $responseUpload = $this->publitio_api->uploadFile(fopen($attachment->guid, 'r'), 'file', $args);
+            $responseUpload = $this->publitio_api->uploadFile(fopen($attach, 'r'), 'file', $args);
             if ($responseUpload->success === true) {
                 if($this->isVideoType($responseUpload->extension)) {
                     $ext = 'mp4';
