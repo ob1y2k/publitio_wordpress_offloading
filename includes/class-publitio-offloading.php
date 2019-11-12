@@ -344,23 +344,27 @@ class PWPO_Offload
                                 $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
                             } else if ($attach_id !== 0) {
                                 $metadata = wp_get_attachment_metadata($attachment_id);
-                                $sizesMeta = $metadata['sizes'];
-                                if ($sizesMeta) {
-                                    foreach ($sizesMeta as $sizeMeta) {
-                                        $file = $sizeMeta['file'];
-                                        $dimensions = null;
-                                        if (strpos($src, $file) !== false) {
-                                            $dimensions['width'] = $sizeMeta['width'];
-                                            $dimensions['height'] = $sizeMeta['height'];
-                                            $dimensions['crop'] = 'c_fill';
-                                            break;
+                                if(isset($metadata['sizes'])) {
+                                    $sizesMeta = $metadata['sizes'];
+                                    if ($sizesMeta) {
+                                        foreach ($sizesMeta as $sizeMeta) {
+                                            $file = $sizeMeta['file'];
+                                            $dimensions = null;
+                                            if (strpos($src, $file) !== false) {
+                                                $dimensions['width'] = $sizeMeta['width'];
+                                                $dimensions['height'] = $sizeMeta['height'];
+                                                $dimensions['crop'] = 'c_fill';
+                                                break;
+                                            }
+                                        }
+                                        if(!is_null($dimensions) && $dimensions) {
+                                            $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
+                                        } else {
+                                            $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
                                         }
                                     }
-                                    if(!is_null($dimensions) && $dimensions) {
-                                        $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
-                                    } else {
-                                        $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
-                                    }
+                                } else {
+                                    $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
                                 }
                             } else {
                                 $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
