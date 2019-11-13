@@ -66,7 +66,11 @@ class PWPO_Offload
         if (file_exists($attach)) {
             if (get_option('publitio_offloading_replace_checkbox') === 'yes') {
                 $filetype = wp_check_filetype($attachment->guid);
-                $delete = true;
+                $publitioMetaFile = $this->getPublitioMeta($attachment);
+                $delete = false;
+                if(!is_null($publitioMetaFile)) {
+                    $delete = true;
+                }
                 if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
                     if ($this->publitioApi->isImageType($filetype['ext'])) {
                         $delete = false;
