@@ -31,7 +31,6 @@ class PWPO_Offload
     public function pwpo_register()
     {
         if (PWPO_AuthService::is_user_authenticated()) {
-            $this->sizes = $this->publitioApi->_get_all_image_sizes();
             add_action('add_attachment', array($this, 'pwpo_upload_file_to_publitio'));
             if (get_option('publitio_offloading_delete_checkbox') === 'yes') {
                 add_action('delete_post_meta', array($this, 'pwpo_delete_file_from_publitio'), 10, 4);
@@ -66,7 +65,11 @@ class PWPO_Offload
         if (file_exists($attach)) {
             if (get_option('publitio_offloading_replace_checkbox') === 'yes') {
                 $filetype = wp_check_filetype($attachment->guid);
-                $delete = true;
+                $publitioMetaFile = $this->getPublitioMeta($attachment);
+                $delete = false;
+                if(!is_null($publitioMetaFile)) {
+                    $delete = true;
+                }
                 if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
                     if ($this->publitioApi->isImageType($filetype['ext'])) {
                         $delete = false;
@@ -129,12 +132,7 @@ class PWPO_Offload
      */
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
-        $crop = false;
         $attachment = get_post($attach_id);
-//        $attach = get_attached_file($attach_id);
-//        if (file_exists($attach)) {
-//            return false;
-//        }
         $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
         if ($publitioMeta && !is_null($publitioMeta)) {
             $dimensions = array();
@@ -156,6 +154,7 @@ class PWPO_Offload
             } else {
                 if ($size && $size !== "") {
                     $dimensions = $this->get_image_size($size);
+                    $crop = false;
                     if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
                         $crop = true;
                         $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
@@ -166,10 +165,6 @@ class PWPO_Offload
                     $dimensions = null;
                 }
             }
-
-//            if (empty($dimensions)) {
-//                return false;
-//            }
 
             return array(
                 $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
@@ -562,6 +557,7 @@ class PWPO_Offload
      */
     private function get_image_size($size)
     {
+        $this->sizes = $this->publitioApi->_get_all_image_sizes();
         if (!empty($this->sizes) && isset($this->sizes[$size])) {
             return $this->sizes[$size];
         }
