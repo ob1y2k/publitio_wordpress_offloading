@@ -137,10 +137,14 @@ class PWPO_Offload
         if ($publitioMeta && !is_null($publitioMeta)) {
             $dimensions = array();
             if (is_array($size)) {
-                    $dimensions = array(
+                $crop = false;
+                if(isset($size['crop'])) {
+                    $crop = $size['crop'];
+                }
+                $dimensions = array(
                         'width' => $size[0],
                         'height' => $size[1],
-                        'crop' => 'c_fill'
+                        'crop' => $crop ? 'c_fill' : 'c_fit'
                     );
             } elseif ('full' === $size) {
                 $meta = wp_get_attachment_metadata($attach_id);
