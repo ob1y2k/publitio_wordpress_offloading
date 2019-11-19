@@ -47,7 +47,7 @@ class PWPO_Offload
                 wp_enqueue_script('offloadingfrontscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
             }
             add_filter('wp_get_attachment_url', array($this, 'pwpo_get_url'), 10, 2);
-            add_action('the_post', array($this, 'pwpo_edit_post_content'), 10, 1);
+            //add_action('the_post', array($this, 'pwpo_edit_post_content'), 10, 1);
         }
     }
 
@@ -132,6 +132,7 @@ class PWPO_Offload
      */
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
+        $attach = get_attached_file($attach_id);
         $attachment = get_post($attach_id);
         $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
         if ($publitioMeta && !is_null($publitioMeta)) {
@@ -156,7 +157,7 @@ class PWPO_Offload
                     );
                 }
             } else {
-                if ($size && $size !== "") {
+                if (!file_exists($attach) && $size && $size !== "") {
                     $dimensions = $this->get_image_size($size);
                     $crop = false;
                     if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
@@ -166,7 +167,7 @@ class PWPO_Offload
                         $dimensions = null;
                     }
                 } else {
-                    $dimensions = null;
+                    return null;
                 }
             }
 
