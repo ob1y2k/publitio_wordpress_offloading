@@ -72,6 +72,10 @@ Publitio is cloud-based media asset management service.
 = 1.0.7 =
 * rounding of width and height fix, srcset calculation/formating fix
 
+= 1.0.8 =
+* Sync Now batch 1-by-1 file fix
+
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -98,3 +102,5 @@ Just install
 = 1.0.7 =
 * rounding of width and height fix, srcset calculation/formating fix
 
+= 1.0.8 =
+* Sync Now batch 1-by-1 file fix
