@@ -391,7 +391,7 @@ class PublitioApiService
             'post_status' => 'null',
             'posts_per_page' => -1);
         $attachments = get_posts($args);
-        return array_chunk($attachments,100);
+        return array_chunk($attachments,1);
     }
 
     /**
