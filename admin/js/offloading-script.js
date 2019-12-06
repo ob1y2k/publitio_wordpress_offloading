@@ -1,6 +1,12 @@
 (function ($) {
         'use strict';
 
+        let timers = {
+            recursiveTimeout : null,
+            deleteTimeout : null
+
+        };
+
         jQuery.extend({
             whenAll: function(expires, firstParam) {
                 return whenAllFx(0, jQuery.makeArray(arguments));
@@ -205,11 +211,18 @@
             $('#media-delete-message-error').empty();
         }
 
+
+
         function showPublitioBlock(elem, content) {
             $(elem).html(content);
-            setTimeout(function () {
-                clearBlocks()
-            }, 3000)
+            var selector = elem.selector;
+            if(timers && timers[selector]){
+                clearTimeout(timers[selector]);
+                timers[selector] = null;
+            }
+            timers[selector] = setTimeout(function () {
+                clearBlocks();
+            }, 3000);
         }
 
         function updatePublitioDefaultFolderChange() {
@@ -389,14 +402,18 @@
                 media_list_sync(media_list,media_list[index],index,resultInfo);
             } else {
                 if ((resultInfo.numOfUploaded+resultInfo.numOfFailed) === resultInfo.numOfMedia) {
-                    setTimeout(function () {
+                    if(timers && timers['recursiveTimeout']) {
+                        clearTimeout(timers['recursiveTimeout']);
+                        timers['recursiveTimeout'] = null;
+                    }
+                    timers['recursiveTimeout'] = setTimeout(function () {
                         $('#publitio-popup').hide();
                         $("#loadPublitioNumber").html(0);
                         $("#publitioBar").width("0%");
                         if(resultInfo.numOfFailed !== 0) {
                             showPublitioBlock($('#media-upload-message-success'), resultInfo.numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+resultInfo.numOfFailed+' failed)</span>');
                         } else {
-                            showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is synchronized successfully!');
+                            showPublitioBlock($('#media-upload-message-success'), 'Your media library is synchronized successfully!');
                         }
 
                     }, 1000)
@@ -417,7 +434,7 @@
                     recursiveMediaLoading(media_list,0,resultInfo);
                 }
             } else {
-                showPublitioBlock($('#media-upload-message-success'), 'You\'r media library is already synchronized!');
+                showPublitioBlock($('#media-upload-message-success'), 'Your media library is already synchronized!');
             }
         }
 
@@ -459,7 +476,11 @@
                             }
                             $("#loadPublitioNumber").html(numOfDeleted + " of "+ numOfMediaForDelete + resDeleteFailed  + " / " + result + "% completed");
                             if (numOfDeleted + numOfDeletedFailed === numOfMediaForDelete) {
-                                setTimeout(function () {
+                                if(timers && timers['deleteTimeout']) {
+                                    clearTimeout(timers['deleteTimeout']);
+                                    timers['deleteTimeout'] = null;
+                                }
+                                timers['deleteTimeout'] = setTimeout(function () {
                                     $('#publitio-popup').hide();
                                     $("#loadPublitioNumber").html(0);
                                     $("#publitioBar").width("0%");
