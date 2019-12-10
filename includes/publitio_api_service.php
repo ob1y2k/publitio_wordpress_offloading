@@ -391,7 +391,38 @@ class PublitioApiService
             'post_status' => 'null',
             'posts_per_page' => -1);
         $attachments = get_posts($args);
-        return array_chunk($attachments,1);
+        $mediaList = array();
+        foreach ($attachments as $attachment) {
+            $add_to_array = true;
+            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
+                if (strpos($attachment->post_mime_type, 'image') !== false ) {
+                    $add_to_array = false;
+                }
+            }
+
+            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no') {
+                if (strpos($attachment->post_mime_type, 'video') !== false ) {
+                    $add_to_array = false;
+                }
+            }
+
+            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no') {
+                if (strpos($attachment->post_mime_type, 'audio') !== false ) {
+                    $add_to_array = false;
+                }
+            }
+
+            if (get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no') {
+                if (strpos($attachment->post_mime_type, 'pdf') !== false ) {
+                    $add_to_array = false;
+                }
+            }
+            if ($add_to_array === true) {
+                array_push($mediaList, $attachment);
+            }
+        }
+
+        return array_chunk($mediaList,1);
     }
 
     /**
