@@ -317,9 +317,7 @@ class PWPO_Offload
                         $publitioMeta = $this->getPublitioMeta($attachment);
                         if (!is_null($publitioMeta)) {
                             $width = preg_match('/ width="([0-9]+)"/', $image, $match_width) ? (int)$match_width[1] : 0;
-                            $width = "auto";
                             $height = preg_match('/ height="([0-9]+)"/', $image, $match_height) ? (int)$match_height[1] : 0;
-                            $height = "auto";
                             $class = preg_match('/ class="([^"]*)"/', $image, $match_class) ? $match_class[1] : '';
 
                             if (!empty($class)) {
