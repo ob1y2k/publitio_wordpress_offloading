@@ -326,7 +326,7 @@ class PWPO_Offload
                                 $size = '';
                             }
 
-                            if ((!empty($width) && $width !== 0) && (!empty($height) && $height !==0)) {
+                            if ((!empty($width) && $width !== 0 && $width !== 'auto') && (!empty($height) && $height !== 0 && $height !== 'auto')) {
                                 $crop = false;
                                 if (!empty($size)) {
                                     $dimensions = $this->get_image_size($size);
