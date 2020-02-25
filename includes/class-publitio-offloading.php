@@ -278,6 +278,7 @@ class PWPO_Offload
         $images = array();
         $diviImages = array();
         $videos = array();
+        $diviVideosWeb = array();
         $diviVideos = array();
         $posters = array();
         $audios = array();
@@ -294,7 +295,10 @@ class PWPO_Offload
         if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
             $videos = $matchesVideo[0];
         }
-        if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
+        if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideosWeb)) {
+            $diviVideosWeb = $matchesDiviVideosWeb[0];
+        }
+        if (preg_match_all('/(?<=video src=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
             $diviVideos = $matchesDiviVideos[0];
         }
         if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
@@ -312,7 +316,7 @@ class PWPO_Offload
             $posters = $matchesPoster['poster'];
         }
 
-        return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters);
+        return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters);
     }
 
     /**
