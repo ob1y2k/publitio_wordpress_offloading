@@ -78,6 +78,8 @@ Publitio is cloud-based media asset management service.
 = 1.0.9 =
 * Sync Now by type fix
 
+= 1.1.0 =
+* Support for divi videos
 
 == Upgrade Notice ==
 
@@ -110,4 +112,7 @@ Just install
 
 = 1.0.9 =
 * Sync Now by type fix
+
+= 1.1.0 =
+* Support for divi videos
 
