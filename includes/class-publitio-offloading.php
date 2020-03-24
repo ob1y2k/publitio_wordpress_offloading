@@ -362,7 +362,6 @@ class PWPO_Offload
      */
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
-        $attach = get_attached_file($attach_id);
         $attachment = get_post($attach_id);
         $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
         if ($publitioMeta && !is_null($publitioMeta)) {
@@ -387,7 +386,7 @@ class PWPO_Offload
                     );
                 }
             } else {
-                if (!file_exists($attach) && $size && $size !== "") {
+                if ($size && $size !== "") {
                     $dimensions = $this->get_image_size($size);
                     $crop = false;
                     if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
