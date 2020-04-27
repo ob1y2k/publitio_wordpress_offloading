@@ -157,9 +157,10 @@ class PWPO_Offload
     /**
      * Get Publitio Meta Data for attachment
      * @param $attachment
+     * @param bool $upload
      * @return array|mixed|null
      */
-    private function getPublitioMeta($attachment)
+    private function getPublitioMeta($attachment, $upload=true)
     {
         $filetype = wp_check_filetype($attachment->guid);
 
@@ -188,7 +189,7 @@ class PWPO_Offload
         }
 
         $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
-        if (!$publitioMeta) {
+        if (!$publitioMeta && $upload) {
             $publitioMeta = $this->publitioApi->uploadFile($attachment);
             if (is_null($publitioMeta)) {
                 return null;
@@ -287,33 +288,53 @@ class PWPO_Offload
         $pdfFiles = array();
 
         if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)[^>]*>/i', $content, $matchesImages)) {
-            $images = $matchesImages[0];
+            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+                $images = $matchesImages[0];
+            }
         }
         if (preg_match_all('/(?<=image src=\")(.*?)(?=")/i', $content, $matchesDiviImages)) {
-            $diviImages = $matchesDiviImages[0];
+            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+                $diviImages = $matchesDiviImages[0];
+            }
         }
         if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
-            $videos = $matchesVideo[0];
+            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
+                $videos = $matchesVideo[0];
+            }
         }
         if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideosWeb)) {
-            $diviVideosWeb = $matchesDiviVideosWeb[0];
+            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
+                $diviVideosWeb = $matchesDiviVideosWeb[0];
+            }
         }
         if (preg_match_all('/(?<=video src=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
-            $diviVideos = $matchesDiviVideos[0];
+            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
+                $diviVideos = $matchesDiviVideos[0];
+            }
         }
         if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
-            $audios = $matchesAudio[0];
+            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'yes') {
+                $audios = $matchesAudio[0];
+            }
         }
         if (preg_match_all('/(?<=audio=\")(.*?)(?=")/i', $content, $matchesDiviAudios)) {
-            $diviAudios = $matchesDiviAudios[0];
+            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'yes') {
+                $diviAudios = $matchesDiviAudios[0];
+            }
         }
         if (preg_match_all('~\bbackground(-image)?\s*:(.*?)\(\s*(\'|")?(?<image>.*?)\3?\s*\)~i', $content, $matchesBackground)) {
-            $backgrounds = $matchesBackground['image'];
+            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+                $backgrounds = $matchesBackground['image'];
+            }
         }
         if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*)<\/a>/siU', $content, $matchesPdf)) {
-            $pdfFiles = $matchesPdf[1];
+            if (get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'yes') {
+                $pdfFiles = $matchesPdf[1];
+            }
         } else if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
-            $posters = $matchesPoster['poster'];
+            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+                $posters = $matchesPoster['poster'];
+            }
         }
 
         return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters);
@@ -363,7 +384,7 @@ class PWPO_Offload
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
         $attachment = get_post($attach_id);
-        $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
+        $publitioMeta = $this->getPublitioMeta($attachment, false);
         if ($publitioMeta && !is_null($publitioMeta)) {
             $dimensions = array();
             if (is_array($size)) {
