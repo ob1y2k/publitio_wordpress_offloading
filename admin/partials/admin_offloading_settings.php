@@ -52,10 +52,10 @@
     <hr />
     <div class="section-offloading-wrapper">
         <div class="off-margin">
-            <label class="switch">
+            <label class="publitio-switch">
                 <input type="checkbox"
                        id="allow-download" <?php echo esc_html((get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no' ? '' : 'checked')) ?>>
-                <span class="slider round"></span>
+                <span class="publitio-slider round"></span>
             </label>
             <span class="download-text">Allow users to save/download media files</span>
         </div>
@@ -67,34 +67,34 @@
         <label class="form-offload-label">Select files to be offloaded:</label>
         <div class="files-checkbox off-margin">
             <div class="offload-checkbox">
-                <label class="switch">
+                <label class="publitio-switch">
                     <input type="checkbox"
                            id="image_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no' ? '' : 'checked')) ?>>
-                    <span class="slider round"></span>
+                    <span class="publitio-slider round"></span>
                 </label>
                 <span class="download-text">Image</span>
             </div>
             <div class="offload-checkbox">
-                <label class="switch">
+                <label class="publitio-switch">
                     <input type="checkbox"
                            id="video_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'no' ? '' : 'checked')) ?>>
-                    <span class="slider round"></span>
+                    <span class="publitio-slider round"></span>
                 </label>
                 <span class="download-text">Video</span>
             </div>
             <div class="offload-checkbox">
-                <label class="switch">
+                <label class="publitio-switch">
                     <input type="checkbox"
                            id="audio_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'no' ? '' : 'checked')) ?>>
-                    <span class="slider round"></span>
+                    <span class="publitio-slider round"></span>
                 </label>
                 <span class="download-text">Audio</span>
             </div>
             <div class="offload-checkbox">
-                <label class="switch">
+                <label class="publitio-switch">
                     <input type="checkbox"
                            id="document_checkbox" class="files-offload-input" <?php echo esc_html((get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'no' ? '' : 'checked')) ?>>
-                    <span class="slider round"></span>
+                    <span class="publitio-slider round"></span>
                 </label>
                 <span class="download-text">Document (pdf)</span>
             </div>
@@ -156,10 +156,10 @@
     <hr />
     <div class="section-offloading-wrapper">
         <div class="offload-checkbox">
-            <label class="switch">
+            <label class="publitio-switch">
                 <input type="checkbox"
                        id="delete_checkbox" class="files-offload-delete" <?php echo esc_html((get_option('publitio_offloading_delete_checkbox') && get_option('publitio_offloading_delete_checkbox') === 'yes' ? 'checked' : '')) ?>>
-                <span class="slider round"></span>
+                <span class="publitio-slider round"></span>
             </label>
             <span class="download-text">Delete file from Publitio when Media is deleted permanently</span>
         </div>
@@ -175,10 +175,10 @@
         <p class="download-text">Options bellow are <strong>best to keep OFF</strong> (default). If you use them, <strong>plugin will delete files from local storage</strong> once they are uploaded to Publitio (useful if you have limited space within site) - but if you choose to <strong>deactivate Publitio Offloading plugin</strong> in the future, your site posts/pages <strong>will result in broken media links</strong> (as they are no longer present locally). <span class="danger-text">Use with caution & at your own risk as there is no going back once you use this options!</span>
         </p>
         <div class="off-margin">
-            <label class="switch">
+            <label class="publitio-switch">
                 <input type="checkbox" class="files-offload-delete"
                        id="replace_checkbox" <?php echo esc_html((get_option('publitio_offloading_replace_checkbox') && get_option('publitio_offloading_replace_checkbox') === 'yes' ? 'checked' : '')) ?>>
-                <span class="slider round"></span>
+                <span class="publitio-slider round"></span>
             </label>
             <span class="download-text">Delete files from Media library once uploaded to Publitio.</span><span class="danger-text"> [Danger zone!]</span>
         </div>

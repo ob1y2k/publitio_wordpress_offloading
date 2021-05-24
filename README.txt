@@ -122,3 +122,6 @@ Just install
 = 1.1.1 =
 * WP 5.6 check OK
 
+= 1.1.2 =
+* Thrive Architect plugin CSS class conflict
+
