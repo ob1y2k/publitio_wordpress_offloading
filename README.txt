@@ -3,7 +3,7 @@ Contributors: publitio
 Donate link: https://publit.io
 Tags: publitio, offloading, offload, s3, aws, cloudinary, digitalocean spaces, media library, images, videos, media, assets, management, upload, storage, hosting, transformation, transcoding
 Requires at least: 5.0.1
-Tested up to: 5.6
+Tested up to: 5.7.2
 Stable tag: 5.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -123,5 +123,5 @@ Just install
 * WP 5.6 check OK
 
 = 1.1.2 =
-* Thrive Architect plugin CSS class conflict
+* Thrive Architect plugin CSS class conflict & WP 5.7.2 check OK
 
