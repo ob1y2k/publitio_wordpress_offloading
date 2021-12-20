@@ -74,8 +74,10 @@ class PWPO_Admin
      */
     public function pwpo_enqueue()
     {
-        wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
-        wp_enqueue_script('offloadingscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js', array('jquery'));
+        if (isset( $_GET['page'] ) && $_GET['page'] == 'publitio_offloading' ) {
+            wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
+            wp_enqueue_script('offloadingscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js', array('jquery'));
+        }
     }
 
     /**
