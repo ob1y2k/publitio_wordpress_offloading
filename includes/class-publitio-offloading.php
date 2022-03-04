@@ -289,62 +289,49 @@ class PWPO_Offload
         $pdfFiles = array();
         $videoSoruces = array();
 
-        if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)[^>]*>/i', $content, $matchesImages)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+        if (get_option('publitio_offloading_image_checkbox', 'yes') === 'yes') {
+            if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)[^>]*>/i', $content, $matchesImages)) {
                 $images = $matchesImages[0];
             }
-        }
-        if (preg_match_all('/(?<=image src=\")(.*?)(?=")/i', $content, $matchesDiviImages)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+            if (preg_match_all('/(?<=image src=\")(.*?)(?=")/i', $content, $matchesDiviImages)) {
                 $diviImages = $matchesDiviImages[0];
             }
-        }
-        if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
-                $videos = $matchesVideo[0];
+            if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
+                $posters = $matchesPoster['poster'];
             }
-        }
-        if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideosWeb)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
-                $diviVideosWeb = $matchesDiviVideosWeb[0];
-            }
-        }
-        if (preg_match_all('/(?<=video src=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
-                $diviVideos = $matchesDiviVideos[0];
-            }
-        }
-        if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
-            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'yes') {
-                $audios = $matchesAudio[0];
-            }
-        }
-        if (preg_match_all('/(?<=audio=\")(.*?)(?=")/i', $content, $matchesDiviAudios)) {
-            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'yes') {
-                $diviAudios = $matchesDiviAudios[0];
-            }
-        }
-        if (preg_match_all('~\bbackground(-image)?\s*:(.*?)\(\s*(\'|")?(?<image>.*?)\3?\s*\)~i', $content, $matchesBackground)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+            if (preg_match_all('~\bbackground(-image)?\s*:(.*?)\(\s*(\'|")?(?<image>.*?)\3?\s*\)~i', $content, $matchesBackground)) {
                 $backgrounds = $matchesBackground['image'];
             }
         }
-        if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*?)<\/a>/siU', $content, $matchesPdf)) {
-            if (get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'yes') {
-                $pdfFiles = $matchesPdf[1];
+        if (get_option('publitio_offloading_video_checkbox', 'yes') === 'yes') {
+            if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
+                $videos = $matchesVideo[0];
             }
-        } 
-        if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
-                $posters = $matchesPoster['poster'];
+            if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideosWeb)) {
+                $diviVideosWeb = $matchesDiviVideosWeb[0];
             }
-        }
-        if (preg_match_all('/<source[^>]+src=([\'"])(.+?)\1[^>]*>/i', $content, $matchesVideoSource)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
+            if (preg_match_all('/(?<=video src=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
+                $diviVideos = $matchesDiviVideos[0];
+            }
+            if (preg_match_all('/<source[^>]+src=([\'"])(.+?)\1[^>]*>/i', $content, $matchesVideoSource)) {
                 $videoSoruces = $matchesVideoSource[0];
             }
         }
-
+        if (get_option('publitio_offloading_audio_checkbox', 'yes') === 'yes') {
+            if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
+                $audios = $matchesAudio[0];
+            }
+            if (preg_match_all('/(?<=audio=\")(.*?)(?=")/i', $content, $matchesDiviAudios)) {
+                $diviAudios = $matchesDiviAudios[0];
+            }
+        }
+       
+        if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*?)<\/a>/siU', $content, $matchesPdf)) {
+            if (get_option('publitio_offloading_document_checkbox', 'yes') === 'yes') {
+                $pdfFiles = $matchesPdf[1];
+            }
+        } 
+        
         return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters, (array)$videoSoruces);
     }
 
