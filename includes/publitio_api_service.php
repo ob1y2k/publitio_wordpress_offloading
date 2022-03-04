@@ -591,7 +591,7 @@ class PublitioApiService
     private function handle_success($response)
     {
         delete_option('publitio_offloading_default_folder');
-        delete_option('publitio_offloading_allow_download');
+        update_option('publitio_offloading_allow_download', 'yes');
         delete_option('publitio_offloading_default_cname');
         delete_option('publitio_offloading_delete_checkbox');
         update_option('publitio_offloading_allow_download', 'yes');
@@ -599,10 +599,10 @@ class PublitioApiService
         update_option('publitio_offloading_video_quality', '480');
         update_option('publitio_offloading_delete_checkbox', 'no');
         delete_option('publitio_offloading_replace_checkbox');
-        delete_option('publitio_offloading_image_checkbox');
-        delete_option('publitio_offloading_video_checkbox');
-        delete_option('publitio_offloading_audio_checkbox');
-        delete_option('publitio_offloading_document_checkbox');
+        update_option('publitio_offloading_image_checkbox', 'yes');
+        update_option('publitio_offloading_video_checkbox', 'yes');
+        update_option('publitio_offloading_audio_checkbox', 'yes');
+        update_option('publitio_offloading_document_checkbox', 'yes');
 
 
         wp_send_json([

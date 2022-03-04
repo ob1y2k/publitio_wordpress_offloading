@@ -37,6 +37,7 @@ class PWPO_Offload
             }
 
             add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 10);
+            add_action('template_redirect', array($this, 'pwpo_update_offloading_images_src_custom'));
             add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
             add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
 
@@ -286,6 +287,7 @@ class PWPO_Offload
         $diviAudios = array();
         $backgrounds = array();
         $pdfFiles = array();
+        $videoSoruces = array();
 
         if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)[^>]*>/i', $content, $matchesImages)) {
             if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
@@ -327,17 +329,23 @@ class PWPO_Offload
                 $backgrounds = $matchesBackground['image'];
             }
         }
-        if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*)<\/a>/siU', $content, $matchesPdf)) {
+        if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*?)<\/a>/siU', $content, $matchesPdf)) {
             if (get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'yes') {
                 $pdfFiles = $matchesPdf[1];
             }
-        } else if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
+        } 
+        if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
             if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
                 $posters = $matchesPoster['poster'];
             }
         }
+        if (preg_match_all('/<source[^>]+src=([\'"])(.+?)\1[^>]*>/i', $content, $matchesVideoSource)) {
+            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
+                $videoSoruces = $matchesVideoSource[0];
+            }
+        }
 
-        return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters);
+        return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters, (array)$videoSoruces);
     }
 
     /**
@@ -513,6 +521,101 @@ class PWPO_Offload
             } else {
                 $attachment_id = $this->get_attachment_id($src);
             }
+
+            if (strpos($src, 'wp-content') === false) {
+                $content = $this->updatePublitioUrl($content, $image, $src);
+            } else {
+                if ($attachment_id && $attachment_id !== 0) {
+                    $attachment = get_post($attachment_id);
+                    if ($attachment) {
+                        $publitioMeta = $this->getPublitioMeta($attachment);
+                        if (!is_null($publitioMeta)) {
+                            $width = preg_match('/ width="([0-9]+)"/', $image, $match_width) ? (int)$match_width[1] : 0;
+                            $height = preg_match('/ height="([0-9]+)"/', $image, $match_height) ? (int)$match_height[1] : 0;
+                            $class = preg_match('/ class="([^"]*)"/', $image, $match_class) ? $match_class[1] : '';
+
+                            if (!empty($class)) {
+                                $size = preg_match('/size-([a-zA-Z0-9-_]+)?/', $class, $match_size) ? $match_size[1] : '';
+                            } else {
+                                $size = '';
+                            }
+
+                            if ((!empty($width) && $width !== 0 && $width !== 'auto') && (!empty($height) && $height !== 0 && $height !== 'auto')) {
+                                $crop = false;
+                                if (!empty($size)) {
+                                    $dimensions = $this->get_image_size($size);
+                                    if (!empty($dimensions) && (bool)$dimensions['crop']) {
+                                        $crop = true;
+                                    }
+                                }
+                                if ($width === $height) {
+                                    $crop = true;
+                                }
+                                $dimensions['width'] = $width;
+                                $dimensions['height'] = $height;
+                                $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
+
+                                $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
+                            } else if ($attach_id !== 0) {
+                                $metadata = wp_get_attachment_metadata($attachment_id);
+                                if (isset($metadata['sizes'])) {
+                                    $sizesMeta = $metadata['sizes'];
+                                    if ($sizesMeta) {
+                                        foreach ($sizesMeta as $sizeMeta) {
+                                            $file = $sizeMeta['file'];
+                                            $dimensions = null;
+                                            if (strpos($src, $file) !== false) {
+                                                $dimensions['width'] = $sizeMeta['width'];
+                                                $dimensions['height'] = $sizeMeta['height'];
+                                                $dimensions['crop'] = 'c_fill';
+                                                break;
+                                            }
+                                        }
+                                        if (!is_null($dimensions) && $dimensions) {
+                                            $updated_src = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
+                                        } else {
+                                            $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
+                                        }
+                                    }
+                                } else {
+                                    $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
+                                }
+                            } else {
+                                $updated_src = $this->publitioApi->getTransformedUrl(null, $publitioMeta);
+                            }
+                            if (!empty($updated_src) && !is_null($updated_src)) {
+                                $updated_image = str_replace($src, $updated_src, $image);
+                                $content = str_replace($image, $updated_image, $content);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $content;
+    }
+
+    /**
+     * Replace image src with Publitio URL on custom pages and post types
+     * @param string $content
+     * @return mixed|string
+     */
+    public function pwpo_update_offloading_images_src_custom($content = '')
+    {
+        $post_images = $this->filter_attachments($content);
+        if (empty($post_images)) {
+            return $content;
+        }
+        foreach ($post_images as $image) {
+            $src = preg_match('/ src="([^"]*)"/', $image, $match_src) ? $match_src[1] : '';
+            $src_set = preg_match('/ srcset="([^"]*)"/', $image, $match_src) ? $match_src[1] : '';
+            $class_id = preg_match('/wp-image-([0-9]+)/i', $image, $match_class) ? $match_class[1] : 0;
+
+            if (empty($src) || $src === "") {
+                $src = $image;
+            }
+
+            $attachment_id = $this->get_attachment_id($src);
 
             if (strpos($src, 'wp-content') === false) {
                 $content = $this->updatePublitioUrl($content, $image, $src);
