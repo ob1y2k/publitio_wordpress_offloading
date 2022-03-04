@@ -36,8 +36,8 @@ class PWPO_Offload
                 add_action('delete_post_meta', array($this, 'pwpo_delete_file_from_publitio'), 10, 4);
             }
 
-            add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 10);
-            add_action('template_redirect', array($this, 'pwpo_update_offloading_images_src_custom'));
+            add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 100);
+            add_action('template_redirect', array($this, 'pwpo_update_offloading_images_src_template_handle'));
             add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
             add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
 
@@ -583,11 +583,18 @@ class PWPO_Offload
     }
 
     /**
+     * Handle template_redirect action
+     */
+    public function pwpo_update_offloading_images_src_template_handle(){
+        ob_start(array($this, 'pwpo_update_offloading_template_images_src'));
+    }
+
+    /**
      * Replace image src with Publitio URL on custom pages and post types
      * @param string $content
      * @return mixed|string
      */
-    public function pwpo_update_offloading_images_src_custom($content = '')
+    public function pwpo_update_offloading_template_images_src($content = '')
     {
         $post_images = $this->filter_attachments($content);
         if (empty($post_images)) {
