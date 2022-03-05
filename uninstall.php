@@ -21,3 +21,4 @@ delete_option('publitio_offloading_video_checkbox');
 delete_option('publitio_offloading_audio_checkbox');
 delete_option('publitio_offloading_document_checkbox');
 delete_option('publitio_offloading_replace_checkbox');
+delete_option('publitio_offloading_offload_templates');

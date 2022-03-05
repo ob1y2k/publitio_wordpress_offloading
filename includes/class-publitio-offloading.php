@@ -37,7 +37,11 @@ class PWPO_Offload
             }
 
             add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 100);
-            add_action('template_redirect', array($this, 'pwpo_update_offloading_images_src_template_handle'));
+            
+            if (get_option('publitio_offloading_offload_templates', 'no') === 'yes') {
+                add_action('template_redirect', array($this, 'pwpo_update_offloading_images_src_template_handle'));
+            }
+
             add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
             add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
 
@@ -45,11 +49,18 @@ class PWPO_Offload
             add_filter('post_thumbnail_html', array($this, 'pwpo_featured_image_update_url'), 10, 5);
             add_filter('get_header_image_tag', array($this, 'pwpo_update_header_image_src'), 10, 5);
             if (get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no') {
-                wp_enqueue_script('offloadingfrontscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+                add_action('wp_enqueue_scripts', array($this, 'offloading_frontend_script'));
             }
             add_filter('wp_get_attachment_url', array($this, 'pwpo_get_url'), 10, 2);
             //add_action('the_post', array($this, 'pwpo_edit_post_content'), 10, 1);
         }
+    }
+
+    /**
+     * Offloading frontend disable download script
+     */
+    public function offloading_frontend_script(){
+        wp_enqueue_script('offloadingfrontscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
     }
 
     /**
@@ -597,6 +608,7 @@ class PWPO_Offload
     public function pwpo_update_offloading_template_images_src($content = '')
     {
         $post_images = $this->filter_attachments($content);
+        $attach_id = '';
         if (empty($post_images)) {
             return $content;
         }

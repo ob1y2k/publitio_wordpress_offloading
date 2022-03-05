@@ -63,6 +63,7 @@
             updatePublitioDefaultFolderChange()
             updatePublitioDefaultCnameChange()
             changePublitioAllowDownload()
+            changePublitioOffloadTemplates()
             changePublitioImageQuality()
             changePublitioVideoQuality()
             checkboxPublitioFiles()
@@ -505,6 +506,21 @@
             $('#allow-download').bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_allow_download',
+                    allow: event.target.checked
+                }, function (response) {
+                    if (response.status === STATUSES.SUCCESS) {
+                        showPublitioBlock($('#success-allow-block'), 'Great!');
+                    } else {
+                        showPublitioBlock($('#error-allow-block'), 'Something went wrong.');
+                    }
+                });
+            });
+        }
+
+        function changePublitioOffloadTemplates() {
+            $('#offload-templates').bind('change', function (event) {
+                jQuery.post(ajaxurl, {
+                    action: 'pwpo_update_offload_templates',
                     allow: event.target.checked
                 }, function (response) {
                     if (response.status === STATUSES.SUCCESS) {
