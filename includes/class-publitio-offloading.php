@@ -44,7 +44,7 @@ class PWPO_Offload
 
             add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
             add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
-
+            add_filter('wp_prepare_attachment_for_js', array($this, 'pwpo_prepare_attachment_for_js'), 10, 3);
 
             add_filter('post_thumbnail_html', array($this, 'pwpo_featured_image_update_url'), 10, 5);
             add_filter('get_header_image_tag', array($this, 'pwpo_update_header_image_src'), 10, 5);
@@ -433,6 +433,27 @@ class PWPO_Offload
                 $dimensions['height'],
             );
         }
+    }
+
+    /**
+     * Return Publitio URL for media library grid (150x150)
+     * @param $response
+     * @param $attachment
+     * @param $meta
+     * @return array
+     */
+    public function pwpo_prepare_attachment_for_js($response, $attachment, $meta ){
+        $dimensions = array(
+            'width' => 150,
+            'height' => 150,
+            'crop' => 'c_fill'
+        );
+        if( 'image' === $response['type'] ) {
+            $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
+            $thumbnail_url = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
+            $response['sizes']['medium']['url'] = $thumbnail_url;
+        }
+        return $response;
     }
 
     /**
