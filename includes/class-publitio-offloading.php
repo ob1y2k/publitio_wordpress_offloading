@@ -446,7 +446,7 @@ class PWPO_Offload
         $dimensions = array(
             'width' => 150,
             'height' => 150,
-            'crop' => 'c_fill'
+            'crop' => 'c_fit'
         );
         if( 'image' === $response['type'] ) {
             $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
