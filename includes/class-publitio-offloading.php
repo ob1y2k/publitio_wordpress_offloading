@@ -430,8 +430,8 @@ class PWPO_Offload
 
                 return array(
                     $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
-                    $dimensions['width'],
-                    $dimensions['height'],
+                    $dimensions['width'] ?? null,
+                    $dimensions['height'] ?? null,
                 );
             }
         }
