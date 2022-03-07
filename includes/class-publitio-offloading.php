@@ -390,48 +390,50 @@ class PWPO_Offload
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
         $attachment = get_post($attach_id);
-        $publitioMeta = $this->getPublitioMeta($attachment, false);
-        if ($publitioMeta && !is_null($publitioMeta)) {
-            $dimensions = array();
-            if (is_array($size)) {
-                $crop = false;
-                if (isset($size['crop'])) {
-                    $crop = $size['crop'];
-                }
-                $dimensions = array(
-                    'width' => $size[0],
-                    'height' => $size[1],
-                    'crop' => $crop ? 'c_fill' : 'c_fit'
-                );
-            } elseif ('full' === $size) {
-                $meta = wp_get_attachment_metadata($attach_id);
-                if (isset($meta['width']) && isset($meta['height'])) {
-                    $dimensions = array(
-                        'width' => $meta['width'],
-                        'height' => $meta['height'],
-                        'crop' => 'c_fit'
-                    );
-                }
-            } else {
-                if ($size && $size !== "") {
-                    $dimensions = $this->get_image_size($size);
+        if($attachment){
+            $publitioMeta = $this->getPublitioMeta($attachment, false);
+            if ($publitioMeta && !is_null($publitioMeta)) {
+                $dimensions = array();
+                if (is_array($size)) {
                     $crop = false;
-                    if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
-                        $crop = true;
-                        $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
-                    } else {
-                        $dimensions = null;
+                    if (isset($size['crop'])) {
+                        $crop = $size['crop'];
+                    }
+                    $dimensions = array(
+                        'width' => $size[0],
+                        'height' => $size[1],
+                        'crop' => $crop ? 'c_fill' : 'c_fit'
+                    );
+                } elseif ('full' === $size) {
+                    $meta = wp_get_attachment_metadata($attach_id);
+                    if (isset($meta['width']) && isset($meta['height'])) {
+                        $dimensions = array(
+                            'width' => $meta['width'],
+                            'height' => $meta['height'],
+                            'crop' => 'c_fit'
+                        );
                     }
                 } else {
-                    return null;
+                    if ($size && $size !== "") {
+                        $dimensions = $this->get_image_size($size);
+                        $crop = false;
+                        if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
+                            $crop = true;
+                            $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
+                        } else {
+                            $dimensions = null;
+                        }
+                    } else {
+                        return null;
+                    }
                 }
-            }
 
-            return array(
-                $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
-                $dimensions['width'],
-                $dimensions['height'],
-            );
+                return array(
+                    $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
+                    $dimensions['width'],
+                    $dimensions['height'],
+                );
+            }
         }
     }
 
