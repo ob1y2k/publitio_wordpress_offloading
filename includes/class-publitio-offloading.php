@@ -390,7 +390,7 @@ class PWPO_Offload
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
         $attachment = get_post($attach_id);
-        if($attachment){
+        if($attachment && strpos($attachment['post_mime_type'], 'image') !== false){
             $publitioMeta = $this->getPublitioMeta($attachment, false);
             if ($publitioMeta && !is_null($publitioMeta)) {
                 $dimensions = array();
