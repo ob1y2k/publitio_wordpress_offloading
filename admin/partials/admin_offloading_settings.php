@@ -59,6 +59,14 @@
             </label>
             <span class="download-text">Allow users to save/download media files</span>
         </div>
+        <div class="off-margin">
+            <label class="publitio-switch">
+                <input type="checkbox"
+                       id="offload-templates" <?php echo esc_html(get_option('publitio_offloading_offload_templates', 'no') === 'no' ? '' : 'checked') ?>>
+                <span class="publitio-slider round"></span>
+            </label>
+            <span class="download-text">Offload templates (header, footer, custom pages...)</span>
+        </div>
         <div class="offloading-block error-offload-block" id="error-allow-block"></div>
         <div class="offloading-block success-offload-block" id="success-allow-block"></div>
     </div>

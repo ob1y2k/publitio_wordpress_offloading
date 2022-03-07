@@ -34,6 +34,7 @@ class PWPO_Admin
         add_action('wp_ajax_pwpo_update_default_offloading_folder', array($this, 'pwpo_update_default_offloading_folder'));
         add_action('wp_ajax_pwpo_update_default_offloading_cname', array($this, 'pwpo_update_default_offloading_cname'));
         add_action('wp_ajax_pwpo_update_allow_download', array($this, 'pwpo_update_allow_download'));
+        add_action('wp_ajax_pwpo_update_offload_templates', array($this, 'pwpo_update_offload_templates'));
         add_action('wp_ajax_pwpo_update_image_offloading_quality', array($this, 'pwpo_update_image_offloading_quality'));
         add_action('wp_ajax_pwpo_update_video_offloading_quality', array($this, 'pwpo_update_video_offloading_quality'));
         add_action('wp_ajax_pwpo_update_files_checkbox', array($this, 'pwpo_update_files_checkbox'));
@@ -172,6 +173,16 @@ class PWPO_Admin
     {
         if (isset($_POST['allow'])) {
             $this->publitioApi->set_allow_download_offloading(sanitize_text_field($_POST['allow']));
+        }
+    }
+
+    /**
+     * Update offload templates option
+     */
+    public function pwpo_update_offload_templates()
+    {
+        if (isset($_POST['allow'])) {
+            $this->publitioApi->set_offload_templates(sanitize_text_field($_POST['allow']));
         }
     }
 

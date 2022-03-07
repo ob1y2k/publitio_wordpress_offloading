@@ -36,19 +36,31 @@ class PWPO_Offload
                 add_action('delete_post_meta', array($this, 'pwpo_delete_file_from_publitio'), 10, 4);
             }
 
-            add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 10);
+            add_filter('the_content', array($this, 'pwpo_update_offloading_images_src'), 100);
+            
+            if (get_option('publitio_offloading_offload_templates', 'no') === 'yes') {
+                add_action('template_redirect', array($this, 'pwpo_update_offloading_images_src_template_handle'));
+            }
+
             add_filter('wp_calculate_image_srcset', array($this, 'pwpo_calculate_image_offloading_srcset'), 10, 5);
             add_filter('image_downsize', array($this, 'pwpo_filter_image_downsize'), 10, 3);
-
+            add_filter('wp_prepare_attachment_for_js', array($this, 'pwpo_prepare_attachment_for_js'), 10, 3);
 
             add_filter('post_thumbnail_html', array($this, 'pwpo_featured_image_update_url'), 10, 5);
             add_filter('get_header_image_tag', array($this, 'pwpo_update_header_image_src'), 10, 5);
             if (get_option('publitio_offloading_allow_download') && get_option('publitio_offloading_allow_download') === 'no') {
-                wp_enqueue_script('offloadingfrontscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
+                add_action('wp_enqueue_scripts', array($this, 'offloading_frontend_script'));
             }
             add_filter('wp_get_attachment_url', array($this, 'pwpo_get_url'), 10, 2);
             //add_action('the_post', array($this, 'pwpo_edit_post_content'), 10, 1);
         }
+    }
+
+    /**
+     * Offloading frontend disable download script
+     */
+    public function offloading_frontend_script(){
+        wp_enqueue_script('offloadingfrontscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'includes/js/inc-script.js', array('jquery'));
     }
 
     /**
@@ -286,58 +298,52 @@ class PWPO_Offload
         $diviAudios = array();
         $backgrounds = array();
         $pdfFiles = array();
+        $videoSoruces = array();
 
-        if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)[^>]*>/i', $content, $matchesImages)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+        if (get_option('publitio_offloading_image_checkbox', 'yes') === 'yes') {
+            if (preg_match_all('/<img[^>]+src=([\'"])(?<src>.+?)[^>]*>/i', $content, $matchesImages)) {
                 $images = $matchesImages[0];
             }
-        }
-        if (preg_match_all('/(?<=image src=\")(.*?)(?=")/i', $content, $matchesDiviImages)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+            if (preg_match_all('/(?<=image src=\")(.*?)(?=")/i', $content, $matchesDiviImages)) {
                 $diviImages = $matchesDiviImages[0];
             }
-        }
-        if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
-                $videos = $matchesVideo[0];
+            if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
+                $posters = $matchesPoster['poster'];
             }
-        }
-        if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideosWeb)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
-                $diviVideosWeb = $matchesDiviVideosWeb[0];
-            }
-        }
-        if (preg_match_all('/(?<=video src=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
-            if (get_option('publitio_offloading_video_checkbox') && get_option('publitio_offloading_video_checkbox') === 'yes') {
-                $diviVideos = $matchesDiviVideos[0];
-            }
-        }
-        if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
-            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'yes') {
-                $audios = $matchesAudio[0];
-            }
-        }
-        if (preg_match_all('/(?<=audio=\")(.*?)(?=")/i', $content, $matchesDiviAudios)) {
-            if (get_option('publitio_offloading_audio_checkbox') && get_option('publitio_offloading_audio_checkbox') === 'yes') {
-                $diviAudios = $matchesDiviAudios[0];
-            }
-        }
-        if (preg_match_all('~\bbackground(-image)?\s*:(.*?)\(\s*(\'|")?(?<image>.*?)\3?\s*\)~i', $content, $matchesBackground)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
+            if (preg_match_all('~\bbackground(-image)?\s*:(.*?)\(\s*(\'|")?(?<image>.*?)\3?\s*\)~i', $content, $matchesBackground)) {
                 $backgrounds = $matchesBackground['image'];
             }
         }
-        if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*)<\/a>/siU', $content, $matchesPdf)) {
-            if (get_option('publitio_offloading_document_checkbox') && get_option('publitio_offloading_document_checkbox') === 'yes') {
-                $pdfFiles = $matchesPdf[1];
+        if (get_option('publitio_offloading_video_checkbox', 'yes') === 'yes') {
+            if (preg_match_all('/<video[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesVideo)) {
+                $videos = $matchesVideo[0];
             }
-        } else if (preg_match_all('/<video[^>]+poster=([\'"])(?<poster>.+?)\1[^>]*>/i', $content, $matchesPoster)) {
-            if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'yes') {
-                $posters = $matchesPoster['poster'];
+            if (preg_match_all('/(?<=src_webm=\")(.*?)(?=")/i', $content, $matchesDiviVideosWeb)) {
+                $diviVideosWeb = $matchesDiviVideosWeb[0];
+            }
+            if (preg_match_all('/(?<=video src=\")(.*?)(?=")/i', $content, $matchesDiviVideos)) {
+                $diviVideos = $matchesDiviVideos[0];
+            }
+            if (preg_match_all('/<source[^>]+src=([\'"])(.+?)\1[^>]*>/i', $content, $matchesVideoSource)) {
+                $videoSoruces = $matchesVideoSource[0];
             }
         }
-
-        return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters);
+        if (get_option('publitio_offloading_audio_checkbox', 'yes') === 'yes') {
+            if (preg_match_all('/<audio[^>]+src=([\'"])(?<src>.+?)\1[^>]*>/i', $content, $matchesAudio)) {
+                $audios = $matchesAudio[0];
+            }
+            if (preg_match_all('/(?<=audio=\")(.*?)(?=")/i', $content, $matchesDiviAudios)) {
+                $diviAudios = $matchesDiviAudios[0];
+            }
+        }
+       
+        if (preg_match_all('/<a\shref=\"([^\"]*)\">(.*?)<\/a>/siU', $content, $matchesPdf)) {
+            if (get_option('publitio_offloading_document_checkbox', 'yes') === 'yes') {
+                $pdfFiles = $matchesPdf[1];
+            }
+        } 
+        
+        return array_merge((array)$images, (array)$diviImages, (array)$videos, (array)$diviVideosWeb, (array)$diviVideos, (array)$audios, (array)$diviAudios, (array)$backgrounds, (array)$pdfFiles, (array)$posters, (array)$videoSoruces);
     }
 
     /**
@@ -384,49 +390,72 @@ class PWPO_Offload
     public function pwpo_filter_image_downsize($downsize, $attach_id, $size)
     {
         $attachment = get_post($attach_id);
-        $publitioMeta = $this->getPublitioMeta($attachment, false);
-        if ($publitioMeta && !is_null($publitioMeta)) {
-            $dimensions = array();
-            if (is_array($size)) {
-                $crop = false;
-                if (isset($size['crop'])) {
-                    $crop = $size['crop'];
-                }
-                $dimensions = array(
-                    'width' => $size[0],
-                    'height' => $size[1],
-                    'crop' => $crop ? 'c_fill' : 'c_fit'
-                );
-            } elseif ('full' === $size) {
-                $meta = wp_get_attachment_metadata($attach_id);
-                if (isset($meta['width']) && isset($meta['height'])) {
-                    $dimensions = array(
-                        'width' => $meta['width'],
-                        'height' => $meta['height'],
-                        'crop' => 'c_fit'
-                    );
-                }
-            } else {
-                if ($size && $size !== "") {
-                    $dimensions = $this->get_image_size($size);
+        if($attachment && strpos($attachment['post_mime_type'], 'image') !== false){
+            $publitioMeta = $this->getPublitioMeta($attachment, false);
+            if ($publitioMeta && !is_null($publitioMeta)) {
+                $dimensions = array();
+                if (is_array($size)) {
                     $crop = false;
-                    if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
-                        $crop = true;
-                        $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
-                    } else {
-                        $dimensions = null;
+                    if (isset($size['crop'])) {
+                        $crop = $size['crop'];
+                    }
+                    $dimensions = array(
+                        'width' => $size[0],
+                        'height' => $size[1],
+                        'crop' => $crop ? 'c_fill' : 'c_fit'
+                    );
+                } elseif ('full' === $size) {
+                    $meta = wp_get_attachment_metadata($attach_id);
+                    if (isset($meta['width']) && isset($meta['height'])) {
+                        $dimensions = array(
+                            'width' => $meta['width'],
+                            'height' => $meta['height'],
+                            'crop' => 'c_fit'
+                        );
                     }
                 } else {
-                    return null;
+                    if ($size && $size !== "") {
+                        $dimensions = $this->get_image_size($size);
+                        $crop = false;
+                        if ($dimensions && !empty($dimensions) && (bool)$dimensions['crop']) {
+                            $crop = true;
+                            $dimensions['crop'] = $crop ? 'c_fill' : 'c_fit';
+                        } else {
+                            $dimensions = null;
+                        }
+                    } else {
+                        return null;
+                    }
                 }
-            }
 
-            return array(
-                $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
-                $dimensions['width'],
-                $dimensions['height'],
-            );
+                return array(
+                    $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta),
+                    $dimensions['width'] ?? null,
+                    $dimensions['height'] ?? null,
+                );
+            }
         }
+    }
+
+    /**
+     * Return Publitio URL for media library grid (150x150)
+     * @param $response
+     * @param $attachment
+     * @param $meta
+     * @return array
+     */
+    public function pwpo_prepare_attachment_for_js($response, $attachment, $meta ){
+        $dimensions = array(
+            'width' => 150,
+            'height' => 150,
+            'crop' => 'c_fit'
+        );
+        if( 'image' === $response['type'] ) {
+            $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
+            $thumbnail_url = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
+            $response['sizes']['medium']['url'] = $thumbnail_url;
+        }
+        return $response;
     }
 
     /**
@@ -585,6 +614,23 @@ class PWPO_Offload
             }
         }
         return $content;
+    }
+
+    /**
+     * Handle template_redirect action
+     */
+    public function pwpo_update_offloading_images_src_template_handle(){
+        ob_start(array($this, 'pwpo_update_offloading_template_images_src'));
+    }
+
+    /**
+     * Replace image src with Publitio URL on custom pages and post types
+     * @param string $content
+     * @return mixed|string
+     */
+    public function pwpo_update_offloading_template_images_src($content = '')
+    {
+        return $this->pwpo_update_offloading_images_src($content, null);
     }
 
     /**

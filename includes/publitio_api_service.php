@@ -105,6 +105,26 @@ class PublitioApiService
     }
 
     /**
+     * Set value for allow download option on setting page
+     * @param $allow
+     */
+    public function set_offload_templates($allow)
+    {
+        if (PWPO_AuthService::is_user_authenticated()) {
+            if ($allow === "true") {
+                $option = 'yes';
+            } else {
+                $option = 'no';
+            }
+            update_option('publitio_offloading_offload_templates', sanitize_text_field($option));
+            wp_send_json([
+                'status' => 200,
+                'offload_templates' => esc_html($option)
+            ]);
+        }
+    }
+
+    /**
      * Set value image quality (50,60,70,80(default),90,100)
      * @param $image_quality
      */
@@ -591,7 +611,7 @@ class PublitioApiService
     private function handle_success($response)
     {
         delete_option('publitio_offloading_default_folder');
-        delete_option('publitio_offloading_allow_download');
+        update_option('publitio_offloading_allow_download', 'yes');
         delete_option('publitio_offloading_default_cname');
         delete_option('publitio_offloading_delete_checkbox');
         update_option('publitio_offloading_allow_download', 'yes');
@@ -599,10 +619,11 @@ class PublitioApiService
         update_option('publitio_offloading_video_quality', '480');
         update_option('publitio_offloading_delete_checkbox', 'no');
         delete_option('publitio_offloading_replace_checkbox');
-        delete_option('publitio_offloading_image_checkbox');
-        delete_option('publitio_offloading_video_checkbox');
-        delete_option('publitio_offloading_audio_checkbox');
-        delete_option('publitio_offloading_document_checkbox');
+        update_option('publitio_offloading_image_checkbox', 'yes');
+        update_option('publitio_offloading_video_checkbox', 'yes');
+        update_option('publitio_offloading_audio_checkbox', 'yes');
+        update_option('publitio_offloading_document_checkbox', 'yes');
+        update_option('publitio_offloading_offload_templates', 'no');
 
 
         wp_send_json([
@@ -612,6 +633,7 @@ class PublitioApiService
             'default_folder_id' => get_option('publitio_offloading_default_folder'),
             'default_cname_url' => get_option('publitio_offloading_default_cname'),
             'allow_download' => get_option('publitio_offloading_allow_download'),
+            'offload_templates' => get_option('publitio_offloading_offload_templates'),
             'image_quality' => get_option('publitio_offloading_image_quality'),
             'video_quality' => get_option('publitio_offloading_video_quality'),
             'image_checkbox' => get_option('publitio_offloading_image_checkbox'),
