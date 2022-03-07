@@ -93,6 +93,9 @@ Publitio is cloud-based media asset management service.
 = 1.1.4 =
 * WP 5.9 check OK && Custom post types support
 
+= 1.1.5 =
+* Small commit
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -139,4 +142,7 @@ Just install
 
 = 1.1.4 =
 * WP 5.9 check OK && Custom post types support
+
+= 1.1.5 =
+* Small commit
 
