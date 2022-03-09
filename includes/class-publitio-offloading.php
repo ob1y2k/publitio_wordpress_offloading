@@ -12,7 +12,7 @@ class PWPO_Offload
     /**
      * @var Instance of PublitioApiService class
      */
-    private $publitioApi;
+    private $publitioApi; 
 
     /**
      * @var array of image sizes
