@@ -62,7 +62,7 @@
         <div class="off-margin">
             <label class="publitio-switch">
                 <input type="checkbox"
-                       id="offload-templates" <?php echo esc_html(get_option('publitio_offloading_offload_templates', 'no') === 'no' ? '' : 'checked') ?>>
+                       id="offload-templates" <?php echo esc_html(get_option('publitio_offloading_offload_templates', 'yes') === 'no' ? '' : 'checked') ?>>
                 <span class="publitio-slider round"></span>
             </label>
             <span class="download-text">Offload templates (header, footer, custom pages...)</span>

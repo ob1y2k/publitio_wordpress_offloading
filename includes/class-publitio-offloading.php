@@ -450,10 +450,12 @@ class PWPO_Offload
             'height' => 150,
             'crop' => 'c_fill'
         );
-        if( 'image' === $response['type'] && get_option('publitio_offloading_image_checkbox', 'yes') === 'yes') {
-            $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
-            $thumbnail_url = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
-            $response['sizes']['medium']['url'] = $thumbnail_url;
+        if( 'image' === $response['type']) {
+            $publitioMeta = $this->getPublitioMeta($attachment, false);
+            if ($publitioMeta && !is_null($publitioMeta)) {
+                $thumbnail_url = $this->publitioApi->getTransformedUrl($dimensions, $publitioMeta);
+                $response['sizes']['medium']['url'] = $thumbnail_url;
+            }
         }
         return $response;
     }

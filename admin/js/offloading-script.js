@@ -85,7 +85,8 @@
                         showPublitioBlock($('#error-offload-block'), 'Wrong credentials');
                         clearFolderList(true);
                         clearCnameList(true);
-                        setPublitioCheckBoxValue('');
+                        setPublitioCheckBoxValue('allow-download', '');
+                        setPublitioCheckBoxValue('offload-templates', '');
                         $(".form-offload-select").attr("disabled", true);
                         $(".files-offload-input").attr("disabled", true);
                         $(".form-offload-select").attr("disabled", true);
@@ -98,7 +99,8 @@
                         showPublitioBlock($('#error-offload-block'), 'Something went wrong.');
                         clearFolderList(true);
                         clearCnameList(true);
-                        setPublitioCheckBoxValue('');
+                        setPublitioCheckBoxValue('allow-download', '');
+                        setPublitioCheckBoxValue('offload-templates', '');
                         $(".form-offload-select").attr("disabled", true);
                         $(".files-offload-input").attr("disabled", true);
                         $(".form-offload-select").attr("disabled", true);
@@ -118,7 +120,8 @@
                 $(".sync-button").removeAttr("disabled");
                 addFoldersList(response.folders, response.default_folder_id);
                 addCnameList(response.cnames, response.default_cname_url);
-                setPublitioCheckBoxValue(response.allow_download);
+                setPublitioCheckBoxValue('allow-download', response.allow_download);
+                setPublitioCheckBoxValue('offload-templates', response.offload_templates);
                 setPublitioImageQualityValue(response.image_quality);
                 setPublitioVideoQualityValue(response.video_quality);
                 setPublitioFilesCheckbox('image_checkbox', response.image_checkbox);
@@ -128,7 +131,8 @@
                 setPublitioFilesCheckbox('delete_checkbox', response.delete_checkbox);
                 setPublitioFilesCheckbox('replace_checkbox', response.replace_checkbox)
             } else {
-                setPublitioCheckBoxValue('');
+                setPublitioCheckBoxValue('allow-download', '');
+                setPublitioCheckBoxValue('offload-templates', '');
                 $(".form-offload-delete").attr("disabled", true);
                 $(".form-offload-select").attr("disabled", true);
                 $(".files-offload-input").attr("disabled", true);
@@ -532,16 +536,16 @@
             });
         }
 
-        function setPublitioCheckBoxValue(allow) {
+        function setPublitioCheckBoxValue(id,allow) {
             if (allow !== '') {
-                setPublitioCheckBoxDisabled('allow-download', false);
+                setPublitioCheckBoxDisabled(id, false);
                 if (allow === 'no') {
-                    $("#allow-download").attr('checked', false);
+                    $("#"+id).attr('checked', false);
                 } else {
-                    $("#allow-download").attr('checked', true);
+                    $("#"+id).attr('checked', true);
                 }
             } else {
-                setPublitioCheckBoxDisabled('allow-download', true);
+                setPublitioCheckBoxDisabled(id, true);
             }
         }
 
