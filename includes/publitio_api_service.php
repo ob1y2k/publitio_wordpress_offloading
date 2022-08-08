@@ -623,7 +623,7 @@ class PublitioApiService
         update_option('publitio_offloading_video_checkbox', 'yes');
         update_option('publitio_offloading_audio_checkbox', 'yes');
         update_option('publitio_offloading_document_checkbox', 'yes');
-        update_option('publitio_offloading_offload_templates', 'no');
+        update_option('publitio_offloading_offload_templates', 'yes');
 
 
         wp_send_json([
