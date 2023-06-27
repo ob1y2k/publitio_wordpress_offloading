@@ -46,8 +46,19 @@ class PublitioApiService
     {
         if (PWPO_AuthService::is_user_authenticated()) {
             $resp = $this->publitio_api->call('/folders/tree', 'GET');
-            $cnames = $this->publitio_api->call('/cnames/list', 'GET');
+            $cnames = $this->publitio_api->call('/cnames/list', 'GET', array(
+                        'wpo' => true
+                    ));
             $resp->cnames = $cnames->cnames;
+
+            //if no default cname set, make it no 1
+            $default_cname = get_option('publitio_offloading_default_cname');
+            if(!$default_cname) {
+                //test
+                $cname_url = $cnames->cnames[0]->url;
+                update_option('publitio_offloading_default_cname', esc_url_raw($cname_url));
+            }            
+
             return $resp;
         } else {
             return false;

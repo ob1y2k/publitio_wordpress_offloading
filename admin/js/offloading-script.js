@@ -112,6 +112,9 @@
         }
 
         function handleResponse(response) {
+
+            //console.log("response.default_cname_url:: "+response.default_cname_url);
+
             if (response.folders != null) {
                 $(".form-offload-select").removeAttr("disabled");
                 $(".files-offload-input").removeAttr("disabled");
@@ -161,7 +164,8 @@
         function addCnameList(cnames, defaultCnameId = '') {
             clearCnameList();
             if (cnames !== undefined && cnames !== null) {
-                $('<option value="">https://media.publit.io</option>').appendTo($('#default-publitio-offloading-cname'));
+                //off via &wpo=true api call
+                //$('<option value="">https://media.publit.io</option>').appendTo($('#default-publitio-offloading-cname'));
                 cnames.forEach((cname) => {
                     $('<option value="' + cname.url + '">' + cname.url + '</option>').appendTo($('#default-publitio-offloading-cname'));
                 })
