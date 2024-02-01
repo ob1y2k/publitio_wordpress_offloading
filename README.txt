@@ -3,7 +3,7 @@ Contributors: publitio
 Donate link: https://publit.io
 Tags: publitio, offloading, offload, s3, aws, cloudinary, digitalocean spaces, media library, images, videos, media, assets, management, upload, storage, hosting, transformation, transcoding
 Requires at least: 5.0.1
-Tested up to: 6.2
+Tested up to: 6.4
 Stable tag: 5.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -114,6 +114,9 @@ Publitio is cloud-based media asset management service.
 = 1.2.1 =
 * V2 sub-accounts support
 
+= 1.2.2 =
+* WP 6.4 check OK
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -181,5 +184,8 @@ Just install
 
 = 1.2.1 =
 * V2 sub-accounts support
+
+= 1.2.2 =
+* WP 6.4 check OK
 
 
