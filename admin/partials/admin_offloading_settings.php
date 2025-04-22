@@ -34,6 +34,7 @@
 
     </div>
     <div class="section-offloading-wrapper">
+        <?php wp_nonce_field('publitio_settings_nonce_action'); ?>
         <label class="form-offload-label" for="api-publitio-offloading-key">API key:</label>
         <input class="form-offload-input" id="api-publitio-offloading-key" name="api-publitio-offloading-key" type="password"
                value="<?php echo esc_html(get_option('publitio_offloading_key', '')); ?>"/>
