@@ -96,6 +96,16 @@ class PWPO_Admin
      */
     public function pwpo_update_offloading_settings()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+        
         if (isset($_POST['api_key']) && isset($_POST['api_secret'])) {
             $api_key = sanitize_text_field($_POST['api_key']);
             $api_secret = sanitize_text_field($_POST['api_secret']);
@@ -125,7 +135,8 @@ class PWPO_Admin
                 'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
                 'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
                 'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
-                'replace_checkbox' => get_option('publitio_offloading_replace_checkbox')
+                'replace_checkbox' => get_option('publitio_offloading_replace_checkbox'),
+                'offload_templates' => get_option('publitio_offloading_offload_templates'),
             ]);
         } else {
             wp_send_json([
@@ -151,6 +162,16 @@ class PWPO_Admin
      */
     public function pwpo_update_default_offloading_folder()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+
         if (isset($_POST['folder_id'])) {
             $this->publitioApi->set_default_offloading_folder(sanitize_text_field($_POST['folder_id']));
         }
@@ -161,6 +182,16 @@ class PWPO_Admin
      */
     public function pwpo_update_default_offloading_cname()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+
         if (isset($_POST['cname_url'])) {
             $this->publitioApi->set_default_offloading_cname(sanitize_text_field($_POST['cname_url']));
         }
@@ -171,6 +202,16 @@ class PWPO_Admin
      */
     public function pwpo_update_allow_download()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+
         if (isset($_POST['allow'])) {
             $this->publitioApi->set_allow_download_offloading(sanitize_text_field($_POST['allow']));
         }
@@ -181,6 +222,16 @@ class PWPO_Admin
      */
     public function pwpo_update_offload_templates()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+
         if (isset($_POST['allow'])) {
             $this->publitioApi->set_offload_templates(sanitize_text_field($_POST['allow']));
         }
@@ -191,6 +242,16 @@ class PWPO_Admin
      */
     public function pwpo_update_image_offloading_quality()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+
         if (isset($_POST['image_quality'])) {
             $this->publitioApi->set_offloading_image_quality(sanitize_text_field($_POST['image_quality']));
         }
@@ -201,6 +262,16 @@ class PWPO_Admin
      */
     public function pwpo_update_video_offloading_quality()
     {
+        // Check the nonce
+		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+			wp_die(__('Unauthorized request.', 'publitio'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have permission to update settings.', 'publitio'));
+		}
+
         if (isset($_POST['video_quality'])) {
             $this->publitioApi->set_offloading_video_quality(sanitize_text_field($_POST['video_quality']));
         }
@@ -211,6 +282,16 @@ class PWPO_Admin
      */
     public function pwpo_update_files_checkbox()
     {
+        // Check the nonce
+        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+            wp_die(__('Unauthorized request.', 'publitio'));
+        }
+
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to update settings.', 'publitio'));
+        }
+
         if (isset($_POST['id']) && isset($_POST['value'])) {
             $this->publitioApi->set_files_checkbox(sanitize_text_field($_POST['id']), sanitize_text_field($_POST['value']));
         }
@@ -221,6 +302,16 @@ class PWPO_Admin
      */
     public function pwpo_update_delete_checkbox()
     {
+        // Check the nonce
+        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+            wp_die(__('Unauthorized request.', 'publitio'));
+        }
+
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to update settings.', 'publitio'));
+        }
+
         if (isset($_POST['delete_checkbox'])) {
             $this->publitioApi->set_delete_checkbox(sanitize_text_field($_POST['delete_checkbox']));
         }
@@ -242,6 +333,16 @@ class PWPO_Admin
      */
     public function pwpo_sync_media_file()
     {
+        // Check the nonce
+        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+            wp_die(__('Unauthorized request.', 'publitio'));
+        }
+
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to update settings.', 'publitio'));
+        }
+
         if (isset($_POST['attach_id'])) {
             $this->publitioApi->syncMedia(sanitize_text_field($_POST['attach_id']));
         }
@@ -252,6 +353,16 @@ class PWPO_Admin
      */
     public function pwpo_update_replace_media()
     {
+        // Check the nonce
+        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+            wp_die(__('Unauthorized request.', 'publitio'));
+        }
+
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to update settings.', 'publitio'));
+        }
+
         if (isset($_POST['replace_checkbox'])) {
             $this->publitioApi->set_replace_checkbox(sanitize_text_field($_POST['replace_checkbox']));
         }
@@ -272,6 +383,16 @@ class PWPO_Admin
      */
     public function pwpo_delete_media_file()
     {
+        // Check the nonce
+        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+            wp_die(__('Unauthorized request.', 'publitio'));
+        }
+
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to update settings.', 'publitio'));
+        }
+
         if (isset($_POST['attach_id'])) {
             $this->publitioApi->deleteAtachment(sanitize_text_field($_POST['attach_id']));
         }

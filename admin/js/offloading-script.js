@@ -79,7 +79,8 @@
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_offloading_settings',
                     api_secret: $('#api-publitio-offloading-secret').val(),
-                    api_key: $('#api-publitio-offloading-key').val()
+                    api_key: $('#api-publitio-offloading-key').val(),
+                    wpnonce: $('#_wpnonce').val()
                 }, function (response) {
                     if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
                         showPublitioBlock($('#error-offload-block'), 'Wrong credentials');
@@ -145,7 +146,9 @@
         }
 
         function getPublitioAccountSettings() {
-            jQuery.get(ajaxurl, {action: 'pwpo_get_offloading_account_settings'}, function (response) {
+            jQuery.get(ajaxurl, {
+                action: 'pwpo_get_offloading_account_settings'
+            }, function (response) {
                 handleResponse(response);
             })
         }
@@ -238,7 +241,8 @@
             $('#default-publitio-offloading-folder').bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_default_offloading_folder',
-                    folder_id: event.target.value
+                    folder_id: event.target.value,
+                    wpnonce: $('#_wpnonce').val()
                 }, function (response) {
                     if (response.status === STATUSES.SUCCESS) {
                         showPublitioBlock($('#folder-success-block'), 'Great, default upload folder saved!');
@@ -253,7 +257,8 @@
             $('#default-publitio-offloading-cname').bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_default_offloading_cname',
-                    cname_url: event.target.value
+                    cname_url: event.target.value,
+                    wpnonce: $('#_wpnonce').val()
                 }, function (response) {
                     if (response.status === STATUSES.SUCCESS) {
                         showPublitioBlock($('#cname-success-block'), 'Great, default CNAME saved!');
@@ -268,7 +273,8 @@
             $("#offloading-image-quality").bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                         action: 'pwpo_update_image_offloading_quality',
-                        image_quality: event.target.value
+                        image_quality: event.target.value,
+                        wpnonce: $('#_wpnonce').val()
                     }, function (response) {
                         if (response.status === STATUSES.SUCCESS) {
                             showPublitioBlock($('#folder-success-image-quality'), 'Great, image quality updated!');
@@ -284,7 +290,8 @@
             $("#offloading-video-quality").bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                         action: 'pwpo_update_video_offloading_quality',
-                        video_quality: event.target.value
+                        video_quality: event.target.value,
+                        wpnonce: $('#_wpnonce').val()
                     }, function (response) {
                         if (response.status === STATUSES.SUCCESS) {
                             showPublitioBlock($('#folder-success-video-quality'), 'Great, video quality updated!');
@@ -301,7 +308,8 @@
                 jQuery.post(ajaxurl, {
                         action: 'pwpo_update_files_checkbox',
                         id: event.target.id,
-                        value: event.target.checked
+                        value: event.target.checked,
+                        wpnonce: $('#_wpnonce').val()
                     }, function (response) {
                         if (response.status === STATUSES.SUCCESS) {
                             showPublitioBlock($('#success-checkbox-block'), 'Great!');
@@ -317,7 +325,8 @@
             $("#delete_checkbox").bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                         action: 'pwpo_update_delete_checkbox',
-                        delete_checkbox: event.target.checked
+                        delete_checkbox: event.target.checked,
+                        wpnonce: $('#_wpnonce').val()
                     }, function (response) {
                         if (response.status === STATUSES.SUCCESS) {
                             showPublitioBlock($('#success-delete-block'), 'Great!');
@@ -335,7 +344,8 @@
                     if (confirm('Are you sure you want to delete files from Media library once they are uploaded to Publitio? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                         jQuery.post(ajaxurl, {
                                 action: 'pwpo_update_replace_media',
-                                replace_checkbox: event.target.checked
+                                replace_checkbox: event.target.checked,
+                                wpnonce: $('#_wpnonce').val()
                             }, function (response) {
                                 if (response.status === STATUSES.SUCCESS) {
                                     showPublitioBlock($('#media-replace-message-success'), 'Great!');
@@ -350,7 +360,8 @@
                 } else {
                     jQuery.post(ajaxurl, {
                             action: 'pwpo_update_replace_media',
-                            replace_checkbox: event.target.checked
+                            replace_checkbox: event.target.checked,
+                            wpnonce: $('#_wpnonce').val()
                         }, function (response) {
                             if (response.status === STATUSES.SUCCESS) {
                                 showPublitioBlock($('#media-replace-message-success'), 'Great!');
@@ -366,7 +377,9 @@
         function syncPublitioMediaFiles() {
             $('#media-offload').bind('click', function (event) {
                 let media_list = null;
-                jQuery.get(ajaxurl, {action: 'pwpo_get_media_list'}, function (response) {
+                jQuery.get(ajaxurl, {
+                    action: 'pwpo_get_media_list'
+                }, function (response) {
                     media_list = response.media;
                     syncPublitioMedia(media_list);
                 })
@@ -377,8 +390,12 @@
             const requestList = [];
             media_list.forEach((media) => {
                 requestList.push(
-                    jQuery.post(ajaxurl,
-                        {async:false,action: 'pwpo_sync_media_file',attach_id: media.ID},
+                    jQuery.post(ajaxurl, {
+                        sync:false,
+                        action: 'pwpo_sync_media_file',
+                        attach_id: media.ID,
+                        wpnonce: $('#_wpnonce').val()
+                    },
                         function (responseMedia) {
                             if (responseMedia.sync === true) {
                                 resultInfo.numOfUploaded++;
@@ -450,7 +467,9 @@
         function deletePublitioMediaFiles() {
             $('#media-delete').bind('click', function (event) {
                 let media_list = null;
-                jQuery.get(ajaxurl, {action: 'pwpo_get_media_list_for_delete'}, function (response) {
+                jQuery.get(ajaxurl, {
+                    action: 'pwpo_get_media_list_for_delete'
+                }, function (response) {
                     media_list = response.media;
                     deletePublitioMedia(media_list);
                 })
@@ -468,7 +487,8 @@
                         jQuery.post(ajaxurl, {
                             async: false,
                             action: 'pwpo_delete_media_file',
-                            attach_id: media.ID
+                            attach_id: media.ID,
+                            wpnonce: $('#_wpnonce').val()
                         }, function (responseMedia) {
                             if (responseMedia.deleted === true) {
                                 numOfDeleted++;
@@ -514,7 +534,8 @@
             $('#allow-download').bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_allow_download',
-                    allow: event.target.checked
+                    allow: event.target.checked,
+                    wpnonce: $('#_wpnonce').val()
                 }, function (response) {
                     if (response.status === STATUSES.SUCCESS) {
                         showPublitioBlock($('#success-allow-block'), 'Great!');
@@ -529,7 +550,8 @@
             $('#offload-templates').bind('change', function (event) {
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_offload_templates',
-                    allow: event.target.checked
+                    allow: event.target.checked,
+                    wpnonce: $('#_wpnonce').val()
                 }, function (response) {
                     if (response.status === STATUSES.SUCCESS) {
                         showPublitioBlock($('#success-allow-block'), 'Great!');
