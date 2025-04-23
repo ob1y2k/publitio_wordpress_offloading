@@ -1,7 +1,7 @@
-=== Plugin Name ===
+=== Publitio Offloading ===
 Contributors: publitio
 Donate link: https://publit.io
-Tags: publitio, offloading, offload, s3, aws, cloudinary, digitalocean spaces, media library, images, videos, media, assets, management, upload, storage, hosting, transformation, transcoding
+Tags: publitio, offloading, offload, image, video
 Requires at least: 5.0.1
 Tested up to: 6.8
 Stable tag: 5.0.3
