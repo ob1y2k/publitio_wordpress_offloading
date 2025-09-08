@@ -2,206 +2,15 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
-@import url('https://fonts.googleapis.com/css?family=Raleway');
 
-.page-offloading-wrapper {
-    padding: 15px 50px;
-    font-family: 'Raleway', sans-serif;
-    font-size: 1.5rem;
-}
-
-.section-offloading-title {
-    color: #4D6D90;
-    font-weight: 800;
-}
-
-.form-offload-label {
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-.form-offload-input,.form-offload-select {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    height: 40px !important;
-}
-
-.button-section-offloading-wrapper {
-    text-align: center;
-}
-
-.publitio-offload-button {
-    background-color: #4D6D90;
-    padding: 10px 20px;
-    border: 1px solid #4D6D90;
-    color: white;
-    border-radius: 3%;
-    font-size: 18px;
-    box-shadow: 5px 5px 5px grey;
-    cursor: pointer;
-}
-
-.publitio-a {
-    color: #4D6D90
-}
-
-.offloading-block {
-    font-size: 0.8rem;
-}
-
-.error-offload-block {
-    color: #cd3703;
-}
-
-.success-offload-block {
-    color: #4BB543;
-}
-
-.publitio-switch {
-    position: relative;
-    display: inline-block;
-    width: 55px;
-    height: 26px;
-}
-
-.publitio-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.publitio-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-
-.publitio-slider:before {
-    position: absolute;
-    content: "";
-    height: 17px;
-    width: 16px;
-    left: 8px;
-    bottom: 5px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-
-.download-text {
-    font-size: 16px;
-}
-
-.danger-text {
-    font-size: 16px;
-    font-weight: bold;
-    color: #e74444;
-}
-
-input:checked + .publitio-slider {
-    background-color: #4D6D90;
-}
-
-input[type="checkbox"]:disabled + .publitio-slider {
-    background-color: #e2e2e2;
-}
-
-input:focus + .publitio-slider {
-    box-shadow: 0 0 1px #4D6D90;
-}
-
-input:checked + .publitio-slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
-}
-
-.publitio-slider.round {
-    border-radius: 34px;
-}
-
-.publitio-slider.round:before {
-    border-radius: 50%;
-}
-
-.files-checkbox {
-    display: flex;
-    margin-top: 15px;
-}
-
-.offload-checkbox {
-    flex-grow: 1;
-    margin-bottom: 10px;
-}
-
-.files_label {
-    font-size:16px;
-}
-
-.files-offload-input,.files-offload-delete {
-    margin-top: 0 !important;
-}
-
-.off-margin {
-    margin: 10px 0;
-}
-
-#publitioProgress {
-    width: 100%;
-    background-color: white;
-    border-radius: 4px;
-}
-
-#publitioBar {
-    width: 0;
-    height: 50px;
-    background-color: #4D6D90;
-}
-
-.sync-button {
-    font-size: 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    transition: opacity 500ms;
-    opacity: 1;
-    display: none;
-}
-
-#loadPublitioNumber {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 22px;
-    padding-bottom: 5px;
-}
+ @import url('https://fonts.googleapis.com/css?family=Raleway');
 
 .offloading-popup {
     margin: 0 auto;
     width: 50%;
     position: fixed;
     border-radius: 4px;
+	overflow: none;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -230,19 +39,556 @@ input:checked + .publitio-slider:before {
     overflow: auto;
 }
 
-.red-text {
-    color: #e74444;
+#loadPublitioNumber {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
 }
 
-@media screen and (max-width: 700px){
-    .box{
-        width: 70%;
-    }
-    .offloading-popup{
-        width: 70%;
-    }
+#publitioProgress {
+    width: 100%;
+    background-color: white;
+    border-radius: 4px;
 }
 
+#publitioBar {
+	border-radius: 4px;
+    width: 0;
+    height: 50px;
+    background-color: #4099de;
+}
 
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    opacity: 1;
+    display: none;
+}
 
+ .publitio-requires-auth {
+    opacity: 0.5;
+    pointer-events: none;
+ }
 
+ .publitio-page-warning-message {
+     display: none;
+     align-items: center;
+     gap: 10px;
+     color: rgba(133, 77, 14);
+     font-size: 0.8rem;
+     font-weight: bold;
+     padding-left: 10px;
+     background: rgb(254, 215, 170);
+     border-left: 5px solid rgba(133, 77, 14, 0.5);
+ }
+ 
+ .publitio-page-warning-message svg {
+     color: rgba(133, 77, 14, 0.5);
+     height: 25px;
+ }
+ 
+ .publitio-page-wrapper {
+     position: relative;
+     margin-top: 20px;
+     margin-right: 20px;
+     max-width: 1280px;
+     font-family: 'Raleway', sans-serif;
+     font-size: 1.5rem;
+     background: white;
+     box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;}
+ 
+ .publitio-page-header {
+     display: flex;
+     align-items: center;
+     width: 100%;
+     height: 100px;
+     background: white;
+     justify-content: space-between;
+ }
+
+.publitio-page-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+ 
+ .publitio-page-logo {
+     margin-left: 10px;
+ }
+ 
+ .publitio-page-data {
+     display: flex;
+     height: 120px;
+     width: 100%;
+     align-items: center;
+     border-bottom: 1px solid #ccc;
+     border-top: 1px solid #ccc;
+     flex-direction: row;
+ }
+ 
+ .publitio-page-data-item {
+     height: 120px;
+     width: calc(100% / 3);
+     border-right: 1px solid #eeeeee7d;
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     justify-content: space-evenly;
+ }
+ 
+ .publitio-page-data-item:last-child {
+     border-right: none;
+ }
+ 
+ .publitio-storage-info,
+ .publitio-bandwidth-info,
+ .publitio-plan-info {
+     font-size: .8rem;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+ }
+ 
+ .publitio-storage-used,
+ .publitio-bandwidth-used {
+     border-bottom: 1px solid #eeeeee7d;
+     padding-bottom: .5rem;
+     margin-bottom: .5rem;
+ }
+ 
+ /* Donut Chart Styles */
+ .publitio-storage-chart-container,
+ .publitio-bandwidth-chart-container {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100%;
+ }
+ 
+ .publitio-storage-chart,
+ .publitio-bandwidth-chart {
+     position: relative;
+     width: 85px;
+     height: 85px;
+     border-radius: 50%;
+     background: conic-gradient(
+         #e5e7eb 0deg,
+         #e5e7eb 360deg
+     );
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+ 
+ .publitio-storage-inner,
+ .publitio-bandwidth-inner {
+     width: 65px;
+     height: 65px;
+     background: white;
+     border-radius: 50%;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+     position: relative;
+ }
+ 
+ .publitio-storage-percentage,
+ .publitio-bandwidth-percentage {
+     font-size: 1rem;
+     font-weight: bold;
+     color: #4099de;
+     line-height: 1;
+ }
+ 
+ .publitio-emphasize {
+     color: #4099de;
+     font-weight: bold;
+ }
+ 
+ .publitio-button {
+     background: #4099de;
+     color: white;
+     padding: 10px 20px;
+     border-radius: 5px;
+     text-decoration: none;
+     font-size: 1rem;
+     font-weight: bold;
+     cursor: pointer;
+     margin-top: 10px;
+     transition: background 0.2s ease-in-out;
+ }
+ 
+ .publitio-button:hover,
+ .publitio-button:focus,
+ .publitio-button:active {
+     background: #3586d0;
+     color: white;
+ }
+ 
+ .publitio-settings-info-title {
+     border-bottom: 1px solid #eeeeee7d;
+     border-top: 1px solid #ccc;
+     padding: 20px 15px;
+     margin: 0;
+     font-size: 1.2rem;
+     font-weight: bold;
+ }
+ 
+ .publitio-settings {
+     padding: 10px 20px;
+ }
+ 
+ .publitio-field-wrapper {
+     border-bottom: 1px solid #eeeeee7d;
+     padding: 10px 0;
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     min-height: 30px;
+ }
+
+ .publitio-field-wrapper.publitio-files-wrapper {
+    align-items: flex-start;
+ }
+ 
+ .publitio-files-checkbox-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+ }
+
+ .publitio-files-checkbox-item span {
+    font-size: .9rem;
+    font-weight: bold;
+ }
+ 
+ .publitio-field-wrapper:last-child {
+     border-bottom: none;
+ }
+ 
+ .publitio-field-wrapper:first-child {
+     padding-top: 0;
+ }
+ 
+ .publitio-field-wrapper label {
+     font-size: .9rem;
+     font-weight: bold;
+     max-width: 300px;
+     width: 100%;
+     display: block;
+     padding-right: 20px;
+ }
+ 
+ .publitio-field-wrapper label small {
+     font-size: .7rem;
+     color: #666;
+     font-weight: normal;
+     line-height: 1;
+ }
+ 
+ .publitio-field-wrapper input[type="password"],
+ .publitio-field-wrapper select {
+     max-width: 300px;
+     width: 100%;
+     border: 1px solid #ccc;
+     border-radius: 5px;
+ }
+
+ .publitio-field-wrapper input[type="checkbox"] {
+     width: 20px;
+     height: 20px;
+     border: 1px solid #ccc;
+     border-radius: 5px;
+ }
+ 
+ .publitio-settings-button {
+     background: #4099de;
+     color: white;
+     padding: 10px 20px;
+     border-radius: 5px;
+     text-decoration: none;
+     font-size: 1rem;
+     font-weight: bold;
+     cursor: pointer;
+     border: none;
+     outline: none;
+     margin: 20px;
+     transition: background 0.2s ease-in-out;
+ }
+ 
+ .publitio-settings-button:hover {
+     background: #3586d0;
+ }
+
+ .publitio-settings-button.publitio-danger-button {
+    background: #dc3545;
+ }
+
+ .publitio-settings-button.publitio-danger-button:hover {
+    background: #c82333;
+ }
+
+ .publitio-settings-button.publitio-success-button {
+    background: #28a745;
+ }
+
+ .publitio-settings-button.publitio-success-button:hover {
+    background: #218838;
+ }
+
+ .publitio-settings-button.publitio-warning-button {
+    background: #FFCC4D;
+ }
+
+ .publitio-settings-button.publitio-warning-button:hover {
+    background: #FF9900;
+ }
+
+ .publitio-version {
+     position: absolute;
+     bottom: 0;
+     right: 0;
+     font-size: .8rem;
+     color: #666;
+     font-weight: normal;
+     line-height: 1;
+     margin: 5px;
+ }
+ 
+ .publitio-page-review {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     font-size: .8rem;
+     font-weight: normal;
+     line-height: 1.5;
+     margin: 20px;
+     border: 1px solid #4099de;
+     border-radius: 5px;
+     color: black;
+     padding: 10px 20px 10px 10px;
+     text-decoration: none;
+     transition: background-color 0.2s ease-in-out;
+ }
+ 
+ .publitio-page-review:hover,
+ .publitio-page-review:focus,
+ .publitio-page-review:active {
+     background-color: #4099de;
+     color: white;
+ }
+
+ .publitio-page-review:hover svg {
+     color: white;
+ }
+
+ .publitio-page-review:hover .publitio-emphasize {
+    color: white;
+}
+ 
+ .publitio-page-review svg {
+     width: 30px;
+     height: 30px;
+     color: #4099de;
+ }
+ 
+ .publitio-page-footer-block {
+     height: 120px;
+     padding: 20px 40px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 40px;
+     font-size: .8rem;
+     text-decoration: none;
+     color: #666;
+ }
+ 
+ .publitio-page-footer-block svg {
+     flex-shrink: 0;
+     height: 50px;
+     color: #4099de;
+ }
+ 
+ .publitio-page-footer-block:hover .publitio-emphasize {
+     text-decoration: underline;
+ }
+
+ .publitio-buttons-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+ }
+ 
+ @media (max-width: 1280px) {
+     .publitio-page-footer-block {
+         gap: 10px;
+         padding: 10px;
+     }
+ }
+ 
+ @media (max-width: 768px) {
+     .publitio-page-data {
+         flex-wrap: wrap;
+         height: auto;
+     }
+ 
+     .publitio-page-data-item:first-child {
+         border-right: 1px solid #ccc;
+     }
+ 
+     .publitio-page-data-item {
+         width: calc(50% - 1px);
+         border: 0;
+         border-bottom: 1px solid #ccc;
+     }
+ 
+     .publitio-page-data-item:last-child {
+         width: 100%;
+         border-bottom: 0;
+     }
+ 
+     .publitio-page-footer-block svg {
+         height: 30px;
+     }
+ }
+ 
+ @media (max-width: 480px) {
+     .publitio-page-review {
+         display: none;
+     }
+     .publitio-page-data-item {
+         width: 100%;
+     }
+     .publitio-page-data-item:first-child {
+         border-right: 0;
+     }
+     .publitio-page-data-item:last-child {
+         border-bottom: 0;
+     }
+ 
+     .publitio-field-wrapper {
+         flex-direction: column;
+         align-items: flex-start;
+         gap: 10px;
+     }
+     .publitio-field-wrapper label {
+         width: 100%;
+     }
+     .publitio-field-wrapper input,
+     .publitio-field-wrapper select {
+         width: 100%;
+     }
+     .publitio-buttons-wrapper {
+         flex-direction: column;
+         gap: 10px;
+         padding: 20px;
+     }
+     .publitio-buttons-wrapper button {
+         width: 100%;
+         margin: 0;
+     }
+     #publitio-sync-now-button {
+        margin: auto;
+        margin-top: 10px;
+     }
+     #update-offloading-button {
+        width: calc(100% - 40px);
+        margin: 20px;
+     }
+ }
+
+ .publitio-files-checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+ }
+
+ .publitio-border-bottom {
+    border-bottom: 1px solid #eeeeee7d;
+ }
+
+  .checkbox-wrapper-6 .tgl {
+    display: none;
+  }
+  .checkbox-wrapper-6 .tgl,
+  .checkbox-wrapper-6 .tgl:after,
+  .checkbox-wrapper-6 .tgl:before,
+  .checkbox-wrapper-6 .tgl *,
+  .checkbox-wrapper-6 .tgl *:after,
+  .checkbox-wrapper-6 .tgl *:before,
+  .checkbox-wrapper-6 .tgl + .tgl-btn {
+    box-sizing: border-box;
+  }
+  .checkbox-wrapper-6 .tgl::-moz-selection,
+  .checkbox-wrapper-6 .tgl:after::-moz-selection,
+  .checkbox-wrapper-6 .tgl:before::-moz-selection,
+  .checkbox-wrapper-6 .tgl *::-moz-selection,
+  .checkbox-wrapper-6 .tgl *:after::-moz-selection,
+  .checkbox-wrapper-6 .tgl *:before::-moz-selection,
+  .checkbox-wrapper-6 .tgl + .tgl-btn::-moz-selection,
+  .checkbox-wrapper-6 .tgl::selection,
+  .checkbox-wrapper-6 .tgl:after::selection,
+  .checkbox-wrapper-6 .tgl:before::selection,
+  .checkbox-wrapper-6 .tgl *::selection,
+  .checkbox-wrapper-6 .tgl *:after::selection,
+  .checkbox-wrapper-6 .tgl *:before::selection,
+  .checkbox-wrapper-6 .tgl + .tgl-btn::selection {
+    background: none;
+  }
+  .checkbox-wrapper-6 .tgl + .tgl-btn {
+    outline: 0;
+    display: block;
+    width: 3em;
+    height: 1.5em;
+    position: relative;
+    cursor: pointer;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+  }
+  .checkbox-wrapper-6 .tgl + .tgl-btn:after,
+  .checkbox-wrapper-6 .tgl + .tgl-btn:before {
+    position: relative;
+    display: block;
+    content: "";
+    width: 50%;
+    height: 100%;
+  }
+  .checkbox-wrapper-6 .tgl + .tgl-btn:after {
+    left: 0;
+  }
+  .checkbox-wrapper-6 .tgl + .tgl-btn:before {
+    display: none;
+  }
+  .checkbox-wrapper-6 .tgl:checked + .tgl-btn:after {
+    left: 50%;
+  }
+
+  .checkbox-wrapper-6 .tgl-light + .tgl-btn {
+    background: #f0f0f0;
+    border-radius: 2em;
+    padding: 2px;
+    transition: all 0.4s ease;
+  }
+  .checkbox-wrapper-6 .tgl-light + .tgl-btn:after {
+    border-radius: 50%;
+    background: #fff;
+    transition: all 0.2s ease;
+  }
+  .checkbox-wrapper-6 .tgl-light:checked + .tgl-btn {
+    background: #4099de;
+  }

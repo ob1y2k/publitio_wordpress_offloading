@@ -31,14 +31,6 @@ class PWPO_Admin
         add_filter("plugin_action_links_" . PUBLITIO_OFFLOADING_PLUGIN, array($this, 'pwpo_settings_link'));
         add_action('wp_ajax_pwpo_update_offloading_settings', array($this, 'pwpo_update_offloading_settings'));
         add_action('wp_ajax_pwpo_get_offloading_account_settings', array($this, 'pwpo_get_offloading_account_settings'));
-        add_action('wp_ajax_pwpo_update_default_offloading_folder', array($this, 'pwpo_update_default_offloading_folder'));
-        add_action('wp_ajax_pwpo_update_default_offloading_cname', array($this, 'pwpo_update_default_offloading_cname'));
-        add_action('wp_ajax_pwpo_update_allow_download', array($this, 'pwpo_update_allow_download'));
-        add_action('wp_ajax_pwpo_update_offload_templates', array($this, 'pwpo_update_offload_templates'));
-        add_action('wp_ajax_pwpo_update_image_offloading_quality', array($this, 'pwpo_update_image_offloading_quality'));
-        add_action('wp_ajax_pwpo_update_video_offloading_quality', array($this, 'pwpo_update_video_offloading_quality'));
-        add_action('wp_ajax_pwpo_update_files_checkbox', array($this, 'pwpo_update_files_checkbox'));
-        add_action('wp_ajax_pwpo_update_delete_checkbox', array($this, 'pwpo_update_delete_checkbox'));
         add_action('wp_ajax_pwpo_get_media_list', array($this, 'pwpo_get_media_list'));
         add_action('wp_ajax_pwpo_sync_media_file', array($this, 'pwpo_sync_media_file'));
         add_action('wp_ajax_pwpo_update_replace_media', array($this, 'pwpo_update_replace_media'));
@@ -77,7 +69,11 @@ class PWPO_Admin
     {
         if (isset( $_GET['page'] ) && $_GET['page'] == 'publitio_offloading' ) {
             wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
+			wp_enqueue_style( 'publitio-offloading-toastify-css', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' );
+
             wp_enqueue_script('offloadingscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js', array('jquery'));
+			wp_enqueue_script( 'publitio-offloading-toastify-js', 'https://cdn.jsdelivr.net/npm/toastify-js', array( 'jquery' ), null, true );
+
         }
     }
 
@@ -105,13 +101,108 @@ class PWPO_Admin
 		if (!current_user_can('manage_options')) {
 			wp_die(__('You do not have permission to update settings.', 'publitio'));
 		}
-        
-        if (isset($_POST['api_key']) && isset($_POST['api_secret'])) {
-            $api_key = sanitize_text_field($_POST['api_key']);
-            $api_secret = sanitize_text_field($_POST['api_secret']);
-            $this->publitioApi->init($api_key, $api_secret);
-        }
 
+        $api_key = sanitize_text_field($_POST['api_key']);
+        $api_secret = sanitize_text_field($_POST['api_secret']);
+
+        $status = PWPO_AuthService::validate_api_credentials($api_key, $api_secret);
+
+        if($status === 200) {
+            // Save the validated API credentials
+            PWPO_AuthService::add_credentials($api_key, $api_secret);
+            
+            $allow_download = sanitize_text_field($_POST['allow_download']);
+            update_option('publitio_offloading_allow_download', $this->pwpo_return_yes_no_value($allow_download));
+            $offload_templates = sanitize_text_field($_POST['offload_templates']);
+            update_option('publitio_offloading_offload_templates', $this->pwpo_return_yes_no_value($offload_templates));
+            $image_checkbox = sanitize_text_field($_POST['image_checkbox']);
+            update_option('publitio_offloading_image_checkbox', $this->pwpo_return_yes_no_value($image_checkbox));
+            $video_checkbox = sanitize_text_field($_POST['video_checkbox']);
+            update_option('publitio_offloading_video_checkbox', $this->pwpo_return_yes_no_value($video_checkbox));
+            $audio_checkbox = sanitize_text_field($_POST['audio_checkbox']);
+            update_option('publitio_offloading_audio_checkbox', $this->pwpo_return_yes_no_value($audio_checkbox));
+            $document_checkbox = sanitize_text_field($_POST['document_checkbox']);
+            update_option('publitio_offloading_document_checkbox', $this->pwpo_return_yes_no_value($document_checkbox));
+            $folder_id = sanitize_text_field($_POST['folder_id']);
+            update_option('publitio_offloading_default_folder', $folder_id);
+            $cname_url = sanitize_text_field($_POST['cname_url']);
+            update_option('publitio_offloading_default_cname', $cname_url);
+            $image_quality = sanitize_text_field($_POST['image_quality']);
+            update_option('publitio_offloading_image_quality', $image_quality);
+            $video_quality = sanitize_text_field($_POST['video_quality']);
+            update_option('publitio_offloading_video_quality', $video_quality);
+            $delete_checkbox = sanitize_text_field($_POST['delete_checkbox']);
+            update_option('publitio_offloading_delete_checkbox', $this->pwpo_return_yes_no_value($delete_checkbox));
+
+            $response = $this->publitioApi->get_publitio_account_settings();
+            wp_send_json([
+                'status' => 200,
+                'folders' => $response->folders,
+                'cnames' => $response->cnames,
+                'default_folder_id' => get_option('publitio_offloading_default_folder'),
+                'default_cname_url' => get_option('publitio_offloading_default_cname'),
+                'allow_download' => get_option('publitio_offloading_allow_download'),
+                'offload_templates' => get_option('publitio_offloading_offload_templates'),
+                'image_quality' => get_option('publitio_offloading_image_quality'),
+                'video_quality' => get_option('publitio_offloading_video_quality'),
+                'image_checkbox' => get_option('publitio_offloading_image_checkbox'),
+                'video_checkbox' => get_option('publitio_offloading_video_checkbox'),
+                'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
+                'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
+                'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
+                'replace_checkbox' => get_option('publitio_offloading_replace_checkbox'),
+                'wordpress_data' => $response->wordpress_data->message
+            ]);
+        } else if($status === 401) {
+            $this->pwpo_reset_values();
+            wp_send_json([
+                'status' => 401,
+            ]);
+        } else if($status === 500) {
+            $this->pwpo_reset_values();
+            wp_send_json([
+                'status' => 500,
+            ]);
+        }
+    }
+
+    /**
+     * Return yes/no value from boolean
+     */
+    public function pwpo_return_yes_no_value($value)
+    {
+        if ($value === true || $value === 'true' || $value === '1') {
+            return 'yes';
+        } else {
+            return 'no';
+        }
+    }
+
+    /**
+     * Reset values for all options
+     */
+    public function pwpo_reset_values()
+    {
+        delete_option('publitio_offloading_key');
+        delete_option('publitio_offloading_secret');
+        delete_option('publitio_offloading_default_folder');
+        update_option('publitio_offloading_allow_download', 'yes');
+        delete_option('publitio_offloading_default_cname');
+        delete_option('publitio_offloading_delete_checkbox');
+        update_option('publitio_offloading_allow_download', 'yes');
+        update_option('publitio_offloading_image_quality', '80');
+        update_option('publitio_offloading_video_quality', '480');
+        update_option('publitio_offloading_delete_checkbox', 'no');
+        delete_option('publitio_offloading_replace_checkbox');
+        update_option('publitio_offloading_image_checkbox', 'yes');
+        update_option('publitio_offloading_video_checkbox', 'yes');
+        update_option('publitio_offloading_audio_checkbox', 'yes');
+        update_option('publitio_offloading_document_checkbox', 'yes');
+        update_option('publitio_offloading_offload_templates', 'yes');
+        update_option('publitio_offloading_image_checkbox', 'yes');
+        update_option('publitio_offloading_video_checkbox', 'yes');
+        update_option('publitio_offloading_audio_checkbox', 'yes');
+        update_option('publitio_offloading_document_checkbox', 'yes');
     }
 
     /**
@@ -119,7 +210,7 @@ class PWPO_Admin
      */
     public function pwpo_get_offloading_account_settings()
     {
-        $response = $this->publitioApi->get_publitio_account_settins();
+        $response = $this->publitioApi->get_publitio_account_settings();
         if ($response) {
             wp_send_json([
                 'status' => 200,
@@ -137,6 +228,7 @@ class PWPO_Admin
                 'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
                 'replace_checkbox' => get_option('publitio_offloading_replace_checkbox'),
                 'offload_templates' => get_option('publitio_offloading_offload_templates'),
+                'wordpress_data' => $response->wordpress_data->message
             ]);
         } else {
             wp_send_json([
@@ -152,168 +244,10 @@ class PWPO_Admin
                 'audio_checkbox' => '',
                 'document_checkbox' => '',
                 'delete_checkbox' => '',
-                'replace_checkbox' => ''
+                'replace_checkbox' => '',
+                'offload_templates' => '',
+                'wordpress_data' => ''
             ]);
-        }
-    }
-
-    /**
-     * Update default folder
-     */
-    public function pwpo_update_default_offloading_folder()
-    {
-        // Check the nonce
-		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-			wp_die(__('Unauthorized request.', 'publitio'));
-		}
-
-		// Check user permissions
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have permission to update settings.', 'publitio'));
-		}
-
-        if (isset($_POST['folder_id'])) {
-            $this->publitioApi->set_default_offloading_folder(sanitize_text_field($_POST['folder_id']));
-        }
-    }
-
-    /**
-     * Update default cname
-     */
-    public function pwpo_update_default_offloading_cname()
-    {
-        // Check the nonce
-		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-			wp_die(__('Unauthorized request.', 'publitio'));
-		}
-
-		// Check user permissions
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have permission to update settings.', 'publitio'));
-		}
-
-        if (isset($_POST['cname_url'])) {
-            $this->publitioApi->set_default_offloading_cname(sanitize_text_field($_POST['cname_url']));
-        }
-    }
-
-    /**
-     * Update allow download option
-     */
-    public function pwpo_update_allow_download()
-    {
-        // Check the nonce
-		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-			wp_die(__('Unauthorized request.', 'publitio'));
-		}
-
-		// Check user permissions
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have permission to update settings.', 'publitio'));
-		}
-
-        if (isset($_POST['allow'])) {
-            $this->publitioApi->set_allow_download_offloading(sanitize_text_field($_POST['allow']));
-        }
-    }
-
-    /**
-     * Update offload templates option
-     */
-    public function pwpo_update_offload_templates()
-    {
-        // Check the nonce
-		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-			wp_die(__('Unauthorized request.', 'publitio'));
-		}
-
-		// Check user permissions
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have permission to update settings.', 'publitio'));
-		}
-
-        if (isset($_POST['allow'])) {
-            $this->publitioApi->set_offload_templates(sanitize_text_field($_POST['allow']));
-        }
-    }
-
-    /**
-     * Update image quality
-     */
-    public function pwpo_update_image_offloading_quality()
-    {
-        // Check the nonce
-		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-			wp_die(__('Unauthorized request.', 'publitio'));
-		}
-
-		// Check user permissions
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have permission to update settings.', 'publitio'));
-		}
-
-        if (isset($_POST['image_quality'])) {
-            $this->publitioApi->set_offloading_image_quality(sanitize_text_field($_POST['image_quality']));
-        }
-    }
-
-    /**
-     * Update video quality
-     */
-    public function pwpo_update_video_offloading_quality()
-    {
-        // Check the nonce
-		if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-			wp_die(__('Unauthorized request.', 'publitio'));
-		}
-
-		// Check user permissions
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have permission to update settings.', 'publitio'));
-		}
-
-        if (isset($_POST['video_quality'])) {
-            $this->publitioApi->set_offloading_video_quality(sanitize_text_field($_POST['video_quality']));
-        }
-    }
-
-    /**
-     * Update checkbox to define which files should be offloaded
-     */
-    public function pwpo_update_files_checkbox()
-    {
-        // Check the nonce
-        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-            wp_die(__('Unauthorized request.', 'publitio'));
-        }
-
-        // Check user permissions
-        if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to update settings.', 'publitio'));
-        }
-
-        if (isset($_POST['id']) && isset($_POST['value'])) {
-            $this->publitioApi->set_files_checkbox(sanitize_text_field($_POST['id']), sanitize_text_field($_POST['value']));
-        }
-    }
-
-    /**
-     * Update checkbox to define which is delete from publitio is allowed
-     */
-    public function pwpo_update_delete_checkbox()
-    {
-        // Check the nonce
-        if (!isset( $_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
-            wp_die(__('Unauthorized request.', 'publitio'));
-        }
-
-        // Check user permissions
-        if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to update settings.', 'publitio'));
-        }
-
-        if (isset($_POST['delete_checkbox'])) {
-            $this->publitioApi->set_delete_checkbox(sanitize_text_field($_POST['delete_checkbox']));
         }
     }
 

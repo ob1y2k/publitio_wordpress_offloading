@@ -7,6 +7,9 @@
 
         };
 
+        let updateLoading = false;
+        let updateDangerLoading = false;
+
         jQuery.extend({
             whenAll: function(expires, firstParam) {
                 return whenAllFx(0, jQuery.makeArray(arguments));
@@ -60,97 +63,204 @@
         $(function () {
             getPublitioAccountSettings()
             updatePublitioSettingsButtonClick()
-            updatePublitioDefaultFolderChange()
-            updatePublitioDefaultCnameChange()
-            changePublitioAllowDownload()
-            changePublitioOffloadTemplates()
-            changePublitioImageQuality()
-            changePublitioVideoQuality()
-            checkboxPublitioFiles()
-            changePublitioDelete()
+            updatePublitioDangerSettingsButtonClick()
             syncPublitioMediaFiles()
-            replacePublitioMedia()
             deletePublitioMediaFiles()
         });
 
         function updatePublitioSettingsButtonClick() {
-            $('#update-offloading-button').bind('click', function (event) {
-                clearBlocks();
+            $('#update-offloading-button').on('click', function (event) {
+                if(updateLoading) {
+                    return;
+                }
+                setUpdateLoading(true);
+                const api_key = $('#api_key').val();
+                const api_secret = $('#api_secret').val();
+                if(api_key === '' || api_secret === '') {
+                    showToast('⚠ Please fill in all fields', 'error');
+                    setUpdateLoading(false)
+                    return
+                  }
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_offloading_settings',
-                    api_secret: $('#api-publitio-offloading-secret').val(),
-                    api_key: $('#api-publitio-offloading-key').val(),
-                    wpnonce: $('#_wpnonce').val()
+                    api_secret: api_secret,
+                    api_key: api_key,
+                    wpnonce: $('#_wpnonce').val(),
+                    allow_download: $('#allow_download').is(':checked'),
+                    offload_templates: $('#offload_templates').is(':checked'),
+                    image_checkbox: $('#image_checkbox').is(':checked'),
+                    video_checkbox: $('#video_checkbox').is(':checked'),
+                    audio_checkbox: $('#audio_checkbox').is(':checked'),
+                    document_checkbox: $('#document_checkbox').is(':checked'),
+                    folder_id: $('#default-publitio-offloading-folder').val(),
+                    cname_url: $('#default-publitio-offloading-cname').val(),
+                    image_quality: $('#offloading-image-quality').val(),
+                    video_quality: $('#offloading-video-quality').val(),
+                    delete_checkbox: $('#delete_checkbox').is(':checked'),
                 }, function (response) {
                     if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
-                        showPublitioBlock($('#error-offload-block'), 'Wrong credentials');
                         clearFolderList(true);
                         clearCnameList(true);
-                        setPublitioCheckBoxValue('allow-download', '');
-                        setPublitioCheckBoxValue('offload-templates', '');
-                        $(".form-offload-select").attr("disabled", true);
-                        $(".files-offload-input").attr("disabled", true);
-                        $(".form-offload-select").attr("disabled", true);
-                        $(".files-offload-delete").attr("disabled", true);
-                        $(".sync-button").attr("disabled", true);
+                        authError();
+                        showToast('⚠ Bad credentials', 'error');
                     } else if (response.status === STATUSES.SUCCESS) {
-                        showPublitioBlock($('#success-offload-block'), 'Great!');
                         handleResponse(response);
+                        showToast('🎉 Great, settings updated!', 'success');
                     } else {
-                        showPublitioBlock($('#error-offload-block'), 'Something went wrong.');
                         clearFolderList(true);
                         clearCnameList(true);
-                        setPublitioCheckBoxValue('allow-download', '');
-                        setPublitioCheckBoxValue('offload-templates', '');
-                        $(".form-offload-select").attr("disabled", true);
-                        $(".files-offload-input").attr("disabled", true);
-                        $(".form-offload-select").attr("disabled", true);
-                        $(".files-offload-delete").attr("disabled", true);
-                        $(".sync-button").attr("disabled", true);
+                        authError();
+                        showToast('⚠ Something went wrong', 'error');
                     }
+                    setUpdateLoading(false);
+                });
+            });
+        }
+
+        function updatePublitioDangerSettingsButtonClick() {
+            $('#publitio-update-danger-settings-button').on('click', function (event) {
+                if(updateDangerLoading) {
+                    return;
+                }
+                setDangerUpdateLoading(true);
+
+                jQuery.post(ajaxurl, {
+                    action: 'pwpo_update_replace_media',
+                    wpnonce: $('#_wpnonce').val(),
+                    replace_checkbox: $('#replace_checkbox').is(':checked'),
+                }, function (response) {
+                    if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
+                        clearFolderList(true);
+                        clearCnameList(true);
+                        authError();
+                        showToast('⚠ Bad credentials', 'error');
+                    } else if (response.status === STATUSES.SUCCESS) {
+                        showToast('🎉 Great, settings updated!', 'success');
+                    } else {
+                        clearFolderList(true);
+                        clearCnameList(true);
+                        authError();
+                        showToast('⚠ Something went wrong', 'error');
+                    }
+                    setDangerUpdateLoading(false);
                 });
             });
         }
 
         function handleResponse(response) {
-
-            //console.log("response.default_cname_url:: "+response.default_cname_url);
-
             if (response.folders != null) {
-                $(".form-offload-select").removeAttr("disabled");
-                $(".files-offload-input").removeAttr("disabled");
-                $(".form-offload-select").removeAttr("disabled");
-                $(".files-offload-delete").removeAttr("disabled");
-                $(".sync-button").removeAttr("disabled");
+                authSuccess();
+                updateCharts(response.wordpress_data);
                 addFoldersList(response.folders, response.default_folder_id);
                 addCnameList(response.cnames, response.default_cname_url);
-                setPublitioCheckBoxValue('allow-download', response.allow_download);
-                setPublitioCheckBoxValue('offload-templates', response.offload_templates);
-                setPublitioImageQualityValue(response.image_quality);
-                setPublitioVideoQualityValue(response.video_quality);
-                setPublitioFilesCheckbox('image_checkbox', response.image_checkbox);
-                setPublitioFilesCheckbox('video_checkbox', response.video_checkbox);
-                setPublitioFilesCheckbox('audio_checkbox', response.audio_checkbox);
-                setPublitioFilesCheckbox('document_checkbox', response.document_checkbox);
-                setPublitioFilesCheckbox('delete_checkbox', response.delete_checkbox);
-                setPublitioFilesCheckbox('replace_checkbox', response.replace_checkbox)
+                setImageQualityValue(response.image_quality);
+                setVideoQualityValue(response.video_quality);
             } else {
-                setPublitioCheckBoxValue('allow-download', '');
-                setPublitioCheckBoxValue('offload-templates', '');
-                $(".form-offload-delete").attr("disabled", true);
-                $(".form-offload-select").attr("disabled", true);
-                $(".files-offload-input").attr("disabled", true);
-                $(".files-offload-delete").attr("disabled", true);
-                $(".sync-button").attr("disabled", true);
+                authError();
             }
         }
 
+        function setUpdateLoading(loading) {
+            if(loading) {
+              $('#update-offloading-button').text('Updating Settings...')
+              $('#update-offloading-button').css('opacity', 0.5)
+              $('#update-offloading-button').css('cursor', 'not-allowed')
+            } else {
+                $('#update-offloading-button').text('Update Settings')
+                $('#update-offloading-button').css('opacity', 1)
+                $('#update-offloading-button').css('cursor', 'pointer')
+                updateLoading = false;
+            }
+            $('#update-offloading-button').prop('disabled', loading)
+          }
+
+          function setDangerUpdateLoading(loading) {
+            if(loading) {
+                $('#publitio-update-danger-settings-button').text('Updating Settings...')
+                $('#publitio-update-danger-settings-button').css('opacity', 0.5)
+                $('#publitio-update-danger-settings-button').css('cursor', 'not-allowed')
+            } else {
+                $('#publitio-update-danger-settings-button').text('Update Settings')
+                $('#publitio-update-danger-settings-button').css('opacity', 1)
+                $('#publitio-update-danger-settings-button').css('cursor', 'pointer')
+                updateLoading = false;
+            }
+            $('#publitio-update-danger-settings-button').prop('disabled', loading)
+          }
+
+        function authSuccess() {
+            $('.publitio-page-warning-message').css('display', 'none')
+            $(".publitio-requires-auth").css("opacity", "1");
+            $(".publitio-requires-auth").css("pointer-events", "auto");
+        }
+
+        function authError() {
+            $('.publitio-page-warning-message').css('display', 'flex')
+            $(".publitio-requires-auth").css("opacity", "0.5");
+            $(".publitio-requires-auth").css("pointer-events", "none");
+        }
+
+        function updateCharts(wordpressData) {
+            if (!wordpressData) {
+                return
+              }
+          
+              const usedStorage = wordpressData.account_storage ?? '0B'
+              const maxStorage = wordpressData.account_max_storage ?? '0B'
+              const percentStorage = wordpressData.account_storage_percentage ?? 0
+              
+              const $chartStorage = $('.publitio-storage-chart')
+              const $percentageStorage = $('.publitio-storage-percentage')
+              
+              if ($chartStorage.length && $percentageStorage.length) {
+                $percentageStorage.text(percentStorage + '%')
+                $chartStorage.attr('data-percentage', percentStorage)
+                
+                const degrees = percentStorage * 3.6
+                const gradient = `conic-gradient(
+                  #4099de 0deg,
+                  #4099de ${degrees}deg,
+                  #e5e7eb ${degrees}deg,
+                  #e5e7eb 360deg
+                )`
+                $chartStorage.css('background', gradient)
+                      
+                $('.publitio-storage-used').text(`Storage used: ${usedStorage}`)
+                $('.publitio-storage-limit').text(`Storage limit: ${maxStorage}`)
+              }
+          
+              const usedBandwidth = wordpressData.account_bandwidth ?? '0B'
+              const maxBandwidth = wordpressData.account_max_bandwidth ?? '0B'
+              const percentBandwidth = wordpressData.account_bandwidth_percentage ?? 0
+          
+              const $chartBandwidth = $('.publitio-bandwidth-chart')
+              const $percentageBandwidth = $('.publitio-bandwidth-percentage')
+              
+              if ($chartBandwidth.length && $percentageBandwidth.length) {
+                $percentageBandwidth.text(percentBandwidth + '%')
+                $chartBandwidth.attr('data-percentage', percentBandwidth)
+                
+                const degrees = percentBandwidth * 3.6
+                const gradient = `conic-gradient(
+                  #4099de 0deg,
+                  #4099de ${degrees}deg,
+                  #e5e7eb ${degrees}deg,
+                  #e5e7eb 360deg
+                )`
+                $chartBandwidth.css('background', gradient)
+                      
+                $('.publitio-bandwidth-used').text(`Bandwidth used: ${usedBandwidth}`)
+                $('.publitio-bandwidth-limit').text(`Bandwidth limit: ${maxBandwidth}`)
+              }
+          
+              const userPlan = wordpressData.account_plan ?? 'None'
+              $('#publitio-plan-used').text(userPlan)
+        }
+
         function getPublitioAccountSettings() {
-            jQuery.get(ajaxurl, {
-                action: 'pwpo_get_offloading_account_settings'
-            }, function (response) {
+            jQuery.get(ajaxurl, { action: 'pwpo_get_offloading_account_settings' }, function (response) {
                 handleResponse(response);
-            })
+            });
         }
 
         function addFoldersList(folders, defaultFolderId = '') {
@@ -167,8 +277,6 @@
         function addCnameList(cnames, defaultCnameId = '') {
             clearCnameList();
             if (cnames !== undefined && cnames !== null) {
-                //off via &wpo=true api call
-                //$('<option value="">https://media.publit.io</option>').appendTo($('#default-publitio-offloading-cname'));
                 cnames.forEach((cname) => {
                     $('<option value="' + cname.url + '">' + cname.url + '</option>').appendTo($('#default-publitio-offloading-cname'));
                 })
@@ -198,184 +306,22 @@
             }
         }
 
-        function clearBlocks() {
-            $('#error-offload-block').empty();
-            $('#success-offload-block').empty();
-            $('#folder-success-block').empty();
-            $('#folder-error-block').empty();
-            $('#folder-success-image-quality').empty();
-            $('#folder-error-image-quality').empty();
-            $('#folder-success-video-quality').empty();
-            $('#folder-error-video-quality').empty();
-            $('#cname-success-block').empty();
-            $('#cname-error-block').empty();
-            $('#success-checkbox-block').empty();
-            $('#error-checkbox-block').empty();
-            $('#success-allow-block').empty();
-            $('#error-allow-block').empty();
-            $('#success-delete-block').empty();
-            $('#error-delete-block').empty();
-            $('#media-upload-message-success').empty();
-            $('#media-upload-message-error').empty();
-            $('#media-replace-message-error').empty();
-            $('#media-replace-message-success').empty();
-            $('#media-delete-message-success').empty();
-            $('#media-delete-message-error').empty();
-        }
-
-
-
-        function showPublitioBlock(elem, content) {
-            $(elem).html(content);
-            var selector = elem.selector;
-            if(timers && timers[selector]){
-                clearTimeout(timers[selector]);
-                timers[selector] = null;
+        function setImageQualityValue(quality) {
+            if (!quality || quality === "") {
+                quality = '80';
             }
-            timers[selector] = setTimeout(function () {
-                clearBlocks();
-            }, 3000);
+            $('#offloading-image-quality > option[value="' + quality + '"]').attr("selected", "selected");
         }
-
-        function updatePublitioDefaultFolderChange() {
-            $('#default-publitio-offloading-folder').bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                    action: 'pwpo_update_default_offloading_folder',
-                    folder_id: event.target.value,
-                    wpnonce: $('#_wpnonce').val()
-                }, function (response) {
-                    if (response.status === STATUSES.SUCCESS) {
-                        showPublitioBlock($('#folder-success-block'), 'Great, default upload folder saved!');
-                    } else {
-                        showPublitioBlock($('#folder-error-block'), 'Something went wrong.');
-                    }
-                });
-            });
-        }
-
-        function updatePublitioDefaultCnameChange() {
-            $('#default-publitio-offloading-cname').bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                    action: 'pwpo_update_default_offloading_cname',
-                    cname_url: event.target.value,
-                    wpnonce: $('#_wpnonce').val()
-                }, function (response) {
-                    if (response.status === STATUSES.SUCCESS) {
-                        showPublitioBlock($('#cname-success-block'), 'Great, default CNAME saved!');
-                    } else {
-                        showPublitioBlock($('#cname-error-block'), 'Something went wrong.');
-                    }
-                });
-            });
-        }
-
-        function changePublitioImageQuality() {
-            $("#offloading-image-quality").bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                        action: 'pwpo_update_image_offloading_quality',
-                        image_quality: event.target.value,
-                        wpnonce: $('#_wpnonce').val()
-                    }, function (response) {
-                        if (response.status === STATUSES.SUCCESS) {
-                            showPublitioBlock($('#folder-success-image-quality'), 'Great, image quality updated!');
-                        } else {
-                            showPublitioBlock($('#folder-error-image-quality'), 'Something went wrong.');
-                        }
-                    }
-                )
-            })
-        }
-
-        function changePublitioVideoQuality() {
-            $("#offloading-video-quality").bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                        action: 'pwpo_update_video_offloading_quality',
-                        video_quality: event.target.value,
-                        wpnonce: $('#_wpnonce').val()
-                    }, function (response) {
-                        if (response.status === STATUSES.SUCCESS) {
-                            showPublitioBlock($('#folder-success-video-quality'), 'Great, video quality updated!');
-                        } else {
-                            showPublitioBlock($('#folder-error-video-quality'), 'Something went wrong.');
-                        }
-                    }
-                )
-            })
-        }
-
-        function checkboxPublitioFiles() {
-            $(".files-offload-input").bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                        action: 'pwpo_update_files_checkbox',
-                        id: event.target.id,
-                        value: event.target.checked,
-                        wpnonce: $('#_wpnonce').val()
-                    }, function (response) {
-                        if (response.status === STATUSES.SUCCESS) {
-                            showPublitioBlock($('#success-checkbox-block'), 'Great!');
-                        } else {
-                            showPublitioBlock($('#error-checkbox-block'), 'Something went wrong.');
-                        }
-                    }
-                )
-            })
-        }
-
-        function changePublitioDelete() {
-            $("#delete_checkbox").bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                        action: 'pwpo_update_delete_checkbox',
-                        delete_checkbox: event.target.checked,
-                        wpnonce: $('#_wpnonce').val()
-                    }, function (response) {
-                        if (response.status === STATUSES.SUCCESS) {
-                            showPublitioBlock($('#success-delete-block'), 'Great!');
-                        } else {
-                            showPublitioBlock($('#error-delete-block'), 'Something went wrong.');
-                        }
-                    }
-                )
-            })
-        }
-
-        function replacePublitioMedia() {
-            $("#replace_checkbox").bind('change', function (event) {
-                if(event.target.checked === true) {
-                    if (confirm('Are you sure you want to delete files from Media library once they are uploaded to Publitio? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
-                        jQuery.post(ajaxurl, {
-                                action: 'pwpo_update_replace_media',
-                                replace_checkbox: event.target.checked,
-                                wpnonce: $('#_wpnonce').val()
-                            }, function (response) {
-                                if (response.status === STATUSES.SUCCESS) {
-                                    showPublitioBlock($('#media-replace-message-success'), 'Great!');
-                                } else {
-                                    showPublitioBlock($('#media-replace-message-error'), 'Something went wrong.');
-                                }
-                            }
-                        )
-                    } else {
-                        $("#replace_checkbox").attr('checked', false);
-                    }
-                } else {
-                    jQuery.post(ajaxurl, {
-                            action: 'pwpo_update_replace_media',
-                            replace_checkbox: event.target.checked,
-                            wpnonce: $('#_wpnonce').val()
-                        }, function (response) {
-                            if (response.status === STATUSES.SUCCESS) {
-                                showPublitioBlock($('#media-replace-message-success'), 'Great!');
-                            } else {
-                                showPublitioBlock($('#media-replace-message-error'), 'Something went wrong.');
-                            }
-                        }
-                    )
-                }
-            })
+        
+        function setVideoQualityValue(quality) {
+            if (!quality || quality === "") {
+                quality = '480';
+            }
+            $('#offloading-video-quality > option[value="' + quality + '"]').attr("selected", "selected");
         }
 
         function syncPublitioMediaFiles() {
-            $('#media-offload').bind('click', function (event) {
+            $('#publitio-sync-now-button').on('click', function (event) {
                 let media_list = null;
                 jQuery.get(ajaxurl, {
                     action: 'pwpo_get_media_list'
@@ -437,16 +383,15 @@
                         $("#loadPublitioNumber").html(0);
                         $("#publitioBar").width("0%");
                         if(resultInfo.numOfFailed !== 0) {
-                            showPublitioBlock($('#media-upload-message-success'), resultInfo.numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+resultInfo.numOfFailed+' failed)</span>');
+                            showToast(resultInfo.numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+resultInfo.numOfFailed+' failed)</span>', 'success');
                         } else {
-                            showPublitioBlock($('#media-upload-message-success'), 'Your media library is synchronized successfully!');
+                            showToast('Your media library is synchronized successfully!', 'success');
                         }
 
                     }, 1000)
                 }
             }
         }
-
 
         function syncPublitioMedia(media_list) {
             if (media_list !== undefined && media_list !== null && media_list.length > 0) {
@@ -460,12 +405,12 @@
                     recursiveMediaLoading(media_list,0,resultInfo);
                 }
             } else {
-                showPublitioBlock($('#media-upload-message-success'), 'Your media library is already synchronized!');
+                showToast('Your media library is already synchronized!', 'error');
             }
         }
 
         function deletePublitioMediaFiles() {
-            $('#media-delete').bind('click', function (event) {
+            $('#media-delete').on('click', function (event) {
                 let media_list = null;
                 jQuery.get(ajaxurl, {
                     action: 'pwpo_get_media_list_for_delete'
@@ -514,9 +459,9 @@
                                     $("#loadPublitioNumber").html(0);
                                     $("#publitioBar").width("0%");
                                     if(numOfDeletedFailed !== 0) {
-                                        showPublitioBlock($('#media-delete-message-success'), numOfDeleted +' deleted successfully!' + '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>');
+                                        showToast(numOfDeleted +' deleted successfully!' + '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>', 'success');
                                     } else {
-                                        showPublitioBlock($('#media-delete-message-success'), 'All media files are deleted successfully!');
+                                        showToast('All media files are deleted successfully!', 'success');
                                     }
 
                                 }, 1000)
@@ -525,92 +470,31 @@
                     })
                 }
             } else {
-                showPublitioBlock($('#media-delete-message-success'), 'All media files are already deleted!');
+                showToast('All media files are already deleted!', 'error');
             }
         }
 
-
-        function changePublitioAllowDownload() {
-            $('#allow-download').bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                    action: 'pwpo_update_allow_download',
-                    allow: event.target.checked,
-                    wpnonce: $('#_wpnonce').val()
-                }, function (response) {
-                    if (response.status === STATUSES.SUCCESS) {
-                        showPublitioBlock($('#success-allow-block'), 'Great!');
-                    } else {
-                        showPublitioBlock($('#error-allow-block'), 'Something went wrong.');
-                    }
-                });
-            });
-        }
-
-        function changePublitioOffloadTemplates() {
-            $('#offload-templates').bind('change', function (event) {
-                jQuery.post(ajaxurl, {
-                    action: 'pwpo_update_offload_templates',
-                    allow: event.target.checked,
-                    wpnonce: $('#_wpnonce').val()
-                }, function (response) {
-                    if (response.status === STATUSES.SUCCESS) {
-                        showPublitioBlock($('#success-allow-block'), 'Great!');
-                    } else {
-                        showPublitioBlock($('#error-allow-block'), 'Something went wrong.');
-                    }
-                });
-            });
-        }
-
-        function setPublitioCheckBoxValue(id,allow) {
-            if (allow !== '') {
-                setPublitioCheckBoxDisabled(id, false);
-                if (allow === 'no') {
-                    $("#"+id).attr('checked', false);
-                } else {
-                    $("#"+id).attr('checked', true);
-                }
-            } else {
-                setPublitioCheckBoxDisabled(id, true);
+        function showToast(content, type) {
+            let style = {
+              background: "linear-gradient(135deg,#73a5ff,#4099de)",
+              borderRadius: "5px",
             }
-        }
-
-        function setPublitioCheckBoxDisabled(id, value) {
-            if (value) {
-                $("#" + id).attr("disabled", true);
-            } else {
-                $("#" + id).removeAttr("disabled");
+        
+            if(type === 'error') {
+              style = {
+                background: "linear-gradient(135deg,#ED775A,#E4004B)",
+                borderRadius: "5px",
+              }
             }
-        }
-
-        function setPublitioImageQualityValue(quality) {
-            if (!quality || quality === "") {
-                quality = '80';
-            }
-            $('#offloading-image-quality > option[value="' + quality + '"]').attr("selected", "selected");
-        }
-
-        function setPublitioVideoQualityValue(quality) {
-            if (!quality || quality === "") {
-                quality = '480';
-            }
-            $('#offloading-video-quality > option[value="' + quality + '"]').attr("selected", "selected");
-        }
-
-        function setPublitioFilesCheckbox(id, value) {
-            if ((!value || value === "" || value === 'yes') && (id !== 'delete_checkbox') && (id !== 'replace_checkbox')) {
-                $("#" + id).attr('checked', true);
-            } else if (id === 'delete_checkbox' || id === 'replace_checkbox') {
-                if (value === "yes") {
-                    $("#" + id).attr('checked', true);
-                } else {
-                    $("#" + id).attr('checked', false);
-                }
-            } else {
-                $("#" + id).attr('checked', false);
-            }
-        }
+        
+            Toastify({
+              text: content,
+              duration: 3000,
+              gravity: 'bottom',
+              position: 'center',
+              style: style,
+            }).showToast();
+          }
     }
 
 )(jQuery);
-
