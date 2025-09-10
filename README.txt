@@ -129,6 +129,9 @@ Publitio is cloud-based media asset management service.
 = 1.2.6 =
 * UI and Security Improvements
 
+= 1.2.7 =
+* Small commit
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -211,3 +214,6 @@ Just install
 
 = 1.2.6 =
 * UI and Security Improvements
+
+= 1.2.7 =
+* Small commit
