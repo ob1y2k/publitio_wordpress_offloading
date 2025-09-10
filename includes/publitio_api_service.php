@@ -42,19 +42,25 @@ class PublitioApiService
      * Get list of account settings for Publitio account
      * @return object
      */
-    public function get_publitio_account_settins()
+    public function get_publitio_account_settings()
     {
-        if (PWPO_AuthService::is_user_authenticated()) {
+        if (PWPO_AuthService::validate_api_credentials() == 200) {
+            if ($this->publitio_api === NULL) {
+                $key = PWPO_AuthService::get_key();
+                $secret = PWPO_AuthService::get_secret();
+                $this->publitio_api = new \Publitio\API($key, $secret);
+            }
             $resp = $this->publitio_api->call('/folders/tree', 'GET');
             $cnames = $this->publitio_api->call('/cnames/list', 'GET', array(
                         'wpo' => true
                     ));
+            $wordpress_data = $this->publitio_api->call('/wordpress/data', 'GET');
             $resp->cnames = $cnames->cnames;
+            $resp->wordpress_data = $wordpress_data;
 
             //if no default cname set, make it no 1
             $default_cname = get_option('publitio_offloading_default_cname');
             if(!$default_cname) {
-                //test
                 $cname_url = $cnames->cnames[0]->url;
                 update_option('publitio_offloading_default_cname', esc_url_raw($cname_url));
             }            
@@ -579,7 +585,7 @@ class PublitioApiService
      */
     private function check_credentials()
     {
-        $response = $this->get_publitio_account_settins();
+        $response = $this->get_publitio_account_settings();
         $this->handle_response($response);
     }
 
@@ -635,6 +641,10 @@ class PublitioApiService
         update_option('publitio_offloading_audio_checkbox', 'yes');
         update_option('publitio_offloading_document_checkbox', 'yes');
         update_option('publitio_offloading_offload_templates', 'yes');
+        update_option('publitio_offloading_image_checkbox', 'yes');
+        update_option('publitio_offloading_video_checkbox', 'yes');
+        update_option('publitio_offloading_audio_checkbox', 'yes');
+        update_option('publitio_offloading_document_checkbox', 'yes');
 
 
         wp_send_json([
@@ -652,7 +662,8 @@ class PublitioApiService
             'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
             'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
             'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
-            'replace_checkbox' => get_option('publitio_offloading_replace_checkbox')
+            'replace_checkbox' => get_option('publitio_offloading_replace_checkbox'),
+            'wordpress_data' => $response->wordpress_data->message
         ]);
     }
 

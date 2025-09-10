@@ -120,6 +120,9 @@ Publitio is cloud-based media asset management service.
 = 1.2.3 =
 * WP 6.8 check OK && security fixes
 
+= 1.2.4 =
+* UI and Security Improvements
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -194,3 +197,5 @@ Just install
 = 1.2.3 =
 * WP 6.8 check OK && security fixes
 
+= 1.2.4 =
+* UI and Security Improvements
