@@ -3,7 +3,7 @@
 class PWPO_AuthService {
 
     /**
-     * Check if user is is authenticated
+     * Check if user is is authenticated 
      * @return bool
      */
     public static function is_user_authenticated() {

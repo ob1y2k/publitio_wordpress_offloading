@@ -11,7 +11,7 @@ require_once PUBLITIO_OFFLOADING_PLUGIN_PATH . '/includes/class-publitio-offload
 class PublitioApiService
 {
     /**
-     * Instance of PublitioApiService class
+     * Instance of PublitioApiService class 
      */
     private $publitio_api;
 

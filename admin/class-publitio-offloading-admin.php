@@ -6,7 +6,7 @@
 require_once PUBLITIO_OFFLOADING_PLUGIN_PATH . '/includes/publitio_api_service.php';
 
 /**
- * Class Admin - handle all plugin changes on admin side
+ * Class Admin - handle all plugin changes on admin side 
  */
 class PWPO_Admin
 {
