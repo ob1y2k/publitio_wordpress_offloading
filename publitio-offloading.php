@@ -16,7 +16,7 @@
  * Plugin Name:       Publitio Offloading
  * Plugin URI:        https://publit.io/
  * Description:       This WordPress plugin offloads your media library to Publitio
- * Version:           1.2.4
+ * Version:           1.2.5
  * Author:            Publitio
  * Author URI:        https://publit.io
  * License:           GPL-2.0+
