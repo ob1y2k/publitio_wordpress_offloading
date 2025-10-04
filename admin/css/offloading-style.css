@@ -77,7 +77,7 @@
     pointer-events: none;
  }
 
- .publitio-page-warning-message {
+ .publitio-offloading-page-warning-message {
      display: none;
      align-items: center;
      gap: 10px;
@@ -89,7 +89,7 @@
      border-left: 5px solid rgba(133, 77, 14, 0.5);
  }
  
- .publitio-page-warning-message svg {
+ .publitio-offloading-page-warning-message svg {
      color: rgba(133, 77, 14, 0.5);
      height: 25px;
  }

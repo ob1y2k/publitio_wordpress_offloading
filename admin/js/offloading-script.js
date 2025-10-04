@@ -189,13 +189,13 @@
           }
 
         function authSuccess() {
-            $('.publitio-page-warning-message').css('display', 'none')
+            $('.publitio-offloading-page-warning-message').css('display', 'none')
             $(".publitio-requires-auth").css("opacity", "1");
             $(".publitio-requires-auth").css("pointer-events", "auto");
         }
 
         function authError() {
-            $('.publitio-page-warning-message').css('display', 'flex')
+            $('.publitio-offloading-page-warning-message').css('display', 'flex')
             $(".publitio-requires-auth").css("opacity", "0.5");
             $(".publitio-requires-auth").css("pointer-events", "none");
         }
