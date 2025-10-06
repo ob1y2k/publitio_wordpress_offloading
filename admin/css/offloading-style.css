@@ -72,12 +72,12 @@
     display: none;
 }
 
- .publitio-requires-auth {
+ .pwpo-requires-auth {
     opacity: 0.5;
     pointer-events: none;
  }
 
- .publitio-page-warning-message {
+ .pwpo-page-warning-message {
      display: none;
      align-items: center;
      gap: 10px;
@@ -89,7 +89,7 @@
      border-left: 5px solid rgba(133, 77, 14, 0.5);
  }
  
- .publitio-page-warning-message svg {
+ .pwpo-page-warning-message svg {
      color: rgba(133, 77, 14, 0.5);
      height: 25px;
  }
@@ -123,7 +123,7 @@
      margin-left: 10px;
  }
  
- .publitio-page-data {
+ .pwpo-page-data {
      display: flex;
      height: 120px;
      width: 100%;
@@ -133,7 +133,7 @@
      flex-direction: row;
  }
  
- .publitio-page-data-item {
+ .pwpo-page-data-item {
      height: 120px;
      width: calc(100% / 3);
      border-right: 1px solid #eeeeee7d;
@@ -143,7 +143,7 @@
      justify-content: space-evenly;
  }
  
- .publitio-page-data-item:last-child {
+ .pwpo-page-data-item:last-child {
      border-right: none;
  }
  
@@ -157,8 +157,8 @@
      justify-content: center;
  }
  
- .publitio-storage-used,
- .publitio-bandwidth-used {
+ .pwpo-storage-used,
+ .pwpo-bandwidth-used {
      border-bottom: 1px solid #eeeeee7d;
      padding-bottom: .5rem;
      margin-bottom: .5rem;
@@ -173,8 +173,8 @@
      height: 100%;
  }
  
- .publitio-storage-chart,
- .publitio-bandwidth-chart {
+ .pwpo-storage-chart,
+ .pwpo-bandwidth-chart {
      position: relative;
      width: 85px;
      height: 85px;
@@ -201,8 +201,8 @@
      position: relative;
  }
  
- .publitio-storage-percentage,
- .publitio-bandwidth-percentage {
+ .pwpo-storage-percentage,
+ .pwpo-bandwidth-percentage {
      font-size: 1rem;
      font-weight: bold;
      color: #4099de;
@@ -440,22 +440,22 @@
  }
  
  @media (max-width: 768px) {
-     .publitio-page-data {
+     .pwpo-page-data {
          flex-wrap: wrap;
          height: auto;
      }
  
-     .publitio-page-data-item:first-child {
+     .pwpo-page-data-item:first-child {
          border-right: 1px solid #ccc;
      }
  
-     .publitio-page-data-item {
+     .pwpo-page-data-item {
          width: calc(50% - 1px);
          border: 0;
          border-bottom: 1px solid #ccc;
      }
  
-     .publitio-page-data-item:last-child {
+     .pwpo-page-data-item:last-child {
          width: 100%;
          border-bottom: 0;
      }
@@ -469,13 +469,13 @@
      .publitio-page-review {
          display: none;
      }
-     .publitio-page-data-item {
+     .pwpo-page-data-item {
          width: 100%;
      }
-     .publitio-page-data-item:first-child {
+     .pwpo-page-data-item:first-child {
          border-right: 0;
      }
-     .publitio-page-data-item:last-child {
+     .pwpo-page-data-item:last-child {
          border-bottom: 0;
      }
  

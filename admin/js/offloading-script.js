@@ -189,15 +189,33 @@
           }
 
         function authSuccess() {
-            $('.publitio-page-warning-message').css('display', 'none')
-            $(".publitio-requires-auth").css("opacity", "1");
-            $(".publitio-requires-auth").css("pointer-events", "auto");
+            $('.pwpo-page-warning-message').css('display', 'none')
+            $(".pwpo-requires-auth").css("opacity", "1");
+            $(".pwpo-requires-auth").css("pointer-events", "auto");
         }
 
         function authError() {
-            $('.publitio-page-warning-message').css('display', 'flex')
-            $(".publitio-requires-auth").css("opacity", "0.5");
-            $(".publitio-requires-auth").css("pointer-events", "none");
+            $('.pwpo-page-warning-message').css('display', 'flex')
+            $(".pwpo-requires-auth").css("opacity", "0.5");
+            $(".pwpo-requires-auth").css("pointer-events", "none");
+
+            const $chartStorage = $('.pwpo-storage-chart')
+            const $percentageStorage = $('.pwpo-storage-percentage')
+            $percentageStorage.text('0%')
+            $chartStorage.attr('data-percentage', 0)
+            $chartStorage.css('background', 'conic-gradient(#e5e7eb 0deg, #e5e7eb 360deg )')
+            $('.pwpo-storage-used').text(`Storage used: 0B`)
+            $('.pwpo-storage-limit').text(`Storage limit: 0B`)
+
+            const $chartBandwidth = $('.pwpo-bandwidth-chart')
+            const $percentageBandwidth = $('.pwpo-bandwidth-percentage')
+            $percentageBandwidth.text('0%')
+            $chartBandwidth.attr('data-percentage', 0)
+            $chartBandwidth.css('background', 'conic-gradient(#e5e7eb 0deg, #e5e7eb 360deg )')
+            $('.pwpo-bandwidth-used').text(`Bandwidth used: 0B`)
+            $('.pwpo-bandwidth-limit').text(`Bandwidth limit: 0B`)
+
+            $('#pwpo-plan-used').text('None')
         }
 
         function updateCharts(wordpressData) {
@@ -209,9 +227,9 @@
               const maxStorage = wordpressData.account_max_storage ?? '0B'
               const percentStorage = wordpressData.account_storage_percentage ?? 0
               
-              const $chartStorage = $('.publitio-storage-chart')
-              const $percentageStorage = $('.publitio-storage-percentage')
-              
+              const $chartStorage = $('.pwpo-storage-chart')
+              const $percentageStorage = $('.pwpo-storage-percentage')
+
               if ($chartStorage.length && $percentageStorage.length) {
                 $percentageStorage.text(percentStorage + '%')
                 $chartStorage.attr('data-percentage', percentStorage)
@@ -225,16 +243,16 @@
                 )`
                 $chartStorage.css('background', gradient)
                       
-                $('.publitio-storage-used').text(`Storage used: ${usedStorage}`)
-                $('.publitio-storage-limit').text(`Storage limit: ${maxStorage}`)
+                $('.pwpo-storage-used').text(`Storage used: ${usedStorage}`)
+                $('.pwpo-storage-limit').text(`Storage limit: ${maxStorage}`)
               }
           
               const usedBandwidth = wordpressData.account_bandwidth ?? '0B'
               const maxBandwidth = wordpressData.account_max_bandwidth ?? '0B'
               const percentBandwidth = wordpressData.account_bandwidth_percentage ?? 0
           
-              const $chartBandwidth = $('.publitio-bandwidth-chart')
-              const $percentageBandwidth = $('.publitio-bandwidth-percentage')
+              const $chartBandwidth = $('.pwpo-bandwidth-chart')
+              const $percentageBandwidth = $('.pwpo-bandwidth-percentage')
               
               if ($chartBandwidth.length && $percentageBandwidth.length) {
                 $percentageBandwidth.text(percentBandwidth + '%')
@@ -249,12 +267,12 @@
                 )`
                 $chartBandwidth.css('background', gradient)
                       
-                $('.publitio-bandwidth-used').text(`Bandwidth used: ${usedBandwidth}`)
-                $('.publitio-bandwidth-limit').text(`Bandwidth limit: ${maxBandwidth}`)
+                $('.pwpo-bandwidth-used').text(`Bandwidth used: ${usedBandwidth}`)
+                $('.pwpo-bandwidth-limit').text(`Bandwidth limit: ${maxBandwidth}`)
               }
           
               const userPlan = wordpressData.account_plan ?? 'None'
-              $('#publitio-plan-used').text(userPlan)
+              $('#pwpo-plan-used').text(userPlan)
         }
 
         function getPublitioAccountSettings() {
