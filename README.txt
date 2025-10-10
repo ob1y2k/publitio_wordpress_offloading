@@ -8,7 +8,7 @@ Stable tag: 5.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Publitio Offloading automatically transfers and serves your images, videos, audios, documents, and archives from [Publitio](https://publit.io/)’s cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
+Publitio Offloading plugin automatically transfers and serves your images, videos, audios, documents, and archives from [Publitio](https://publit.io/)’s cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
 
 == Description ==
 
