@@ -14,7 +14,7 @@ Publitio Offloading automatically transfers and serves your images, videos, audi
 
 Media & Document Cloud Storage and Delivery
 
-Publitio Offloading - Media & Document Cloud Storage and Delivery
+Publitio Offloading - Media Asset Management, Cloud Storage and Delivery
 
 Publitio Offloading plugin seamlessly integrates your WordPress media library with [Publitio](https://publit.io), 
 a secure, scalable cloud-based media asset management and delivery platform. 
@@ -44,26 +44,50 @@ Learn More & Support:
 
     - Setup guide: [How to setup Publitio Offloading Wordpress Plugin](https://publit.io/community/blog/wordpress-offloading-with-publitio)
     - API & Documentation: [Publitio API](https://publit.io/docs)
-    - Contact Support: support@publit.io, contact us through a webwidget on our site or write on our [Community Board](https://dashboard.publit.io/app/dashboards/community)
+    - Contact Support: support@publit.io, contact us through a support webwidget on our site or write on our [Community Board](https://dashboard.publit.io/app/dashboards/community)
     - This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
 
 
 == Installation ==
 
-1. Upload plugin to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. On the left menu find Publitio Offloading and enter API & Secret keys, and set desired options
-4. On each new/edit post/page media files (images, vidoes, audios and/or pdf) will be offloaded to and served via Publitio
+1. Go to Plugins > Add New in WordPress and search for “Publitio Offloading”.
+2. Click Install Now and then Activate the plugin.
+3. Create a free Publitio account and get your API Key and Secret from your Publitio dashboard.
+4. In WordPress, go to Settings > Publitio offloading, enter your API credentials, save, and enjoy automated offloading and delivery of your media files via Publitio’s CDN.
 
 == Frequently Asked Questions ==
 
-= Is this Plugin free? =
+= Is the Publitio Offloading plugin free? =
 
-Yes. You will need Publitio account (also free) to obtain API keys
+Yes, it is free to use. You just need a Publitio account, which is also free to create.
 
-= What is Publitio? =
+= What does the Publitio Offloading plugin do? =
 
-Publitio is cloud-based media asset management service.
+It offloads your WordPress media library—including images, videos, audios, documents, and archives—to Publitio’s cloud storage and replaces local media URLs with Publitio URLs for faster delivery.
+
+= Can I keep local copies of my media? =
+
+Yes, you can choose to keep media files locally and have a copy uploaded to Publitio, or serve all media directly from Publitio’s cloud.
+
+= How do I set up the plugin? =
+
+Install and activate the plugin, enter your Publitio API Key and Secret in plugin settings, then configure your offloading preferences.
+
+= Will offloading my media improve website performance? =
+
+Yes, by serving media from Publitio’s global CDN, your website speed improves, and server storage load is reduced.
+
+= Can I offload existing media files? =
+
+Yes, the plugin supports bulk offloading of your existing media library to Publitio.
+
+= Is my media secure on Publitio? =
+
+Publitio provides domain-level protection and HLS encryption for files to prevent unauthorized access.
+
+= Who do I contact for plugin support? =
+
+Send an email to support@publit.io, use the sites support webwidget or contact us on our community board for assistance.
 
 == Screenshots ==
 

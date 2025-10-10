@@ -32,5 +32,5 @@ Learn More & Support:
 
     - Setup guide: [How to setup Publitio Offloading Wordpress Plugin](https://publit.io/community/blog/wordpress-offloading-with-publitio)
     - API & Documentation: [Publitio API](https://publit.io/docs)
-    - Contact Support: support@publit.io, contact us through a webwidget on our site or write on our [Community Board](https://dashboard.publit.io/app/dashboards/community)
+    - Contact Support: support@publit.io, contact us through a support webwidget on our site or write on our [Community Board](https://dashboard.publit.io/app/dashboards/community)
     - This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
