@@ -36,6 +36,7 @@ class PWPO_Admin
         add_action('wp_ajax_pwpo_update_replace_media', array($this, 'pwpo_update_replace_media'));
         add_action('wp_ajax_pwpo_get_media_list_for_delete', array($this, 'pwpo_get_media_list_for_delete'));
         add_action('wp_ajax_pwpo_delete_media_file', array($this, 'pwpo_delete_media_file'));
+        add_action('admin_notices', array($this, 'pwpo_display_admin_notice'));
     }
 
     /**
@@ -67,14 +68,11 @@ class PWPO_Admin
      */
     public function pwpo_enqueue()
     {
-        if (isset( $_GET['page'] ) && $_GET['page'] == 'publitio_offloading' ) {
-            wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
-			wp_enqueue_style( 'publitio-offloading-toastify-css', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' );
+        wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
+        wp_enqueue_style( 'publitio-offloading-toastify-css', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' );
 
-            wp_enqueue_script('offloadingscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js', array('jquery'));
-			wp_enqueue_script( 'publitio-offloading-toastify-js', 'https://cdn.jsdelivr.net/npm/toastify-js', array( 'jquery' ), null, true );
-
-        }
+        wp_enqueue_script('offloadingscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js', array('jquery'));
+        wp_enqueue_script( 'publitio-offloading-toastify-js', 'https://cdn.jsdelivr.net/npm/toastify-js', array( 'jquery' ), null, true );
     }
 
     /**
@@ -84,6 +82,12 @@ class PWPO_Admin
     {
         $settings_link = '<a href="admin.php?page=publitio_offloading">Settings</a>';
         array_push($links, $settings_link);
+
+        $show_notice = get_option('publitio_offloading_show_notice', 'no');
+        if($show_notice === 'yes') {
+            $links[] = '<a href="https://dashboard.publit.io/app/onboarding?trial=true" target="_blank" class="pwpo-text-green">Free trial</a>';
+        }
+
         return $links;
     }
 
@@ -329,6 +333,24 @@ class PWPO_Admin
 
         if (isset($_POST['attach_id'])) {
             $this->publitioApi->deleteAtachment(sanitize_text_field($_POST['attach_id']));
+        }
+    }
+
+    /**
+     * Display admin notice when wordpress_data message is true
+     */
+    public function pwpo_display_admin_notice()
+    {
+        $show_notice = get_option('publitio_offloading_show_notice', 'no');
+        
+        if ($show_notice === 'yes' && (!isset($_GET['page']) || 
+            isset($_GET['page']) != 'publitio_offloading' ||
+            isset($_GET['page']) != 'publitio_settings')) {
+            ?>
+            <div class="notice notice-info is-dismissible">
+                <p><strong>Publitio Offloading:</strong> Your free trial is available. <a href="https://dashboard.publit.io/app/onboarding?trial=true" target="_blank">Try Publitio PREMIUM plan</a> free for 14 days.</p>
+            </div>
+            <?php
         }
     }
 

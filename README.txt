@@ -8,22 +8,45 @@ Stable tag: 5.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This WordPress plugin offloads your media library to [Publitio](https://publit.io/).
+Publitio Offloading automatically transfers and serves your images, videos, audios, documents, and archives from [Publitio](https://publit.io/)’s cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
 
 == Description ==
 
-Publitio Offloading plugin offloads your media library to [Publitio - Media Asset Management in the cloud](https://publit.io) and replaces links to images/videos within posts/pages.
-You may keep the media locally and make a copy to Publitio cloud storage, or just serve it all from Publitio.
+Media & Document Cloud Storage and Delivery
 
-Read tutorial [How to setup Publitio Offloading Wordpress Plugin](https://publit.io/community/blog/wordpress-offloading-with-publitio)
+Publitio Offloading - Media & Document Cloud Storage and Delivery
 
-For more info check out [Publitio](https://publit.io) website
+Publitio Offloading plugin seamlessly integrates your WordPress media library with [Publitio](https://publit.io), 
+a secure, scalable cloud-based media asset management and delivery platform. 
+Effortlessly offload and serve your images, videos, audios, documents, 
+and archives from Publitio’s fast global CDN, improving site speed and reducing your server load.
 
-Or check detailed documentation for [Publitio API](https://publit.io/docs)
 
-This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
+Key Features:
 
-Plugin is in BETA and testing phase. For support send us email at support@publit.io
+    - Offload WordPress media, documents, and archive files to [Publitio](https://publit.io) cloud storage
+    - Replace and serve all media URLs automatically from Publitio’s secure CDN
+    - Flexible options to keep local copies or serve fully remote files
+    - URL-based on-the-fly media transformations: resizing, cropping, watermarking, transcoding, and more
+    - Protect content with domain restrictions
+    - Easy setup with comprehensive documentation and tutorials
+
+
+Why Use Publitio Offloading?
+
+Boost your website performance and SEO by delivering media and documents faster worldwide. 
+Reduce hosting costs and scale effortlessly with Publitio’s pay-as-you-go pricing model, robust security, and global infrastructure.
+
+Start offloading your WordPress media, documents, and archives today with [Publitio](https://publit.io)—trusted by 70,000+ users!
+
+
+Learn More & Support:
+
+    - Setup guide: [How to setup Publitio Offloading Wordpress Plugin](https://publit.io/community/blog/wordpress-offloading-with-publitio)
+    - API & Documentation: [Publitio API](https://publit.io/docs)
+    - Contact Support: support@publit.io, contact us through a webwidget on our site or write on our [Community Board](https://dashboard.publit.io/app/dashboards/community)
+    - This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
+
 
 == Installation ==
 
@@ -45,6 +68,9 @@ Publitio is cloud-based media asset management service.
 == Screenshots ==
 
 1. Publitio Offloading Settings page
+2. Adding media with your editor
+3. Offloaded media on your page (Video & Image)
+4. Offloaded media on your page (Image & Audio)
 
 == Changelog ==
 
@@ -132,6 +158,9 @@ Publitio is cloud-based media asset management service.
 = 1.2.7 =
 * Small commit
 
+= 1.2.8 =
+* Quality of life fixes
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -217,3 +246,6 @@ Just install
 
 = 1.2.7 =
 * Small commit
+
+= 1.2.8 =
+* Quality of life fixes

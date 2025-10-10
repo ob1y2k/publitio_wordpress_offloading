@@ -69,7 +69,7 @@
         });
 
         function updatePublitioSettingsButtonClick() {
-            $('#update-offloading-button').on('click', function (event) {
+            $('#pwpo-update-offloading-button').on('click', function (event) {
                 if(updateLoading) {
                     return;
                 }
@@ -92,8 +92,8 @@
                     video_checkbox: $('#video_checkbox').is(':checked'),
                     audio_checkbox: $('#audio_checkbox').is(':checked'),
                     document_checkbox: $('#document_checkbox').is(':checked'),
-                    folder_id: $('#default-publitio-offloading-folder').val(),
-                    cname_url: $('#default-publitio-offloading-cname').val(),
+                    folder_id: $('#pwpo-default-offloading-folder').val(),
+                    cname_url: $('#pwpo-default-offloading-cname').val(),
                     image_quality: $('#offloading-image-quality').val(),
                     video_quality: $('#offloading-video-quality').val(),
                     delete_checkbox: $('#delete_checkbox').is(':checked'),
@@ -118,7 +118,7 @@
         }
 
         function updatePublitioDangerSettingsButtonClick() {
-            $('#publitio-update-danger-settings-button').on('click', function (event) {
+            $('#pwpo-update-danger-settings-button').on('click', function (event) {
                 if(updateDangerLoading) {
                     return;
                 }
@@ -162,30 +162,30 @@
 
         function setUpdateLoading(loading) {
             if(loading) {
-              $('#update-offloading-button').text('Updating Settings...')
-              $('#update-offloading-button').css('opacity', 0.5)
-              $('#update-offloading-button').css('cursor', 'not-allowed')
+              $('#pwpo-update-offloading-button').text('Updating Settings...')
+              $('#pwpo-update-offloading-button').css('opacity', 0.5)
+              $('#pwpo-update-offloading-button').css('cursor', 'not-allowed')
             } else {
-                $('#update-offloading-button').text('Update Settings')
-                $('#update-offloading-button').css('opacity', 1)
-                $('#update-offloading-button').css('cursor', 'pointer')
+                $('#pwpo-update-offloading-button').text('Update Settings')
+                $('#pwpo-update-offloading-button').css('opacity', 1)
+                $('#pwpo-update-offloading-button').css('cursor', 'pointer')
                 updateLoading = false;
             }
-            $('#update-offloading-button').prop('disabled', loading)
+            $('#pwpo-update-offloading-button').prop('disabled', loading)
           }
 
           function setDangerUpdateLoading(loading) {
             if(loading) {
-                $('#publitio-update-danger-settings-button').text('Updating Settings...')
-                $('#publitio-update-danger-settings-button').css('opacity', 0.5)
-                $('#publitio-update-danger-settings-button').css('cursor', 'not-allowed')
+                $('#pwpo-update-danger-settings-button').text('Updating Settings...')
+                $('#pwpo-update-danger-settings-button').css('opacity', 0.5)
+                $('#pwpo-update-danger-settings-button').css('cursor', 'not-allowed')
             } else {
-                $('#publitio-update-danger-settings-button').text('Update Settings')
-                $('#publitio-update-danger-settings-button').css('opacity', 1)
-                $('#publitio-update-danger-settings-button').css('cursor', 'pointer')
+                $('#pwpo-update-danger-settings-button').text('Update Settings')
+                $('#pwpo-update-danger-settings-button').css('opacity', 1)
+                $('#pwpo-update-danger-settings-button').css('cursor', 'pointer')
                 updateLoading = false;
             }
-            $('#publitio-update-danger-settings-button').prop('disabled', loading)
+            $('#pwpo-update-danger-settings-button').prop('disabled', loading)
           }
 
         function authSuccess() {
@@ -284,9 +284,9 @@
         function addFoldersList(folders, defaultFolderId = '') {
             clearFolderList();
             if (folders !== undefined && folders !== null) {
-                $('<option value="">/</option>').appendTo($('#default-publitio-offloading-folder'));
+                $('<option value="">/</option>').appendTo($('#pwpo-default-offloading-folder'));
                 folders.forEach((folder) => {
-                    $('<option value="' + folder.id + '">' + folder.path + '</option>').appendTo($('#default-publitio-offloading-folder'));
+                    $('<option value="' + folder.id + '">' + folder.path + '</option>').appendTo($('#pwpo-default-offloading-folder'));
                 });
                 setSelectedOffloadingFolder(defaultFolderId);
             }
@@ -296,31 +296,31 @@
             clearCnameList();
             if (cnames !== undefined && cnames !== null) {
                 cnames.forEach((cname) => {
-                    $('<option value="' + cname.url + '">' + cname.url + '</option>').appendTo($('#default-publitio-offloading-cname'));
+                    $('<option value="' + cname.url + '">' + cname.url + '</option>').appendTo($('#pwpo-default-offloading-cname'));
                 })
                 setSelectedOffloadingCname(defaultCnameId);
             }
         }
 
         function setSelectedOffloadingFolder(id) {
-            $('#default-publitio-offloading-folder > option[value="' + id + '"]').attr("selected", "selected");
+            $('#pwpo-default-offloading-folder > option[value="' + id + '"]').attr("selected", "selected");
         }
 
         function setSelectedOffloadingCname(id) {
-            $('#default-publitio-offloading-cname > option[value="' + id + '"]').attr("selected", "selected");
+            $('#pwpo-default-offloading-cname > option[value="' + id + '"]').attr("selected", "selected");
         }
 
         function clearFolderList(show = false) {
-            $('#default-publitio-offloading-folder').empty();
+            $('#pwpo-default-offloading-folder').empty();
             if (show === true) {
-                $('<option selected hidden disabled>None</option>').appendTo($('#default-publitio-offloading-folder'));
+                $('<option selected hidden disabled>None</option>').appendTo($('#pwpo-default-offloading-folder'));
             }
         }
 
         function clearCnameList(show = false) {
-            $('#default-publitio-offloading-cname').empty();
+            $('#pwpo-default-offloading-cname').empty();
             if (show === true) {
-                $('<option selected hidden disabled>None</option>').appendTo($('#default-publitio-offloading-cname'));
+                $('<option selected hidden disabled>None</option>').appendTo($('#pwpo-default-offloading-cname'));
             }
         }
 
@@ -339,7 +339,7 @@
         }
 
         function syncPublitioMediaFiles() {
-            $('#publitio-sync-now-button').on('click', function (event) {
+            $('#pwpo-sync-now-button').on('click', function (event) {
                 let media_list = null;
                 jQuery.get(ajaxurl, {
                     action: 'pwpo_get_media_list'
@@ -370,12 +370,12 @@
                         resultInfo.numOfFailed++;
                     }).always(function() {
                         let result = (((resultInfo.numOfUploaded + resultInfo.numOfFailed) / resultInfo.numOfMedia) * 100).toFixed(1);
-                        $("#publitioBar").width(result + "%");
+                        $("#pwpo-publitioBar").width(result + "%");
                         let resFailed = "";
                         if (resultInfo.numOfFailed !== 0) {
                             resFailed = ' <span class="red-text">(' + resultInfo.numOfFailed + ' failed)</span>';
                         }
-                        $("#loadPublitioNumber").html(resultInfo.numOfUploaded + " of " + resultInfo.numOfMedia + resFailed + " / " + result + "% completed");
+                        $("#pwpoLoadPublitioNumber").html(resultInfo.numOfUploaded + " of " + resultInfo.numOfMedia + resFailed + " / " + result + "% completed");
                     })
                 );
             });
@@ -397,9 +397,9 @@
                         timers['recursiveTimeout'] = null;
                     }
                     timers['recursiveTimeout'] = setTimeout(function () {
-                        $('#publitio-popup').hide();
-                        $("#loadPublitioNumber").html(0);
-                        $("#publitioBar").width("0%");
+                        $('#pwpo-popup').hide();
+                        $("#pwpoLoadPublitioNumber").html(0);
+                        $("#pwpo-publitioBar").width("0%");
                         if(resultInfo.numOfFailed !== 0) {
                             showToast(resultInfo.numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+resultInfo.numOfFailed+' failed)</span>', 'success');
                         } else {
@@ -419,7 +419,7 @@
                         numOfFailed : 0,
                         numOfMedia : media_list.map((item) => item.length).reduce((a,b) => a+b,0)
                     };
-                    $('#publitio-popup').show();
+                    $('#pwpo-popup').show();
                     recursiveMediaLoading(media_list,0,resultInfo);
                 }
             } else {
@@ -444,7 +444,7 @@
                 if (confirm('Are you sure you want to delete all offloaded Media locally and replace it with Publitio Media URLs? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                     let numOfDeleted = 0;
                     let numOfDeletedFailed = 0;
-                    $('#publitio-popup').show();
+                    $('#pwpo-popup').show();
                     let numOfMediaForDelete = media_list.length;
                     media_list.forEach((media) => {
                         jQuery.post(ajaxurl, {
@@ -460,22 +460,22 @@
                             }
 
                             let result = (((numOfDeleted + numOfDeletedFailed) / numOfMediaForDelete) * 100).toFixed(1);
-                            $("#publitioBar").width(result + "%");
-                            $("#loadPublitioNumber").empty();
+                            $("#pwpo-publitioBar").width(result + "%");
+                            $("#pwpoLoadPublitioNumber").empty();
                             let resDeleteFailed = "";
                             if(numOfDeletedFailed !== 0 ) {
                                 resDeleteFailed = '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>';
                             }
-                            $("#loadPublitioNumber").html(numOfDeleted + " of "+ numOfMediaForDelete + resDeleteFailed  + " / " + result + "% completed");
+                            $("#pwpoLoadPublitioNumber").html(numOfDeleted + " of "+ numOfMediaForDelete + resDeleteFailed  + " / " + result + "% completed");
                             if (numOfDeleted + numOfDeletedFailed === numOfMediaForDelete) {
                                 if(timers && timers['deleteTimeout']) {
                                     clearTimeout(timers['deleteTimeout']);
                                     timers['deleteTimeout'] = null;
                                 }
                                 timers['deleteTimeout'] = setTimeout(function () {
-                                    $('#publitio-popup').hide();
-                                    $("#loadPublitioNumber").html(0);
-                                    $("#publitioBar").width("0%");
+                                    $('#pwpo-popup').hide();
+                                    $("#pwpoLoadPublitioNumber").html(0);
+                                    $("#pwpo-publitioBar").width("0%");
                                     if(numOfDeletedFailed !== 0) {
                                         showToast(numOfDeleted +' deleted successfully!' + '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>', 'success');
                                     } else {
