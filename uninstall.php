@@ -23,3 +23,4 @@ delete_option('publitio_offloading_document_checkbox');
 delete_option('publitio_offloading_replace_checkbox');
 delete_option('publitio_offloading_offload_templates');
 delete_option('publitio_offloading_delete_checkbox');
+delete_option('publitio_offloading_show_notice');

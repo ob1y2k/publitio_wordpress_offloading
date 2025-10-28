@@ -58,6 +58,12 @@ class PublitioApiService
             $resp->cnames = $cnames->cnames;
             $resp->wordpress_data = $wordpress_data;
 
+            if(isset($wordpress_data->account_can_have_trial) && $wordpress_data->account_can_have_trial === true) {
+                update_option('publitio_offloading_show_notice', 'yes');
+            } else {
+                update_option('publitio_offloading_show_notice', 'no');
+            }
+
             //if no default cname set, make it no 1
             $default_cname = get_option('publitio_offloading_default_cname');
             if(!$default_cname) {

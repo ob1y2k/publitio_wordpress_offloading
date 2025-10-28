@@ -15,8 +15,8 @@
  * @wordpress-plugin
  * Plugin Name:       Publitio Offloading
  * Plugin URI:        https://publit.io/
- * Description:       This WordPress plugin offloads your media library to Publitio
- * Version:           1.2.7
+ * Description:       Publitio Offloading plugin automatically transfers and serves your images, videos, audios, documents, and archives from Publitio’s cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
+ * Version:           1.2.8
  * Author:            Publitio
  * Author URI:        https://publit.io
  * License:           GPL-2.0+
@@ -36,7 +36,7 @@ define('PUBLITIO_OFFLOADING_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('PUBLITIO_OFFLOADING_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('PUBLITIO_OFFLOADING_PLUGIN', plugin_basename(__FILE__));
 define('PUBLITIO_OFFLOADING_PUBLITIO_MEDIA', 'https://media.publit.io/file/');
-define('PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.2.7');
+define('PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.2.8');
 
 /**
  * The code that runs during plugin activation.
