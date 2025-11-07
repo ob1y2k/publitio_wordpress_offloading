@@ -176,6 +176,10 @@ class PWPO_Offload
     {
         $filetype = wp_check_filetype($attachment->guid);
 
+        if ($this->is_plugin_upload_context($attachment)) {
+            return null;
+        }
+
         if (get_option('publitio_offloading_image_checkbox') && get_option('publitio_offloading_image_checkbox') === 'no') {
             if ($this->publitioApi->isImageType($filetype['ext'])) {
                 return null;
@@ -208,6 +212,43 @@ class PWPO_Offload
             }
         }
         return $publitioMeta;
+    }
+
+    /**
+     * Determine if current request originated from the plugin upload form.
+     * @param WP_Post $attachment
+     * @return bool
+     */
+    private function is_plugin_upload_context($attachment)
+    {
+        if (!is_admin()) {
+            return false;
+        }
+
+        if (isset($_REQUEST['action'])) {
+            $action = sanitize_key(wp_unslash($_REQUEST['action']));
+            if ($action === 'upload-plugin') {
+                return true;
+            }
+        }
+
+        if (isset($_REQUEST['install-plugin-submit'])) {
+            return true;
+        }
+
+        if (isset($_REQUEST['_wp_http_referer'])) {
+            $referer = wp_unslash($_REQUEST['_wp_http_referer']);
+            if (strpos($referer, 'upload-plugin') !== false) {
+                return true;
+            }
+        }
+
+        $context = get_post_meta($attachment->ID, '_wp_attachment_context', true);
+        if (!empty($context) && in_array($context, array('plugin-install', 'upgrader', 'plugin'), true)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
