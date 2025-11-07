@@ -273,3 +273,6 @@ Just install
 
 = 1.2.8 =
 * Quality of life fixes
+
+= 1.2.9 =
+* Bugfixes
