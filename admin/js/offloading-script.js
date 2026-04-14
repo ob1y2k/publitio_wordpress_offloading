@@ -3,12 +3,13 @@
 
         let timers = {
             recursiveTimeout : null,
-            deleteTimeout : null
-
+            deleteTimeout : null,
+            restoreTimeout : null
         };
 
         let updateLoading = false;
         let updateDangerLoading = false;
+        let pwpoFolderSlimSelect = null;
 
         jQuery.extend({
             whenAll: function(expires, firstParam) {
@@ -61,12 +62,92 @@
         }
 
         $(function () {
-            getPublitioAccountSettings()
+            if ($('#_wpnonce').length) {
+                getPublitioAccountSettings()
+            }
             updatePublitioSettingsButtonClick()
             updatePublitioDangerSettingsButtonClick()
+            rebuildPostDataToggle()
             syncPublitioMediaFiles()
             deletePublitioMediaFiles()
+            restorePublitioMediaFiles()
+            $('#pwpo-popup-close-btn').on('click', function () {
+                hideBulkOperationPopup()
+            })
         });
+
+        function parseAjaxJsonResponse(data) {
+            if (data == null) {
+                return {}
+            }
+            if (typeof data === 'string') {
+                try {
+                    return JSON.parse(data)
+                } catch (e) {
+                    return {}
+                }
+            }
+            return data
+        }
+
+        function hideBulkOperationPopup() {
+            $('#pwpo-popup').hide()
+            $('#pwpo-popup-title').hide()
+            $('#pwpo-popup-close-btn').hide()
+            $('#pwpo-popup-results').hide()
+            $('#pwpoPublitioProgress').show()
+            $('#pwpo-publitioBar').removeClass('pwpo-progress-idle').width('0%')
+            $('#pwpoLoadPublitioNumber').html('')
+            $('#pwpo-popup-results-summary').html('')
+        }
+
+        function showBulkOperationProgress(titleText) {
+            $('#pwpo-popup-close-btn').hide()
+            $('#pwpo-popup-results').hide()
+            $('#pwpoPublitioProgress').show()
+            $('#pwpo-publitioBar').removeClass('pwpo-progress-idle').width('0%')
+            $('#pwpoLoadPublitioNumber').html('')
+            $('#pwpo-popup-title').text(titleText).show()
+            $('#pwpo-popup').show()
+        }
+
+        function showBulkOperationComplete(options) {
+            const o = $.extend({
+                headline: 'Finished',
+                successLabel: 'Completed',
+                summaryHtml: '',
+                success: 0,
+                failed: 0,
+                skipped: 0,
+                total: 0
+            }, options)
+
+            const total = o.total > 0 ? o.total : (o.success + o.failed + o.skipped)
+
+            $('#pwpo-popup-title').text(o.headline).show()
+            $('#pwpoPublitioProgress').hide()
+            $('#pwpo-popup-results-summary').html(o.summaryHtml)
+            $('#pwpo-stat-success-label').text(o.successLabel)
+            $('#pwpo-stat-success').text(o.success)
+            $('#pwpo-stat-failed').text(o.failed)
+            $('#pwpo-stat-skipped').text(o.skipped)
+            $('#pwpo-stat-total').text(total)
+            $('#pwpo-popup-results').show()
+            $('#pwpo-popup-close-btn').show()
+            $('#pwpo-popup').show()
+        }
+
+        function showBulkOperationEmpty(headline, messageHtml, successStatLabel) {
+            showBulkOperationComplete({
+                headline: headline,
+                successLabel: successStatLabel || 'Synced',
+                summaryHtml: messageHtml,
+                success: 0,
+                failed: 0,
+                skipped: 0,
+                total: 0
+            })
+        }
 
         function updatePublitioSettingsButtonClick() {
             $('#pwpo-update-offloading-button').on('click', function (event) {
@@ -97,6 +178,7 @@
                     image_quality: $('#offloading-image-quality').val(),
                     video_quality: $('#offloading-video-quality').val(),
                     delete_checkbox: $('#delete_checkbox').is(':checked'),
+                    rebuild_post_data: $('#pwpo-rebuild-post-data').is(':checked'),
                 }, function (response) {
                     if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
                         clearFolderList(true);
@@ -276,19 +358,62 @@
         }
 
         function getPublitioAccountSettings() {
-            jQuery.get(ajaxurl, { action: 'pwpo_get_offloading_account_settings' }, function (response) {
+            jQuery.post(ajaxurl, {
+                action: 'pwpo_get_offloading_account_settings',
+                wpnonce: $('#_wpnonce').val()
+            }, function (response) {
                 handleResponse(response);
+            });
+        }
+
+        function destroyPwpoFolderSlimSelect() {
+            if (typeof SlimSelect === 'undefined' || !pwpoFolderSlimSelect) {
+                pwpoFolderSlimSelect = null;
+                return;
+            }
+            try {
+                pwpoFolderSlimSelect.destroy();
+            } catch (e) {
+                /* ignore */
+            }
+            pwpoFolderSlimSelect = null;
+        }
+
+        function initPwpoFolderSlimSelect() {
+            destroyPwpoFolderSlimSelect();
+            if (typeof SlimSelect === 'undefined') {
+                return;
+            }
+            const $folder = $('#pwpo-default-offloading-folder');
+            if (!$folder.length || $folder.find('option').length === 0) {
+                return;
+            }
+            const l10n = typeof pwpoOffloadingL10n !== 'undefined' ? pwpoOffloadingL10n : {};
+            pwpoFolderSlimSelect = new SlimSelect({
+                select: '#pwpo-default-offloading-folder',
+                settings: {
+                    showSearch: true,
+                    searchHighlight: true,
+                    searchPlaceholder: l10n.folderSearchPlaceholder || 'Search folders…',
+                },
+                cssClasses: {
+                    option: 'pwpo-ss-option',
+                    list: 'pwpo-ss-list',
+                    content: 'pwpo-ss-content'
+                }
             });
         }
 
         function addFoldersList(folders, defaultFolderId = '') {
             clearFolderList();
             if (folders !== undefined && folders !== null) {
-                $('<option value="">/</option>').appendTo($('#pwpo-default-offloading-folder'));
+                const $sel = $('#pwpo-default-offloading-folder');
+                $('<option value="">/</option>').appendTo($sel);
                 folders.forEach((folder) => {
-                    $('<option value="' + folder.id + '">' + folder.path + '</option>').appendTo($('#pwpo-default-offloading-folder'));
+                    $('<option/>').val(folder.id).text(folder.path).appendTo($sel);
                 });
                 setSelectedOffloadingFolder(defaultFolderId);
+                initPwpoFolderSlimSelect();
             }
         }
 
@@ -303,7 +428,7 @@
         }
 
         function setSelectedOffloadingFolder(id) {
-            $('#pwpo-default-offloading-folder > option[value="' + id + '"]').attr("selected", "selected");
+            $('#pwpo-default-offloading-folder').val(id);
         }
 
         function setSelectedOffloadingCname(id) {
@@ -311,6 +436,7 @@
         }
 
         function clearFolderList(show = false) {
+            destroyPwpoFolderSlimSelect();
             $('#pwpo-default-offloading-folder').empty();
             if (show === true) {
                 $('<option selected hidden disabled>None</option>').appendTo($('#pwpo-default-offloading-folder'));
@@ -340,14 +466,32 @@
 
         function syncPublitioMediaFiles() {
             $('#pwpo-sync-now-button').on('click', function (event) {
-                let media_list = null;
-                jQuery.get(ajaxurl, {
-                    action: 'pwpo_get_media_list'
-                }, function (response) {
-                    media_list = response.media;
-                    syncPublitioMedia(media_list);
+                const $btn = $(this);
+                const originalText = $btn.text();
+                $btn.prop('disabled', true).text('Checking…');
+                jQuery.post(ajaxurl, {
+                    action: 'pwpo_get_media_list',
+                    wpnonce: $('#_wpnonce').val()
                 })
-            })
+                    .done(function (response) {
+                        $btn.prop('disabled', false).text(originalText);
+                        syncPublitioMedia(response ? response.media : null);
+                    })
+                    .fail(function () {
+                        $btn.prop('disabled', false).text(originalText);
+                    });
+            });
+        }
+
+        function rebuildPostDataToggle() {
+            $('#pwpo-rebuild-post-data').on('change', function () {
+                const enabled = $(this).is(':checked');
+                jQuery.post(ajaxurl, {
+                    action: 'pwpo_update_rebuild_post_data',
+                    wpnonce: $('#_wpnonce').val(),
+                    rebuild_post_data: enabled,
+                });
+            });
         }
 
          function media_list_sync(mainList,media_list,index,resultInfo) {
@@ -361,21 +505,44 @@
                         wpnonce: $('#_wpnonce').val()
                     },
                         function (responseMedia) {
-                            if (responseMedia.sync === true) {
-                                resultInfo.numOfUploaded++;
+                            const res = parseAjaxJsonResponse(responseMedia)
+                            if (res.sync === true) {
+                                if (res.skipped) {
+                                    resultInfo.numOfSkipped++;
+                                } else {
+                                    resultInfo.numOfUploaded++;
+                                }
+                            } else if (res.reason === 'no_publitio_meta') {
+                                resultInfo.numOfSkipped++;
                             } else {
                                 resultInfo.numOfFailed++;
+                                console.error('[Publitio Offloading] Sync failed for attachment', media.ID, {
+                                    title: media.post_title,
+                                    response: res
+                                });
                             }
-                    }).fail(function() {
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
                         resultInfo.numOfFailed++;
+                        console.error('[Publitio Offloading] Sync request failed for attachment', media.ID, {
+                            title: media.post_title,
+                            textStatus: textStatus,
+                            errorThrown: errorThrown,
+                            status: jqXHR.status,
+                            responseText: jqXHR.responseText
+                        });
                     }).always(function() {
-                        let result = (((resultInfo.numOfUploaded + resultInfo.numOfFailed) / resultInfo.numOfMedia) * 100).toFixed(1);
+                        const done = resultInfo.numOfUploaded + resultInfo.numOfFailed + resultInfo.numOfSkipped;
+                        let result = ((done / resultInfo.numOfMedia) * 100).toFixed(1);
                         $("#pwpo-publitioBar").width(result + "%");
                         let resFailed = "";
                         if (resultInfo.numOfFailed !== 0) {
                             resFailed = ' <span class="red-text">(' + resultInfo.numOfFailed + ' failed)</span>';
                         }
-                        $("#pwpoLoadPublitioNumber").html(resultInfo.numOfUploaded + " of " + resultInfo.numOfMedia + resFailed + " / " + result + "% completed");
+                        let resSkipped = "";
+                        if (resultInfo.numOfSkipped !== 0) {
+                            resSkipped = ' (' + resultInfo.numOfSkipped + ' skipped)';
+                        }
+                        $("#pwpoLoadPublitioNumber").html(done + " of " + resultInfo.numOfMedia + resFailed + resSkipped + " / " + result + "% completed");
                     })
                 );
             });
@@ -391,22 +558,33 @@
             if(index < media_list.length) {
                 media_list_sync(media_list,media_list[index],index,resultInfo);
             } else {
-                if ((resultInfo.numOfUploaded+resultInfo.numOfFailed) === resultInfo.numOfMedia) {
+                const done = resultInfo.numOfUploaded + resultInfo.numOfFailed + resultInfo.numOfSkipped;
+                if (done === resultInfo.numOfMedia) {
                     if(timers && timers['recursiveTimeout']) {
                         clearTimeout(timers['recursiveTimeout']);
                         timers['recursiveTimeout'] = null;
                     }
                     timers['recursiveTimeout'] = setTimeout(function () {
-                        $('#pwpo-popup').hide();
-                        $("#pwpoLoadPublitioNumber").html(0);
-                        $("#pwpo-publitioBar").width("0%");
-                        if(resultInfo.numOfFailed !== 0) {
-                            showToast(resultInfo.numOfUploaded +' synchronized successfully!' + '<span class="red-text"> ('+resultInfo.numOfFailed+' failed)</span>', 'success');
+                        let summary = '';
+                        if (resultInfo.numOfFailed === 0 && resultInfo.numOfUploaded === 0 && resultInfo.numOfSkipped > 0) {
+                            summary = 'No new files were uploaded or updated. Skipped includes items already in sync on Publitio and items with no local file (upload not possible).';
+                        } else if (resultInfo.numOfFailed === 0 && resultInfo.numOfSkipped === 0) {
+                            summary = 'All items finished without errors.';
+                        } else if (resultInfo.numOfFailed !== 0) {
+                            summary = 'Some items could not be synchronized. Check the browser console for details.';
                         } else {
-                            showToast('Your media library is synchronized successfully!', 'success');
+                            summary = 'Skipped includes items already in sync and items with no local file (cannot upload).';
                         }
-
-                    }, 1000)
+                        showBulkOperationComplete({
+                            headline: 'Synchronization finished',
+                            successLabel: 'Synced',
+                            summaryHtml: summary,
+                            success: resultInfo.numOfUploaded,
+                            failed: resultInfo.numOfFailed,
+                            skipped: resultInfo.numOfSkipped,
+                            total: resultInfo.numOfMedia
+                        })
+                    }, 400)
                 }
             }
         }
@@ -415,28 +593,36 @@
             if (media_list !== undefined && media_list !== null && media_list.length > 0) {
                 if (confirm('Are you sure you want to synchronize all media files with Publitio?')) {
                     const resultInfo = {
-                        numOfUploaded:0,
-                        numOfFailed : 0,
-                        numOfMedia : media_list.map((item) => item.length).reduce((a,b) => a+b,0)
+                        numOfUploaded: 0,
+                        numOfFailed: 0,
+                        numOfSkipped: 0,
+                        numOfMedia: media_list.map((item) => item.length).reduce((a,b) => a+b,0)
                     };
-                    $('#pwpo-popup').show();
+                    showBulkOperationProgress('Synchronizing media with Publitio…');
                     recursiveMediaLoading(media_list,0,resultInfo);
                 }
             } else {
-                showToast('Your media library is already synchronized!', 'error');
+                showBulkOperationEmpty('Nothing to synchronize', 'No media items matched your current offloading filters, or the library is empty.', 'Synced');
             }
         }
 
         function deletePublitioMediaFiles() {
             $('#media-delete').on('click', function (event) {
-                let media_list = null;
-                jQuery.get(ajaxurl, {
-                    action: 'pwpo_get_media_list_for_delete'
-                }, function (response) {
-                    media_list = response.media;
-                    deletePublitioMedia(media_list);
+                const $btn = $(this);
+                const originalText = $btn.text();
+                $btn.prop('disabled', true).text('Checking…');
+                jQuery.post(ajaxurl, {
+                    action: 'pwpo_get_media_list_for_delete',
+                    wpnonce: $('#_wpnonce').val()
                 })
-            })
+                    .done(function (response) {
+                        $btn.prop('disabled', false).text(originalText);
+                        deletePublitioMedia(response ? response.media : null);
+                    })
+                    .fail(function () {
+                        $btn.prop('disabled', false).text(originalText);
+                    });
+            });
         }
 
         function deletePublitioMedia(media_list) {
@@ -444,51 +630,158 @@
                 if (confirm('Are you sure you want to delete all offloaded Media locally and replace it with Publitio Media URLs? Plugin will delete files from local storage - but if you choose to deactivate Publitio Offloading plugin in the future, your site posts/pages will result in broken media links (as they are no longer present locally). Use with caution & at your own risk as there is no going back once you use this options!')) {
                     let numOfDeleted = 0;
                     let numOfDeletedFailed = 0;
-                    $('#pwpo-popup').show();
-                    let numOfMediaForDelete = media_list.length;
+                    const numSkippedDelete = 0;
+                    const numOfMediaForDelete = media_list.length;
+                    let deleteCompleteScheduled = false;
+                    showBulkOperationProgress('Deleting local copies of offloaded media…');
                     media_list.forEach((media) => {
                         jQuery.post(ajaxurl, {
                             async: false,
                             action: 'pwpo_delete_media_file',
                             attach_id: media.ID,
                             wpnonce: $('#_wpnonce').val()
-                        }, function (responseMedia) {
-                            if (responseMedia.deleted === true) {
-                                numOfDeleted++;
-                            } else {
-                                numOfDeletedFailed++;
-                            }
-
-                            let result = (((numOfDeleted + numOfDeletedFailed) / numOfMediaForDelete) * 100).toFixed(1);
-                            $("#pwpo-publitioBar").width(result + "%");
-                            $("#pwpoLoadPublitioNumber").empty();
-                            let resDeleteFailed = "";
-                            if(numOfDeletedFailed !== 0 ) {
-                                resDeleteFailed = '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>';
-                            }
-                            $("#pwpoLoadPublitioNumber").html(numOfDeleted + " of "+ numOfMediaForDelete + resDeleteFailed  + " / " + result + "% completed");
-                            if (numOfDeleted + numOfDeletedFailed === numOfMediaForDelete) {
-                                if(timers && timers['deleteTimeout']) {
-                                    clearTimeout(timers['deleteTimeout']);
-                                    timers['deleteTimeout'] = null;
-                                }
-                                timers['deleteTimeout'] = setTimeout(function () {
-                                    $('#pwpo-popup').hide();
-                                    $("#pwpoLoadPublitioNumber").html(0);
-                                    $("#pwpo-publitioBar").width("0%");
-                                    if(numOfDeletedFailed !== 0) {
-                                        showToast(numOfDeleted +' deleted successfully!' + '<span class="red-text"> ('+numOfDeletedFailed+' failed)</span>', 'success');
-                                    } else {
-                                        showToast('All media files are deleted successfully!', 'success');
-                                    }
-
-                                }, 1000)
-                            }
                         })
-                    })
+                            .done(function (responseMedia) {
+                                const res = parseAjaxJsonResponse(responseMedia);
+                                if (res.deleted === true) {
+                                    numOfDeleted++;
+                                } else {
+                                    numOfDeletedFailed++;
+                                }
+                            })
+                            .fail(function () {
+                                numOfDeletedFailed++;
+                            })
+                            .always(function () {
+                                const done = numOfDeleted + numOfDeletedFailed;
+                                const result = ((done / numOfMediaForDelete) * 100).toFixed(1);
+                                $("#pwpo-publitioBar").width(result + "%");
+                                let resDeleteFailed = "";
+                                if (numOfDeletedFailed !== 0) {
+                                    resDeleteFailed = '<span class="red-text"> (' + numOfDeletedFailed + ' failed)</span>';
+                                }
+                                $("#pwpoLoadPublitioNumber").html(done + " of " + numOfMediaForDelete + resDeleteFailed + " / " + result + "% completed");
+                                if (done === numOfMediaForDelete && !deleteCompleteScheduled) {
+                                    deleteCompleteScheduled = true;
+                                    if (timers && timers['deleteTimeout']) {
+                                        clearTimeout(timers['deleteTimeout']);
+                                        timers['deleteTimeout'] = null;
+                                    }
+                                    timers['deleteTimeout'] = setTimeout(function () {
+                                        let summary = '';
+                                        if (numOfDeletedFailed === 0) {
+                                            summary = 'Local copies were removed for all listed items.';
+                                        } else {
+                                            summary = 'Some items could not be deleted locally. Check file permissions and the browser console.';
+                                        }
+                                        showBulkOperationComplete({
+                                            headline: 'Local delete finished',
+                                            successLabel: 'Deleted locally',
+                                            summaryHtml: summary,
+                                            success: numOfDeleted,
+                                            failed: numOfDeletedFailed,
+                                            skipped: numSkippedDelete,
+                                            total: numOfMediaForDelete
+                                        });
+                                    }, 400);
+                                }
+                            });
+                    });
                 }
             } else {
-                showToast('All media files are already deleted!', 'error');
+                showBulkOperationEmpty('Nothing to delete', 'There are no offloaded media items that still have a local file to remove.', 'Deleted locally');
+            }
+        }
+
+        function restorePublitioMediaFiles() {
+            $('#media-restore').on('click', function (event) {
+                const $btn = $(this);
+                const originalText = $btn.text();
+                $btn.prop('disabled', true).text('Checking…');
+                console.log('[Publitio Restore] Fetching restorable media list…');
+                jQuery.post(ajaxurl, {
+                    action: 'pwpo_get_media_list_for_restore',
+                    wpnonce: $('#_wpnonce').val()
+                })
+                .done(function (response, status, xhr) {
+                    console.log('[Publitio Restore] Raw response text:', xhr.responseText);
+                    console.log('[Publitio Restore] Parsed response:', response);
+                    console.log('[Publitio Restore] Media list:', response ? response.media : 'undefined');
+                    $btn.prop('disabled', false).text(originalText);
+                    restorePublitioMedia(response ? response.media : null);
+                })
+                .fail(function (xhr, status, error) {
+                    console.error('[Publitio Restore] AJAX request failed:', status, error);
+                    console.error('[Publitio Restore] Raw response text:', xhr.responseText);
+                    $btn.prop('disabled', false).text(originalText);
+                });
+            });
+        }
+
+        function restorePublitioMedia(media_list) {
+            if (media_list !== undefined && media_list !== null && media_list.length > 0) {
+                if (confirm('Are you sure you want to return ' + media_list.length + ' media file(s) from Publitio back to their local WordPress folders? The files will be downloaded and the Publitio URL will be replaced with the local file.')) {
+                    let numOfRestored = 0;
+                    let numOfRestoreFailed = 0;
+                    const numSkippedRestore = 0;
+                    const numOfMediaForRestore = media_list.length;
+                    let restoreCompleteScheduled = false;
+                    showBulkOperationProgress('Restoring media to local folders…');
+                    media_list.forEach((media) => {
+                        jQuery.post(ajaxurl, {
+                            action: 'pwpo_restore_media_file',
+                            attach_id: media.ID,
+                            wpnonce: $('#_wpnonce').val()
+                        })
+                            .done(function (responseMedia) {
+                                const res = parseAjaxJsonResponse(responseMedia);
+                                if (res.restored === true) {
+                                    numOfRestored++;
+                                } else {
+                                    numOfRestoreFailed++;
+                                }
+                            })
+                            .fail(function () {
+                                numOfRestoreFailed++;
+                            })
+                            .always(function () {
+                                const done = numOfRestored + numOfRestoreFailed;
+                                const result = ((done / numOfMediaForRestore) * 100).toFixed(1);
+                                $("#pwpo-publitioBar").width(result + "%");
+                                let resRestoreFailed = "";
+                                if (numOfRestoreFailed !== 0) {
+                                    resRestoreFailed = '<span class="red-text"> (' + numOfRestoreFailed + ' failed)</span>';
+                                }
+                                $("#pwpoLoadPublitioNumber").html(done + " of " + numOfMediaForRestore + resRestoreFailed + " / " + result + "% completed");
+                                if (done === numOfMediaForRestore && !restoreCompleteScheduled) {
+                                    restoreCompleteScheduled = true;
+                                    if (timers && timers['restoreTimeout']) {
+                                        clearTimeout(timers['restoreTimeout']);
+                                        timers['restoreTimeout'] = null;
+                                    }
+                                    timers['restoreTimeout'] = setTimeout(function () {
+                                        let summary = '';
+                                        if (numOfRestoreFailed === 0) {
+                                            summary = 'Files were downloaded back to your uploads folder.';
+                                        } else {
+                                            summary = 'Some downloads failed (network, disk space, or missing Publitio file). Check the browser console.';
+                                        }
+                                        showBulkOperationComplete({
+                                            headline: 'Restore to local finished',
+                                            successLabel: 'Restored',
+                                            summaryHtml: summary,
+                                            success: numOfRestored,
+                                            failed: numOfRestoreFailed,
+                                            skipped: numSkippedRestore,
+                                            total: numOfMediaForRestore
+                                        });
+                                    }, 400);
+                                }
+                            });
+                    });
+                }
+            } else {
+                showBulkOperationEmpty('Nothing to restore', 'Every attachment already has a local file, or none are eligible for restore.', 'Restored');
             }
         }
 

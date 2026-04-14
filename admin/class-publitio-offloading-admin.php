@@ -22,6 +22,19 @@ class PWPO_Admin
     }
 
     /**
+     * Verify nonce and manage_options for admin AJAX handlers.
+     */
+    private function pwpo_verify_ajax_admin_request()
+    {
+        if (!isset($_POST['wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wpnonce'])), 'publitio_settings_nonce_action')) {
+            wp_die(esc_html__('Unauthorized request.', 'publitio'), esc_html__('Error', 'publitio'), array('response' => 403));
+        }
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'publitio'), esc_html__('Error', 'publitio'), array('response' => 403));
+        }
+    }
+
+    /**
      * Register all admin actions and filters
      */
     public function pwpo_register()
@@ -30,12 +43,15 @@ class PWPO_Admin
         add_action('admin_menu', array($this, 'pwpo_add_admin_pages'));
         add_filter("plugin_action_links_" . PUBLITIO_OFFLOADING_PLUGIN, array($this, 'pwpo_settings_link'));
         add_action('wp_ajax_pwpo_update_offloading_settings', array($this, 'pwpo_update_offloading_settings'));
+        add_action('wp_ajax_pwpo_update_rebuild_post_data', array($this, 'pwpo_update_rebuild_post_data'));
         add_action('wp_ajax_pwpo_get_offloading_account_settings', array($this, 'pwpo_get_offloading_account_settings'));
         add_action('wp_ajax_pwpo_get_media_list', array($this, 'pwpo_get_media_list'));
         add_action('wp_ajax_pwpo_sync_media_file', array($this, 'pwpo_sync_media_file'));
         add_action('wp_ajax_pwpo_update_replace_media', array($this, 'pwpo_update_replace_media'));
         add_action('wp_ajax_pwpo_get_media_list_for_delete', array($this, 'pwpo_get_media_list_for_delete'));
         add_action('wp_ajax_pwpo_delete_media_file', array($this, 'pwpo_delete_media_file'));
+        add_action('wp_ajax_pwpo_get_media_list_for_restore', array($this, 'pwpo_get_media_list_for_restore'));
+        add_action('wp_ajax_pwpo_restore_media_file', array($this, 'pwpo_restore_media_file'));
         add_action('admin_notices', array($this, 'pwpo_display_admin_notice'));
     }
 
@@ -66,13 +82,47 @@ class PWPO_Admin
     /**
      * Register all styles and scripts
      */
-    public function pwpo_enqueue()
+    public function pwpo_enqueue($hook)
     {
-        wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
-        wp_enqueue_style( 'publitio-offloading-toastify-css', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' );
+        if ($hook !== 'toplevel_page_publitio_offloading') {
+            return;
+        }
 
-        wp_enqueue_script('offloadingscripts', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js', array('jquery'));
-        wp_enqueue_script( 'publitio-offloading-toastify-js', 'https://cdn.jsdelivr.net/npm/toastify-js', array( 'jquery' ), null, true );
+        $slim_version = '3.4.3';
+        wp_enqueue_style(
+            'publitio-slim-select',
+            'https://cdn.jsdelivr.net/npm/slim-select@' . $slim_version . '/dist/slimselect.css',
+            array(),
+            $slim_version
+        );
+        wp_enqueue_script(
+            'publitio-slim-select',
+            'https://cdn.jsdelivr.net/npm/slim-select@' . $slim_version . '/dist/slimselect.min.js',
+            array(),
+            $slim_version,
+            true
+        );
+
+        wp_enqueue_style('offloadingstyle', PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/css/offloading-style.css');
+        wp_enqueue_style('publitio-offloading-toastify-css', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css');
+
+        wp_enqueue_script('publitio-offloading-toastify-js', 'https://cdn.jsdelivr.net/npm/toastify-js', array('jquery'), null, true);
+
+        wp_enqueue_script(
+            'offloadingscripts',
+            PUBLITIO_OFFLOADING_PLUGIN_URL . 'admin/js/offloading-script.js',
+            array('jquery', 'publitio-slim-select', 'publitio-offloading-toastify-js'),
+            PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION,
+            true
+        );
+
+        wp_localize_script(
+            'offloadingscripts',
+            'pwpoOffloadingL10n',
+            array(
+                'folderSearchPlaceholder' => __('Search folders…', 'publitio'),
+            )
+        );
     }
 
     /**
@@ -138,6 +188,11 @@ class PWPO_Admin
             $delete_checkbox = sanitize_text_field($_POST['delete_checkbox']);
             update_option('publitio_offloading_delete_checkbox', $this->pwpo_return_yes_no_value($delete_checkbox));
 
+            if (isset($_POST['rebuild_post_data'])) {
+                $rebuild_post_data = sanitize_text_field($_POST['rebuild_post_data']);
+                update_option('publitio_offloading_rebuild_post_data', $this->pwpo_return_yes_no_value($rebuild_post_data));
+            }
+
             $response = $this->publitioApi->get_publitio_account_settings();
             wp_send_json([
                 'status' => 200,
@@ -154,6 +209,7 @@ class PWPO_Admin
                 'audio_checkbox' => get_option('publitio_offloading_audio_checkbox'),
                 'document_checkbox' => get_option('publitio_offloading_document_checkbox'),
                 'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
+                'rebuild_post_data' => get_option('publitio_offloading_rebuild_post_data', 'no'),
                 'replace_checkbox' => get_option('publitio_offloading_replace_checkbox'),
                 'wordpress_data' => $response->wordpress_data->message
             ]);
@@ -214,6 +270,8 @@ class PWPO_Admin
      */
     public function pwpo_get_offloading_account_settings()
     {
+        $this->pwpo_verify_ajax_admin_request();
+
         $response = $this->publitioApi->get_publitio_account_settings();
         if ($response) {
             wp_send_json([
@@ -232,6 +290,7 @@ class PWPO_Admin
                 'delete_checkbox' => get_option('publitio_offloading_delete_checkbox'),
                 'replace_checkbox' => get_option('publitio_offloading_replace_checkbox'),
                 'offload_templates' => get_option('publitio_offloading_offload_templates'),
+                'rebuild_post_data' => get_option('publitio_offloading_rebuild_post_data', 'no'),
                 'wordpress_data' => $response->wordpress_data->message
             ]);
         } else {
@@ -250,9 +309,22 @@ class PWPO_Admin
                 'delete_checkbox' => '',
                 'replace_checkbox' => '',
                 'offload_templates' => '',
+                'rebuild_post_data' => '',
                 'wordpress_data' => ''
             ]);
         }
+    }
+
+    /**
+     * Persist "Rebuild post data" toggle value.
+     */
+    public function pwpo_update_rebuild_post_data()
+    {
+        $this->pwpo_verify_ajax_admin_request();
+
+        $value = isset($_POST['rebuild_post_data']) ? filter_var(wp_unslash($_POST['rebuild_post_data']), FILTER_VALIDATE_BOOLEAN) : false;
+        update_option('publitio_offloading_rebuild_post_data', $value ? 'yes' : 'no');
+        wp_send_json(['status' => 200]);
     }
 
     /**
@@ -260,6 +332,8 @@ class PWPO_Admin
      */
     public function pwpo_get_media_list()
     {
+        $this->pwpo_verify_ajax_admin_request();
+
         $attachments = $this->publitioApi->get_media_for_sync();
         wp_send_json([
             'media' => $attachments
@@ -282,7 +356,13 @@ class PWPO_Admin
         }
 
         if (isset($_POST['attach_id'])) {
-            $this->publitioApi->syncMedia(sanitize_text_field($_POST['attach_id']));
+            $rebuild_post_data = (get_option('publitio_offloading_rebuild_post_data', 'no') === 'yes');
+            $this->publitioApi->syncMedia(sanitize_text_field($_POST['attach_id']), $rebuild_post_data);
+        } else {
+            wp_send_json([
+                'sync' => false,
+                'reason' => 'missing_attach_id',
+            ]);
         }
     }
 
@@ -310,6 +390,8 @@ class PWPO_Admin
      * Return list of media objects that needs to be deleted
      */
     public function pwpo_get_media_list_for_delete() {
+        $this->pwpo_verify_ajax_admin_request();
+
         $attachments = $this->publitioApi->get_undeleted_attachments();
         wp_send_json([
             'media' => $attachments
@@ -333,6 +415,36 @@ class PWPO_Admin
 
         if (isset($_POST['attach_id'])) {
             $this->publitioApi->deleteAtachment(sanitize_text_field($_POST['attach_id']));
+        }
+    }
+
+    /**
+     * Return list of media objects missing from local storage that can be restored from Publitio
+     */
+    public function pwpo_get_media_list_for_restore() {
+        $this->pwpo_verify_ajax_admin_request();
+
+        $attachments = $this->publitioApi->get_attachments_for_restore();
+        wp_send_json([
+            'media' => $attachments
+        ]);
+    }
+
+    /**
+     * Download a media file from Publitio back to its original local path
+     */
+    public function pwpo_restore_media_file()
+    {
+        if (!isset($_POST['wpnonce']) || !wp_verify_nonce($_POST['wpnonce'], 'publitio_settings_nonce_action')) {
+            wp_die(__('Unauthorized request.', 'publitio'));
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to update settings.', 'publitio'));
+        }
+
+        if (isset($_POST['attach_id'])) {
+            $this->publitioApi->restoreAttachment(intval($_POST['attach_id']));
         }
     }
 
