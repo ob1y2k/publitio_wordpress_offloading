@@ -9,6 +9,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "publitio/publitio": "dev-master"
+        "publitio/publitio": "dev-master",
+        "guzzlehttp/psr7": "^1.9"
     }
 }

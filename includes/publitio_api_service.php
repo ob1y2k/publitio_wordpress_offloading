@@ -241,10 +241,36 @@ class PublitioApiService
     /**
      * Check if Publitio file exists, if not upload it again and update meta data for attachment
      * @param $attcID
+     * @param bool $rebuild_post_data If true, always upload and upsert publitioMeta
      */
-    public function syncMedia($attcID)
+    public function syncMedia($attcID, $rebuild_post_data = false)
     {
         $attachment = get_post($attcID);
+        if (!$attachment instanceof WP_Post) {
+            wp_send_json([
+                'sync' => false,
+                'reason' => 'invalid_attachment',
+            ]);
+            return;
+        }
+
+        if ($rebuild_post_data) {
+            $publitioMetaData = $this->uploadFile($attachment);
+            if (!is_null($publitioMetaData)) {
+                wp_send_json([
+                    'sync' => true,
+                ]);
+            } else {
+                wp_send_json([
+                    'sync' => false,
+                    'reason' => 'upload_failed',
+                    'guid' => $attachment->guid,
+                ]);
+            }
+            return;
+        }
+
+        $had_publitio_meta_before = (bool) get_post_meta($attachment->ID, 'publitioMeta', true);
         $publitioMeta = $this->getPublitioMeta($attachment);
         if (!is_null($publitioMeta)) {
             $responseShow = $this->showFile($publitioMeta['id']);
@@ -253,35 +279,50 @@ class PublitioApiService
                     $publitioMetaData = $this->getPublitioMeta($attachment);
                     if (!is_null($publitioMetaData)) {
                         wp_send_json([
-                            'sync' => true
+                            'sync' => true,
                         ]);
                     } else {
                         wp_send_json([
                             'sync' => false,
-                            'guid' => $attachment->guid
+                            'guid' => $attachment->guid,
                         ]);
                     }
                 }
                 wp_send_json([
                     'sync' => false,
-                    'guid' => $attachment->guid
+                    'guid' => $attachment->guid,
                 ]);
-            }
-            else {
-                if($responseShow->url_preview !== $publitioMeta['publitio_url']) {
+            } else {
+                $meta_changed = false;
+                if ($responseShow->url_preview !== $publitioMeta['publitio_url']) {
                     $publitioMeta['publitio_url'] = $responseShow->url_preview;
-                    if($responseShow->folder && !is_null($responseShow->folder)) {
+                    if ($responseShow->folder && !is_null($responseShow->folder)) {
                         $publitioMeta['folder_name'] = $responseShow->folder;
                     } else {
                         unset($publitioMeta['folder_name']);
                     }
                     update_post_meta($attachment->ID, 'publitioMeta', $publitioMeta);
+                    $meta_changed = true;
                 }
 
-                wp_send_json([
-                    'sync' => true
-                ]);
+                $did_fresh_upload = ! $had_publitio_meta_before;
+                if ($did_fresh_upload || $meta_changed) {
+                    wp_send_json([
+                        'sync' => true,
+                    ]);
+                } else {
+                    wp_send_json([
+                        'sync' => true,
+                        'skipped' => true,
+                    ]);
+                }
             }
+        } else {
+            wp_send_json([
+                'sync' => false,
+                'reason' => 'no_publitio_meta',
+                'guid' => ($attachment instanceof WP_Post) ? $attachment->guid : '',
+            ]);
         }
     }
 
@@ -466,6 +507,69 @@ class PublitioApiService
         }
 
         return array_chunk($mediaList,1);
+    }
+
+    /**
+     * Get all media that are on Publitio but missing from local uploads folder
+     * @return array
+     */
+    public function get_attachments_for_restore()
+    {
+        $args = array(
+            'post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'posts_per_page' => -1
+        );
+        $attachments = get_posts($args);
+        $restorable = array();
+        foreach ($attachments as $attachment) {
+            $attach = get_attached_file($attachment->ID);
+            $publitioMeta = get_post_meta($attachment->ID, 'publitioMeta', true);
+            if (!file_exists($attach) && $publitioMeta && !is_null($publitioMeta)) {
+                array_push($restorable, $attachment);
+            }
+        }
+        return $restorable;
+    }
+
+    /**
+     * Download a file from Publitio back to its original local path.
+     * Keeps publitioMeta so the attachment stays linked to Publitio (sync, bulk delete local copies, remote URLs if the file is removed again).
+     * @param $attachment_id
+     */
+    public function restoreAttachment($attachment_id)
+    {
+        $publitioMeta = get_post_meta($attachment_id, 'publitioMeta', true);
+
+        if (!$publitioMeta) {
+            wp_send_json(['restored' => false]);
+            return;
+        }
+
+        $attach = get_attached_file($attachment_id);
+        $dir = dirname($attach);
+
+        if (!file_exists($dir)) {
+            wp_mkdir_p($dir);
+        }
+
+        $publitio_url = $publitioMeta['publitio_url'];
+        $file_response = wp_remote_get($publitio_url, array('timeout' => 60));
+
+        if (is_wp_error($file_response) || wp_remote_retrieve_response_code($file_response) !== 200) {
+            wp_send_json(['restored' => false]);
+            return;
+        }
+
+        $file_body = wp_remote_retrieve_body($file_response);
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+        $bytes_written = file_put_contents($attach, $file_body);
+
+        if ($bytes_written !== false && $bytes_written > 0) {
+            wp_send_json(['restored' => true]);
+        } else {
+            wp_send_json(['restored' => false]);
+        }
     }
 
     /**

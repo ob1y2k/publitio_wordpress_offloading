@@ -89,12 +89,12 @@
         <label for="api_key">API key<br />
           <small>API key and API secret pairs are used to authenticate your requests to the Publitio API.</small>
         </label>
-        <input id="api_key" name="api_key" type="password" value="<?php echo get_option('publitio_offloading_key', ''); ?>" autocomplete="off" placeholder="API key" />
+        <input id="api_key" name="api_key" type="password" value="<?php echo esc_attr( get_option('publitio_offloading_key', '') ); ?>" autocomplete="off" placeholder="API key" />
       </div>
 
       <div class="pwpo-field-wrapper">
         <label for="api_secret">API secret</label>
-        <input id="api_secret" name="api_secret" type="password" value="<?php echo get_option('publitio_offloading_secret', ''); ?>" autocomplete="off" placeholder="API secret" />
+        <input id="api_secret" name="api_secret" type="password" value="<?php echo esc_attr( get_option('publitio_offloading_secret', '') ); ?>" autocomplete="off" placeholder="API secret" />
       </div>
 
       <div class="pwpo-field-wrapper pwpo-requires-auth">
@@ -204,9 +204,26 @@
 
       <div class="pwpo-field-wrapper pwpo-files-wrapper pwpo-requires-auth">
         <label for="api-secret">Sync now<br />
-            <small>Plugin will automatically upload media from posts during editing & rendering. You can sync entire media library right away via this button - but please be patient, large media library can take some time to upload to Publitio. Use this if you have deleted files from Publitio, and need them re-uploaded. Proceed with caution!</small>
+            <small>Plugin will automatically upload media from posts during editing & rendering. You can sync entire media library right away via this button - but please be patient, large media library can take some time to upload to Publitio. Proceed with caution!</small>
         </label>
         <button type="button" class="pwpo-settings-button pwpo-success-button" id="pwpo-sync-now-button">Sync Now</button>
+      </div>
+
+      <div class="pwpo-field-wrapper pwpo-requires-auth">
+        <label for="pwpo-rebuild-post-data">Rebuild post meta data when syncing<br />
+            <small>Enable if you have deleted media files from Publitio or you wish to offload files into another folder</small>
+        </label>
+        <div class="pwpo-checkbox-wrapper">
+            <input class="tgl tgl-light" id="pwpo-rebuild-post-data" name="pwpo-rebuild-post-data" type="checkbox" <?php echo esc_html(get_option('publitio_offloading_rebuild_post_data', 'no') === 'yes' ? 'checked' : '') ?> />
+            <label class="tgl-btn" for="pwpo-rebuild-post-data"></label>
+        </div>
+      </div>
+
+      <div class="pwpo-field-wrapper pwpo-files-wrapper pwpo-requires-auth">
+        <label for="media-restore">Return media to local folders<br />
+            <small>Download all offloaded files that are missing locally back from Publitio into their original WordPress uploads folders. Useful before deactivating the plugin.</small>
+        </label>
+        <button type="button" class="pwpo-settings-button pwpo-success-button" id="media-restore">Return to Local</button>
       </div>
     </div>
 
@@ -280,10 +297,25 @@
 </div>
 
 <div id="pwpo-popup" class="pwpo-overlay">
-    <div class="pwpo-popup">
-        <div id="pwpoPublitioProgress">
-            <div id="pwpoLoadPublitioNumber">0</div>
-            <div id="pwpo-publitioBar"></div>
+    <div class="pwpo-popup pwpo-popup-card">
+        <div id="pwpo-popup-title" class="pwpo-popup-title"></div>
+        <div id="pwpoPublitioProgress" class="pwpo-popup-progress-wrap">
+            <div class="pwpo-progress-stack">
+                <div id="pwpo-publitioBar" class="pwpo-progress-bar-fill"></div>
+                <div id="pwpoLoadPublitioNumber" class="pwpo-progress-label" aria-live="polite"></div>
+            </div>
+        </div>
+        <div id="pwpo-popup-results" class="pwpo-popup-results" style="display: none;">
+            <p id="pwpo-popup-results-summary" class="pwpo-popup-results-summary"></p>
+            <ul class="pwpo-popup-stats" role="list">
+                <li><span id="pwpo-stat-success-label" class="pwpo-stat-label"><?php echo esc_html__( 'Synced', 'publitio' ); ?></span> <strong id="pwpo-stat-success">0</strong></li>
+                <li><span class="pwpo-stat-label"><?php echo esc_html__( 'Failed', 'publitio' ); ?></span> <strong id="pwpo-stat-failed" class="pwpo-stat-failed">0</strong></li>
+                <li><span class="pwpo-stat-label"><?php echo esc_html__( 'Skipped', 'publitio' ); ?></span> <strong id="pwpo-stat-skipped">0</strong></li>
+            </ul>
+            <p class="pwpo-popup-results-total"><?php echo esc_html__( 'Total processed:', 'publitio' ); ?> <strong id="pwpo-stat-total">0</strong></p>
+            <div class="pwpo-popup-results-footer">
+                <button type="button" id="pwpo-popup-close-btn" class="pwpo-settings-button pwpo-popup-close-btn"><?php echo esc_html__( 'Close', 'publitio' ); ?></button>
+            </div>
         </div>
     </div>
 </div>

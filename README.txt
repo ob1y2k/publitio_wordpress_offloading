@@ -3,12 +3,12 @@ Contributors: publitio
 Donate link: https://publit.io
 Tags: publitio, offloading, offload, image, video
 Requires at least: 5.0.1
-Tested up to: 6.8
+Tested up to: 6.9
 Stable tag: 5.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Publitio Offloading plugin automatically transfers and serves your images, videos, audios, documents, and archives from [Publitio](https://publit.io/)’s cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
+Publitio Offloading plugin automatically transfers and serves your images, videos, audios, documents, and archives from Publitio cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
 
 == Description ==
 
@@ -16,7 +16,7 @@ Media & Document Cloud Storage and Delivery
 
 Publitio Offloading - Media Asset Management, Cloud Storage and Delivery
 
-Publitio Offloading plugin seamlessly integrates your WordPress media library with [Publitio](https://publit.io), 
+Publitio Offloading plugin seamlessly integrates your WordPress media library with Publitio (https://publit.io/),
 a secure, scalable cloud-based media asset management and delivery platform. 
 Effortlessly offload and serve your images, videos, audios, documents, 
 and archives from Publitio’s fast global CDN, improving site speed and reducing your server load.
@@ -24,12 +24,12 @@ and archives from Publitio’s fast global CDN, improving site speed and reducin
 
 Key Features:
 
-    - Offload WordPress media, documents, and archive files to [Publitio](https://publit.io) cloud storage
-    - Replace and serve all media URLs automatically from Publitio’s secure CDN
-    - Flexible options to keep local copies or serve fully remote files
-    - URL-based on-the-fly media transformations: resizing, cropping, watermarking, transcoding, and more
-    - Protect content with domain restrictions
-    - Easy setup with comprehensive documentation and tutorials
+* Offload WordPress media, documents, and archive files to Publitio cloud storage (https://publit.io/)
+* Replace and serve all media URLs automatically from Publitio’s secure CDN
+* Flexible options to keep local copies or serve fully remote files
+* URL-based on-the-fly media transformations: resizing, cropping, watermarking, transcoding, and more
+* Protect content with domain restrictions
+* Easy setup with comprehensive documentation and tutorials
 
 
 Why Use Publitio Offloading?
@@ -37,15 +37,15 @@ Why Use Publitio Offloading?
 Boost your website performance and SEO by delivering media and documents faster worldwide. 
 Reduce hosting costs and scale effortlessly with Publitio’s pay-as-you-go pricing model, robust security, and global infrastructure.
 
-Start offloading your WordPress media, documents, and archives today with [Publitio](https://publit.io)—trusted by 70,000+ users!
+Start offloading your WordPress media, documents, and archives today with Publitio (https://publit.io/)—trusted by 70,000+ users!
 
 
 Learn More & Support:
 
-    - Setup guide: [How to setup Publitio Offloading Wordpress Plugin](https://publit.io/community/blog/wordpress-offloading-with-publitio)
-    - API & Documentation: [Publitio API](https://publit.io/docs)
-    - Contact Support: support@publit.io, contact us through a support webwidget on our site or write on our [Community Board](https://dashboard.publit.io/app/dashboards/community)
-    - This plugin is open source, you can contribute to the development at [Publitio Offloading Wordpress Plugin Source on Github](https://github.com/ob1y2k/publitio_wordpress_offloading)
+* Setup guide: https://publit.io/community/blog/wordpress-offloading-with-publitio
+* API & documentation: https://publit.io/docs
+* Contact support: mailto:support@publit.io, use the support web widget on our site, or write on our Community Board: https://dashboard.publit.io/app/dashboards/community
+* Plugin source (GitHub): https://github.com/ob1y2k/publitio_wordpress_offloading
 
 
 == Installation ==
@@ -185,6 +185,15 @@ Send an email to support@publit.io, use the sites support webwidget or contact u
 = 1.2.8 =
 * Quality of life fixes
 
+= 1.2.9 =
+* Bugfixes
+
+= 1.3.0 =
+* Bugfixes
+* Security fixes
+* Optimization
+* WP 6.9 check OK
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -276,3 +285,9 @@ Just install
 
 = 1.2.9 =
 * Bugfixes
+
+= 1.3.0 =
+* Bugfixes
+* Security fixes
+* Optimization
+* WP 6.9 check OK

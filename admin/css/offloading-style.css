@@ -5,15 +5,19 @@
 
  @import url('https://fonts.googleapis.com/css?family=Raleway');
 
-.pwpo-popup {
+.pwpo-popup.pwpo-popup-card {
     margin: 0 auto;
     width: 50%;
+    max-width: 520px;
+    min-width: 280px;
     position: fixed;
-    border-radius: 4px;
-	overflow: none;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    border-radius: 4px;
+    overflow: visible;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    background: #fff;
 }
 
 .pwpo-text-green {
@@ -43,25 +47,143 @@
     overflow: auto;
 }
 
-#pwpoLoadPublitioNumber {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 22px;
+.pwpo-popup-results-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e5;
 }
 
-#pwpoPublitioProgress {
+#pwpo-popup-close-btn.pwpo-popup-close-btn {
+    display: none;
+    margin: 0;
+}
+
+.pwpo-popup-results {
+    padding: 8px 24px 15px;
+    background: #fff;
+    border-radius: 0 0 4px 4px;
+}
+
+.pwpo-popup-results-summary {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: #444;
+    text-align: center;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.pwpo-popup-stats {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 15px;
+}
+
+.pwpo-popup-stats li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.pwpo-popup-stats li:last-child {
+    border-bottom: none;
+}
+
+.pwpo-stat-label {
+    color: #555;
+}
+
+.pwpo-popup-stats .pwpo-stat-failed {
+    color: #dc3545;
+}
+
+.pwpo-popup-results-total {
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+#pwpo-publitioBar.pwpo-progress-idle {
+    animation: none;
+    background: #e0e0e0;
+}
+
+.pwpo-popup-title {
+    background: white;
+    border-radius: 4px 4px 0 0;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 14px 20px 10px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    font-family: Tahoma, Arial, sans-serif;
+    letter-spacing: 0.01em;
+    display: none;
+}
+
+#pwpoPublitioProgress.pwpo-popup-progress-wrap {
     width: 100%;
-    background-color: white;
-    border-radius: 4px;
+    background-color: #fff;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
 }
 
-#pwpo-publitioBar {
-	border-radius: 4px;
+.pwpo-progress-stack {
+    position: relative;
+    height: 52px;
+    margin: 0;
+    background: #e6e6e6;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+#pwpo-publitioBar.pwpo-progress-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
     width: 0;
-    height: 50px;
-    background-color: #4099de;
+    z-index: 1;
+    border-radius: 0;
+    background: linear-gradient(90deg, #4099de 33%, #5ab4f5 50%, #4099de 66%);
+    background-size: 300% 100%;
+    animation: pwpo-shimmer 1.8s linear infinite;
+    transition: width 0.3s ease;
+}
+
+.pwpo-progress-label,
+#pwpoLoadPublitioNumber {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-family: Tahoma, Arial, sans-serif;
+    line-height: 1.35;
+    pointer-events: none;
+}
+
+@keyframes pwpo-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 .pwpo-overlay {
@@ -294,13 +416,20 @@
      line-height: 1;
  }
  
- .pwpo-field-wrapper input[type="password"],
- .pwpo-field-wrapper select {
-     max-width: 300px;
-     width: 100%;
-     border: 1px solid #ccc;
-     border-radius: 5px;
- }
+.pwpo-field-wrapper input[type="password"],
+.pwpo-field-wrapper select {
+    max-width: 300px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Slim Select (folder dropdown) — match native select sizing */
+.pwpo-field-wrapper #pwpo-default-offloading-folder + .ss-main,
+.pwpo-field-wrapper .ss-main {
+    max-width: 300px;
+    width: 100%;
+}
 
  .pwpo-field-wrapper input[type="checkbox"] {
      width: 20px;
@@ -589,4 +718,40 @@
   }
   .pwpo-checkbox-wrapper .tgl-light:checked + .tgl-btn {
     background: #4099de;
+  }
+
+  .pwpo-field-wrapper #pwpo-default-offloading-folder + .ss-main {
+    font-family: inherit;
+    font-size: 14px;
+    min-height: 30px;
+    border-color: #ccc;
+    color: #2c3338;
+  }
+
+  .pwpo-field-wrapper #pwpo-default-offloading-folder + .ss-main:focus {
+    border-color: #2271b1;
+    color: #0a4b78;
+    box-shadow: 0 0 0 1px #2271b1;
+  }
+
+  .pwpo-field-wrapper #pwpo-default-offloading-folder + .ss-main:hover {
+    color: #2271b1;
+  }
+
+  .pwpo-field-wrapper #pwpo-default-offloading-folder + .ss-main .ss-arrow {
+    width: 11px;
+    height: 11px;
+    margin-right: 2px;
+  }
+
+  .pwpo-ss-option:hover:not(.ss-disabled) {
+    border-left: 0 !important;
+  }
+
+  .pwpo-ss-list {
+    scrollbar-width: thin;
+  }
+
+  .pwpo-ss-content {
+    border-radius: 0 0 5px 5px !important;
   }
