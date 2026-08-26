@@ -20,7 +20,7 @@ class PublitioApiService
         if (PWPO_AuthService::is_user_authenticated()) {
             $key = PWPO_AuthService::get_key();
             $secret = PWPO_AuthService::get_secret();
-            $this->publitio_api = new \Publitio\API($key, $secret);
+            $this->publitio_api = new PWPO_Publitio_API($key, $secret);
         } else {
             $this->publitio_api = NULL;
         }
@@ -33,7 +33,7 @@ class PublitioApiService
      */
     public function init($api_key, $api_secret)
     {
-        $this->publitio_api = new \Publitio\API($api_key, $api_secret);
+        $this->publitio_api = new PWPO_Publitio_API($api_key, $api_secret);
         PWPO_AuthService::add_credentials($api_key, $api_secret);
         $this->check_credentials();
     }
@@ -48,7 +48,7 @@ class PublitioApiService
             if ($this->publitio_api === NULL) {
                 $key = PWPO_AuthService::get_key();
                 $secret = PWPO_AuthService::get_secret();
-                $this->publitio_api = new \Publitio\API($key, $secret);
+                $this->publitio_api = new PWPO_Publitio_API($key, $secret);
             }
             $resp = $this->publitio_api->call('/folders/tree', 'GET');
             $cnames = $this->publitio_api->call('/cnames/list', 'GET', array(
@@ -343,7 +343,7 @@ class PublitioApiService
         }
         $attach = get_attached_file($attachment->ID);
         if (file_exists($attach)) {
-            $responseUpload = $this->publitio_api->uploadFile(fopen($attach, 'r'), 'file', $args);
+            $responseUpload = $this->publitio_api->uploadFile($attach, 'file', $args);
             if ($responseUpload->success === true) {
                 if($this->isVideoType($responseUpload->extension)) {
                     $ext = 'mp4';

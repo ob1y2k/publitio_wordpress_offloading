@@ -8,13 +8,7 @@ A WordPress media offloading plugin that integrates the WordPress media library 
 
 ## Development Commands
 
-There is no build system. This is a pure PHP/JS WordPress plugin.
-
-**Composer** (PHP dependencies):
-```bash
-composer install          # Install dependencies (Publitio SDK, guzzlehttp/psr7)
-composer update           # Update dependencies
-```
+There is no build system. This is a pure PHP/JS WordPress plugin with **no Composer dependencies** — the Publitio API client is self-contained (`includes/class-pwpo-publitio-api.php`, since 1.4.0; the previous Guzzle-based SDK caused PHP 8.1+ fatals when other plugins bundled psr/http-message v2).
 
 There are no automated tests, linting tools, or CI/CD workflows.
 
@@ -31,13 +25,14 @@ There are no automated tests, linting tools, or CI/CD workflows.
 | File | Class | Role |
 |------|-------|------|
 | `includes/class-publitio-offloading.php` | `PWPO_Offload` | Main engine: hooks into WP upload/display pipeline, URL transformation, srcset generation |
-| `includes/publitio_api_service.php` | `PublitioApiService` | Wraps the Publitio PHP SDK; handles uploads, metadata reads/writes, URL generation |
+| `includes/publitio_api_service.php` | `PublitioApiService` | Wraps `PWPO_Publitio_API`; handles uploads, metadata reads/writes, URL generation |
+| `includes/class-pwpo-publitio-api.php` | `PWPO_Publitio_API` | Dependency-free Publitio API client (WP HTTP API for signed calls, cURL + CURLFile for streaming multipart uploads); never throws — returns a synthetic `success=false` object on errors |
 | `admin/class-publitio-offloading-admin.php` | `PWPO_Admin` | Admin settings page, AJAX handlers for bulk sync/delete/restore |
 | `includes/class-publitio-offloading-auth-service.php` | `PWPO_AuthService` | Credential validation and `get_option`/`update_option` helpers |
 
 ### Key Data Flow
 
-**Upload path**: `add_attachment` action → `PWPO_Offload::pwpo_upload_file_to_publitio()` → `PublitioApiService` → Publitio SDK → stores Publitio file ID and URL in attachment post meta.
+**Upload path**: `add_attachment` action → `PWPO_Offload::pwpo_upload_file_to_publitio()` → `PublitioApiService` → `PWPO_Publitio_API` → stores Publitio file ID and URL in attachment post meta.
 
 **Display path**: WordPress `the_content`, `image_downsize`, `wp_calculate_image_srcset`, and related filters → `PWPO_Offload` intercepts and rewrites URLs to Publitio CDN URLs, building dimension-specific URLs on the fly.
 
@@ -74,6 +69,9 @@ All settings are stored as WordPress options (`get_option`/`update_option`). Pub
      --exclude='.DS_Store' \
      --exclude='.gitignore' \
      --exclude='publitio-offloading.zip' \
+     --exclude='composer.json' \
+     --exclude='composer.lock' \
+     --exclude='vendor/' \
      /Users/ob1y2k/Projects/publitio_wp_offloading/ \
      /Users/ob1y2k/Projects/publitio_wp_offloading/_builds/publitio-offloading/trunk/
    ```
@@ -91,6 +89,6 @@ All settings are stored as WordPress options (`get_option`/`update_option`). Pub
 
 ## Dependencies
 
-- **PHP**: WordPress 5.0.1–6.9
-- **Composer**: `publitio/publitio` (dev-master), `guzzlehttp/psr7` ^1.9
+- **PHP**: 7.4+ (needs cURL for uploads), WordPress 5.0.1–6.9
+- **Composer**: none — do not reintroduce bundled libraries; unprefixed vendor code collides with other plugins' copies (this caused the PHP 8.1+ psr/http-message fatal fixed in 1.4.0)
 - **WordPress**: jQuery (standard WP), no plugin dependencies

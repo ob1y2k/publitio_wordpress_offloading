@@ -25,7 +25,7 @@ class PWPO_AuthService {
         }
     
         try {
-            $temp_api = new \Publitio\API($api_key, $api_secret);
+            $temp_api = new PWPO_Publitio_API($api_key, $api_secret);
             $response = $temp_api->call('/wordpress/data', 'GET');
             
             if ($response && $response->success === true) {

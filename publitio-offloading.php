@@ -16,7 +16,9 @@
  * Plugin Name:       Publitio Offloading
  * Plugin URI:        https://publit.io/
  * Description:       Publitio Offloading plugin automatically transfers and serves your images, videos, audios, documents, and archives from Publitio’s cloud storage and CDN, boosting site speed and reducing server load with secure, scalable delivery.
- * Version:           1.3.0
+ * Version:           1.4.0
+ * Requires at least: 5.0.1
+ * Requires PHP:      7.4
  * Author:            Publitio
  * Author URI:        https://publit.io
  * License:           GPL-2.0+
@@ -29,14 +31,13 @@ if (!defined('WPINC')) {
     die;
 }
 
-if (file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
-    require_once dirname(__FILE__) . '/vendor/autoload.php';
-}
 define('PUBLITIO_OFFLOADING_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('PUBLITIO_OFFLOADING_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('PUBLITIO_OFFLOADING_PLUGIN', plugin_basename(__FILE__));
 define('PUBLITIO_OFFLOADING_PUBLITIO_MEDIA', 'https://media.publit.io/file/');
-define('PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.3.0');
+define('PUBLITIO_OFFLOADING_PLUGIN_NAME_VERSION', '1.4.0');
+
+require_once PUBLITIO_OFFLOADING_PLUGIN_PATH . 'includes/class-pwpo-publitio-api.php';
 
 /**
  * The code that runs during plugin activation.
