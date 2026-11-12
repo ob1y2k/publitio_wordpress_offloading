@@ -83,7 +83,7 @@
 
     <div class="pwpo-settings">
 
-      <?php wp_nonce_field('publitio_settings_nonce_action'); ?>
+      <?php wp_nonce_field('publitio_settings_nonce_action', 'pwpo_wpnonce'); ?>
 
       <div class="pwpo-field-wrapper">
         <label for="api_key">API key<br />

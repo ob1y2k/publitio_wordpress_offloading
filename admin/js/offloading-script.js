@@ -62,7 +62,7 @@
         }
 
         $(function () {
-            if ($('#_wpnonce').length) {
+            if ($('#pwpo_wpnonce').length) {
                 getPublitioAccountSettings()
             }
             updatePublitioSettingsButtonClick()
@@ -166,7 +166,7 @@
                     action: 'pwpo_update_offloading_settings',
                     api_secret: api_secret,
                     api_key: api_key,
-                    wpnonce: $('#_wpnonce').val(),
+                    wpnonce: $('#pwpo_wpnonce').val(),
                     allow_download: $('#allow_download').is(':checked'),
                     offload_templates: $('#offload_templates').is(':checked'),
                     image_checkbox: $('#image_checkbox').is(':checked'),
@@ -208,7 +208,7 @@
 
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_replace_media',
-                    wpnonce: $('#_wpnonce').val(),
+                    wpnonce: $('#pwpo_wpnonce').val(),
                     replace_checkbox: $('#replace_checkbox').is(':checked'),
                 }, function (response) {
                     if (response.status === STATUSES.ERROR_UNAUTHORIZED) {
@@ -360,7 +360,7 @@
         function getPublitioAccountSettings() {
             jQuery.post(ajaxurl, {
                 action: 'pwpo_get_offloading_account_settings',
-                wpnonce: $('#_wpnonce').val()
+                wpnonce: $('#pwpo_wpnonce').val()
             }, function (response) {
                 handleResponse(response);
             });
@@ -471,7 +471,7 @@
                 $btn.prop('disabled', true).text('Checking…');
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_get_media_list',
-                    wpnonce: $('#_wpnonce').val()
+                    wpnonce: $('#pwpo_wpnonce').val()
                 })
                     .done(function (response) {
                         $btn.prop('disabled', false).text(originalText);
@@ -488,7 +488,7 @@
                 const enabled = $(this).is(':checked');
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_update_rebuild_post_data',
-                    wpnonce: $('#_wpnonce').val(),
+                    wpnonce: $('#pwpo_wpnonce').val(),
                     rebuild_post_data: enabled,
                 });
             });
@@ -502,7 +502,7 @@
                         sync:false,
                         action: 'pwpo_sync_media_file',
                         attach_id: media.ID,
-                        wpnonce: $('#_wpnonce').val()
+                        wpnonce: $('#pwpo_wpnonce').val()
                     },
                         function (responseMedia) {
                             const res = parseAjaxJsonResponse(responseMedia)
@@ -613,7 +613,7 @@
                 $btn.prop('disabled', true).text('Checking…');
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_get_media_list_for_delete',
-                    wpnonce: $('#_wpnonce').val()
+                    wpnonce: $('#pwpo_wpnonce').val()
                 })
                     .done(function (response) {
                         $btn.prop('disabled', false).text(originalText);
@@ -639,7 +639,7 @@
                             async: false,
                             action: 'pwpo_delete_media_file',
                             attach_id: media.ID,
-                            wpnonce: $('#_wpnonce').val()
+                            wpnonce: $('#pwpo_wpnonce').val()
                         })
                             .done(function (responseMedia) {
                                 const res = parseAjaxJsonResponse(responseMedia);
@@ -701,7 +701,7 @@
                 console.log('[Publitio Restore] Fetching restorable media list…');
                 jQuery.post(ajaxurl, {
                     action: 'pwpo_get_media_list_for_restore',
-                    wpnonce: $('#_wpnonce').val()
+                    wpnonce: $('#pwpo_wpnonce').val()
                 })
                 .done(function (response, status, xhr) {
                     console.log('[Publitio Restore] Raw response text:', xhr.responseText);
@@ -731,7 +731,7 @@
                         jQuery.post(ajaxurl, {
                             action: 'pwpo_restore_media_file',
                             attach_id: media.ID,
-                            wpnonce: $('#_wpnonce').val()
+                            wpnonce: $('#pwpo_wpnonce').val()
                         })
                             .done(function (responseMedia) {
                                 const res = parseAjaxJsonResponse(responseMedia);
