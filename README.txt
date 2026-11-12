@@ -3,9 +3,9 @@ Contributors: publitio
 Donate link: https://publit.io
 Tags: publitio, offloading, offload, image, video
 Requires at least: 5.0.1
-Tested up to: 6.9
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -199,6 +199,10 @@ Send an email to support@publit.io, use the sites support webwidget or contact u
 * Replaced bundled Guzzle/Composer dependencies with a lightweight built-in HTTP client (fixes fatal error on PHP 8.1+ when another plugin bundles psr/http-message v2)
 * API requests now use HTTPS
 
+= 1.4.1 =
+* Fixed plugin conflicts
+* WP 7.1 check OK
+
 == Upgrade Notice ==
 
 = 1.0 =
@@ -299,3 +303,7 @@ Just install
 
 = 1.4.0 =
 * PHP 8.1+ compatibility fix — removed bundled Guzzle libraries
+
+= 1.4.1 =
+* Fixed plugin conflicts
+* WP 7.1 check OK
